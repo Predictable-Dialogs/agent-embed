@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig/nextjs.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "emitDeclarationOnly": true,
+    "strict": false
+  }
+}

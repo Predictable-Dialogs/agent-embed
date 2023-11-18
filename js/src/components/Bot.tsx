@@ -1,0 +1,293 @@
+import { LiteBadge } from './LiteBadge'
+import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js'
+import { isNotDefined, isNotEmpty } from '@/lib/utils'
+import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery'
+import { ConversationContainer } from './ConversationContainer'
+import { setIsMobile } from '@/utils/isMobileSignal'
+import { BotContext, InitialChatReply, OutgoingLog } from '@/types'
+import { ErrorMessage } from './ErrorMessage'
+import {
+  getExistingResultIdFromStorage,
+  setResultInStorage,
+} from '@/utils/storage'
+import { setCssVariablesValue } from '@/utils/setCssVariablesValue'
+import immutableCss from '../assets/immutable.css'
+
+export type BotProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  agentName: string | any
+  isPreview?: boolean
+  resultId?: string
+  startGroupId?: string
+  prefilledVariables?: Record<string, unknown>
+  apiHost?: string
+  onNewInputBlock?: (ids: { id: string; groupId: string }) => void
+  onAnswer?: (answer: { message: string; blockId: string }) => void
+  onInit?: () => void
+  onEnd?: () => void
+  onNewLogs?: (logs: OutgoingLog[]) => void
+}
+
+export const Bot = (props: BotProps & { class?: string }) => {
+  const [sessionId, setSessionId] = createSignal<string | null>(null);
+  const [initialAgentReply, setInitialChatReply] = createSignal<
+    InitialChatReply | undefined
+  >()
+  const [customCss, setCustomCss] = createSignal('')
+  const [isInitialized, setIsInitialized] = createSignal(false)
+  const [error, setError] = createSignal<Error | undefined>()
+
+
+  const getSessionData = () => {
+    const storedData = localStorage.getItem("sessionData");
+    return storedData ? JSON.parse(storedData) : null;
+  };
+  
+  const initializeBot = async () => {
+    setIsInitialized(true)
+    const urlParams = new URLSearchParams(location.search)
+    props.onInit?.()
+    const prefilledVariables: { [key: string]: string } = {}
+    urlParams.forEach((value, key) => {
+      prefilledVariables[key] = value
+    })
+
+    let agentIdFromProps = props.agentName;
+    const storedSessionData = getSessionData();
+
+    if (storedSessionData) {
+      // If session data exists in localStorage, use it to initialize your component
+      setSessionId(storedSessionData.sessionId);
+      setInitialChatReply(storedSessionData.initialAgentReply);
+      setCustomCss(storedSessionData.customCss ?? '');
+      if (storedSessionData.agentName) {
+        agentIdFromProps = storedSessionData.agentName;
+      }
+    } else {
+      const { data, error } = await getInitialChatReplyQuery({
+        stripeRedirectStatus: urlParams.get('redirect_status') ?? undefined,
+        agentName: props.agentName,
+        apiHost: props.apiHost,
+        isPreview: props.isPreview ?? false,
+        resultId: isNotEmpty(props.resultId)
+          ? props.resultId
+          : getExistingResultIdFromStorage(agentIdFromProps),
+        startGroupId: props.startGroupId,
+        prefilledVariables: {
+          ...prefilledVariables,
+          ...props.prefilledVariables,
+        },
+      })
+      if (error && 'code' in error && typeof error.code === 'string') {
+        if (props.isPreview ?? false) {
+          return setError(
+            new Error('An error occurred while loading the bot.', {
+              cause: error.message,
+            })
+          )
+        }
+        if (['BAD_REQUEST', 'FORBIDDEN'].includes(error.code))
+          return setError(new Error('This bot is now closed.'))
+        if (error.code === 'NOT_FOUND')
+          return setError(new Error("The bot you're looking for doesn't exist."))
+      }
+      if (!data) return setError(new Error("Error! Couldn't initiate the chat."))
+
+      if (data.resultId && agentIdFromProps)
+      setResultInStorage(data.agentConfig.settings.general.rememberUser?.storage)(
+        agentIdFromProps,
+        data.resultId
+      )
+
+      setSessionId(data.sessionId);
+      setInitialChatReply(data);
+      setCustomCss(data.agentConfig.theme.customCss ?? '')
+
+      if (data.input?.id && props.onNewInputBlock)
+      props.onNewInputBlock({
+        id: data.input.id,
+        groupId: data.input.groupId,
+      })
+      if (data.logs) props.onNewLogs?.(data.logs)
+
+      // After all your usual initializations, save the session data to localStorage
+      localStorage.setItem(
+        "sessionData",
+        JSON.stringify({
+          sessionId: data.sessionId,
+          initialAgentReply: data,
+          agentName: props.agentName,
+          customCss: data.agentConfig.theme.customCss ?? ''
+        })
+      );
+    }
+  }
+    
+  createEffect(() => {
+    if (isNotDefined(props.agentName) || isInitialized()) return
+    initializeBot().then()
+  })
+
+  
+  createEffect(() => {
+    localStorage.setItem(
+      "sessionData",
+      JSON.stringify({
+        sessionId: sessionId(),
+        initialAgentReply: initialAgentReply(),
+        agentName: props.agentName,
+      })
+    );
+  });
+
+  // The key used to store the last tab number
+  const LAST_TAB_NUMBER_KEY = 'lastTabNumber';
+
+  let tabNumber: number;
+  createEffect(() => {    
+    // Check if we have a tab number for the current session
+    let tabNumberString = sessionStorage.getItem('tabNumber');
+
+    if (!tabNumberString) {
+        // If not, get the last tab number from localStorage, increment it and save
+        const lastTabNumber = parseInt(localStorage.getItem(LAST_TAB_NUMBER_KEY) || '0');
+        tabNumber = lastTabNumber + 1;
+        localStorage.setItem(LAST_TAB_NUMBER_KEY, tabNumber.toString());
+        sessionStorage.setItem('tabNumber', tabNumber.toString());
+        // Trigger the storage event for other tabs
+        window.dispatchEvent(new Event('storage'));
+    } else {
+      tabNumber = parseInt(tabNumberString);
+    }
+
+    // Cleanup logic (if needed)...
+    onCleanup(() => {
+      // any cleanup activities, if necessary.
+    });
+  });
+
+  
+  onCleanup(() => {
+    setIsInitialized(false)
+  })
+
+  return (
+    <>
+      <style>{customCss()}</style>
+      <style>{immutableCss}</style>
+      <Show when={error()} keyed>
+        {(error) => <ErrorMessage error={error} />}
+      </Show>
+      <Show when={initialAgentReply()} keyed>
+        {(initialAgentReply) => (
+          <BotContent
+            class={props.class}
+            initialAgentReply={{
+              ...initialAgentReply,
+              agentConfig: {
+                ...initialAgentReply.agentConfig,
+                settings: initialAgentReply.agentConfig?.settings,
+                theme: initialAgentReply.agentConfig?.theme
+              },
+            }}
+            context={{
+              apiHost: props.apiHost,
+              isPreview: (props.isPreview ?? false),
+              resultId: initialAgentReply.resultId,
+              sessionId: sessionId(),
+              agentConfig: initialAgentReply.agentConfig,
+              agentName: props.agentName,
+              tabNumber: tabNumber
+            }}
+            setSessionId={setSessionId}
+            onNewInputBlock={props.onNewInputBlock}
+            onNewLogs={props.onNewLogs}
+            onAnswer={props.onAnswer}
+            onEnd={props.onEnd}
+          />
+        )}
+      </Show>
+    </>
+  )
+}
+
+type BotContentProps = {
+  initialAgentReply: InitialChatReply
+  context: BotContext
+  class?: string
+  onNewInputBlock?: (block: { id: string; groupId: string }) => void
+  onAnswer?: (answer: { message: string; blockId: string }) => void
+  onEnd?: () => void
+  onNewLogs?: (logs: OutgoingLog[]) => void
+  setSessionId: (id: string | null) => void;
+}
+
+const BotContent = (props: BotContentProps) => {
+  let botContainer: HTMLDivElement | undefined
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    return setIsMobile(entries[0].target.clientWidth < 400)
+  })
+
+  const injectCustomFont = () => {
+    const existingFont = document.getElementById('bot-font')
+    if (
+      existingFont
+        ?.getAttribute('href')
+        ?.includes(
+          props.initialAgentReply.agentConfig?.theme?.general?.font ?? 'Open Sans'
+        )
+    )
+      return
+    const font = document.createElement('link')
+    font.href = `https://fonts.bunny.net/css2?family=${
+      props.initialAgentReply.agentConfig?.theme?.general?.font ?? 'Open Sans'
+    }:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');')`
+    font.rel = 'stylesheet'
+    font.id = 'bot-font'
+    document.head.appendChild(font)
+  }
+
+  onMount(() => {
+    if (!botContainer) return
+    resizeObserver.observe(botContainer)
+  })
+
+  createEffect(() => {
+    injectCustomFont()
+    if (!botContainer) return
+    setCssVariablesValue(props.initialAgentReply.agentConfig.theme, botContainer)
+  })
+
+  onCleanup(() => {
+    if (!botContainer) return
+    resizeObserver.unobserve(botContainer)
+  })
+
+  return (
+    <div
+      ref={botContainer}
+      class={
+        'relative flex w-full h-full text-base overflow-hidden bg-cover bg-center flex-col items-center agent-widget-container ' +
+        props.class
+      }
+    >
+      <div class="flex w-full h-full justify-center">
+        <ConversationContainer
+          context={props.context}
+          initialAgentReply={props.initialAgentReply}
+          onNewInputBlock={props.onNewInputBlock}
+          onAnswer={props.onAnswer}
+          onEnd={props.onEnd}
+          onNewLogs={props.onNewLogs}
+          setSessionId={props.setSessionId}
+        />
+      </div>
+      <Show
+        when={props.initialAgentReply.agentConfig.settings.general.isBrandingEnabled}
+      >
+        <LiteBadge botContainer={botContainer} />
+      </Show>
+    </div>
+  )
+}

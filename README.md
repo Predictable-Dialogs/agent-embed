@@ -6,7 +6,7 @@ An agent widget blends the traditional concept of a widget with the more dynamic
 
 ## Protocol to talk with a agent server
 
-1. Session initiated by chat widget using the agent name & server end point. The server responds with (initialAgentReply)
+1. Session initiated by agent widget using the agent name & server end point. The server responds with (initialAgentReply)
    initialAgentReply contains:
        a. A theme, used for styling the chat widget. 
        b. The sessionId created on the server.

@@ -8,9 +8,9 @@ An agent widget blends the traditional concept of a widget with the more dynamic
 
 1. Session initiated by agent widget using the agent name & server end point. The server responds with (initialAgentReply)
    initialAgentReply contains:
-       a. A theme, used for styling the chat widget. 
+       a. A theme, used for styling the agent widget. 
        b. The sessionId created on the server.
-       c. A message to show on the chat widget (optional)
+       c. A message to show on the agent widget (optional)
        d. A list of serverInitiatedActions - things like start streaming, execute webhooks (upload images)
        
 2. The following is stored in the sessionData on the client:

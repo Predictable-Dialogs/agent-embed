@@ -1,0 +1,9 @@
+{
+  "name": "agent-widget-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Add build scripts here'",
+    "test": "echo 'Add test scripts here'"
+  }
+}
+

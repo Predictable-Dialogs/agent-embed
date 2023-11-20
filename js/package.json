@@ -1,6 +1,6 @@
 {
   "name": "agent-widget",
-  "version": "0.1.13",
+  "version": "0.0.1",
   "description": "Javascript library to display agent widgets on your website",
   "type": "module",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
     "build": "rollup --config rollup.config.js",
     "lint": "eslint --fix \"src/**/*.ts*\""
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@stripe/stripe-js": "1.54.1",
     "@udecode/plate-common": "^21.1.5",

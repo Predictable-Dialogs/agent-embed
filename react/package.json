@@ -1,6 +1,6 @@
 {
   "name": "@agent-widget/react",
-  "version": "0.1.13",
+  "version": "0.1.1",
   "description": "Convenient library to display Agent Widget on your React website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
   },
   "keywords": [],
   "author": "Jai",
-  "license": "ISC",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@ladle/react": "2.5.1"
   },

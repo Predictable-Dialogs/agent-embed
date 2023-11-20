@@ -4,6 +4,13 @@
 
 An agent widget blends the traditional concept of a widget with the more dynamic role of an "agent." This is a tool that's not just a passive interface element, but an active, intelligent participant in user interactions. It implies a certain level of autonomy and sophistication so it fits into the evolving nature of integrating AI with web technologies.
 
+
+# Example Screen
+
+<img src="https://github.com/Predictable-Dialogs/agent-widget/assets/3472565/ee609766-a401-4490-a2bf-939ae408ef5a" width="300" />
+
+
+
 ## Protocol to talk with a agent server
 
 1. Session initiated by agent widget using the agent name & server end point. The server responds with (initialAgentReply)

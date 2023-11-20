@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :host {
-  --agent-widget-container-bg-image: none;
-  --agent-widget-container-bg-color: transparent;
-  --agent-widget-container-font-family: 'Open Sans';
-  --agent-widget-container-color: #303235;
+  --agent-embed-container-bg-image: none;
+  --agent-embed-container-bg-color: transparent;
+  --agent-embed-container-font-family: 'Open Sans';
+  --agent-embed-container-color: #303235;
 
   --agent-button-bg-color: #0042da;
   --agent-button-bg-color-rgb: 0, 66, 218;
@@ -127,10 +127,10 @@ textarea {
   opacity: 1 !important;
 }
 
-.agent-widget-container {
-  background-image: var(--agent-widget-container-bg-image);
-  background-color: var(--agent-widget-container-bg-color);
-  font-family: var(--agent-widget-container-font-family), -apple-system,
+.agent-embed-container {
+  background-image: var(--agent-embed-container-bg-image);
+  background-color: var(--agent-embed-container-bg-color);
+  font-family: var(--agent-embed-container-font-family), -apple-system,
     BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
@@ -156,7 +156,7 @@ textarea {
       calc(var(--selectable-base-alpha) + 0.25)
     );
   border-radius: var(--agent-border-radius);
-  color: var(--agent-widget-container-color);
+  color: var(--agent-embed-container-color);
   background-color: rgba(
     var(--agent-button-bg-color-rgb),
     calc(var(--selectable-base-alpha) + 0.08)
@@ -352,7 +352,7 @@ textarea {
       calc(var(--selectable-base-alpha) + 0.25)
     );
   border-radius: var(--agent-border-radius);
-  color: var(--agent-widget-container-color);
+  color: var(--agent-embed-container-color);
   background-color: rgba(
     var(--agent-button-bg-color-rgb),
     calc(var(--selectable-base-alpha) + 0.08)

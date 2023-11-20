@@ -1,7 +1,7 @@
 {
-  "name": "@agent-widget/react",
+  "name": "@agent-embed/react",
   "version": "0.1.1",
-  "description": "Convenient library to display Agent Widget on your React website",
+  "description": "Convenient library to display Agent embed on your React website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -26,7 +26,7 @@
     "@rollup/plugin-node-resolve": "15.1.0",
     "@rollup/plugin-terser": "0.4.3",
     "@rollup/plugin-typescript": "11.1.2",
-    "agent-widget": "file:../js",
+    "agent-embed": "file:../js",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",
     "eslint": "8.44.0",

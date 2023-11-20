@@ -1,5 +1,5 @@
 {
-  "name": "agent-widget-monorepo",
+  "name": "agent-embed-monorepo",
   "private": true,
   "scripts": {
     "build": "echo 'Add build scripts here'",

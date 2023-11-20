@@ -17,7 +17,7 @@ const indexConfig = {
   plugins: [
     alias({
       entries: [
-        { find: 'agent-widget/dist/web', replacement: '../../js/dist/web' },
+        { find: 'agent-embed/dist/web', replacement: '../../js/dist/web' },
       ],
     }),
     resolve({ extensions }),

@@ -1,7 +1,7 @@
 {
-  "name": "@agent-widget/js",
+  "name": "@agent-embed/js",
   "version": "0.0.1",
-  "description": "Javascript library to display agent widgets on your website",
+  "description": "Javascript library to display agent embeds on your website",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

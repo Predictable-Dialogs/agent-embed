@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
-import type { BotProps } from 'agent-widget'
-import 'agent-widget/dist/web'
+import type { BotProps } from 'agent-embed'
+import 'agent-embed/dist/web'
 
 type Props = BotProps & {
   style?: React.CSSProperties

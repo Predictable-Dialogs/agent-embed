@@ -16,7 +16,7 @@ const indexConfig = {
   external: ['react', 'react/jsx-runtime'],
   plugins: [
     alias({
-      entries: [{ find: 'agent-widget', replacement: '../../js' }],
+      entries: [{ find: 'agent-embed', replacement: '../../js' }],
     }),
     resolve({ extensions }),
     babel({

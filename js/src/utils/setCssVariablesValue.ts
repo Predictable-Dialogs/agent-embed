@@ -12,10 +12,10 @@ import { isNotEmpty } from '@/lib/utils'
 
 const cssVariableNames = {
   general: {
-    bgImage: '--agent-widget-container-bg-image',
-    bgColor: '--agent-widget-container-bg-color',
-    fontFamily: '--agent-widget-container-font-family',
-    color: '--agent-widget-container-color',
+    bgImage: '--agent-embed-container-bg-image',
+    bgColor: '--agent-embed-container-bg-color',
+    fontFamily: '--agent-embed-container-font-family',
+    color: '--agent-embed-container-color',
   },
   chat: {
     hostBubbles: {

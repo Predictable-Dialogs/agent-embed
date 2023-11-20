@@ -1,14 +1,14 @@
 ## Install
 
 ```bash
-npm install @agent-widget/nextjs
+npm install @agent-embed/nextjs
 ```
 
 ## Bubble
 
 ```tsx
 const Bubble = dynamic(
-  () => import('cwidget').then(module => {
+  () => import('cembed').then(module => {
     return module.Bubble}),
   { ssr: false }
 );
@@ -38,13 +38,13 @@ This code will show the bubble and let a preview message appear after 5 seconds.
 You can use these commands:
 
 ```js
-import { showPreviewMessage } from '@agent-widget/nextjs'
+import { showPreviewMessage } from '@agent-embed/nextjs'
 
 Agent.showPreviewMessage()
 ```
 
 ```js
-import { hidePreviewMessage } from '@agent-widget/nextjs'
+import { hidePreviewMessage } from '@agent-embed/nextjs'
 
 Agent.hidePreviewMessage()
 ```
@@ -54,19 +54,19 @@ Agent.hidePreviewMessage()
 You can use these commands:
 
 ```js
-import { open } from '@agent-widget/nextjs'
+import { open } from '@agent-embed/nextjs'
 
 open()
 ```
 
 ```js
-import { close } from '@agent-widget/nextjs'
+import { close } from '@agent-embed/nextjs'
 
 close()
 ```
 
 ```js
-import { toggle } from '@agent-widget/nextjs'
+import { toggle } from '@agent-embed/nextjs'
 
 toggle()
 ```

@@ -268,7 +268,7 @@ const BotContent = (props: BotContentProps) => {
     <div
       ref={botContainer}
       class={
-        'relative flex w-full h-full text-base overflow-hidden bg-cover bg-center flex-col items-center agent-widget-container ' +
+        'relative flex w-full h-full text-base overflow-hidden bg-cover bg-center flex-col items-center agent-embed-container ' +
         props.class
       }
     >

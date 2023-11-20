@@ -1,6 +1,6 @@
-# Agent Widget JS library
+# Agent embed JS library
 
-Frontend library to embed Agent Widgets.
+Frontend library to embed Agent embeds.
 
 ## Installation
 
@@ -9,14 +9,14 @@ Frontend library to embed Agent Widgets.
 To install, simply run:
 
 ```bash
-npm install agent-widget
+npm install agent-embed
 ```
 
 ### Directly in your HTML
 
 ```
 <script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-widget/js@0.1/dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.1/dist/web.js'
 
   Agent.initStandard({
     agentName: 'my-agent',
@@ -34,7 +34,7 @@ There, you can change the container dimensions. Here is a code example:
 
 ```html
 <script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-widget/js@0.1/dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.1/dist/web.js'
 
   Agent.initStandard({
     agentName: 'my-agent',
@@ -54,7 +54,7 @@ Here is an example:
 
 ```html
 <script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-widget/js@0.1/dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.1/dist/web.js'
 
   Agent.initPopup({
     agentName: 'my-agent',
@@ -96,7 +96,7 @@ Here is an example:
 
 ```html
 <script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-widget/js@0.1/dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.1/dist/web.js'
 
   Agent.initBubble({
     agentName: 'my-agent',

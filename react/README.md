@@ -1,13 +1,13 @@
 ## Install
 
 ```bash
-npm install @agent-widget/react
+npm install @agent-embed/react
 ```
 
 ## Standard
 
 ```tsx
-import { Standard } from '@agent-widget/react'
+import { Standard } from '@agent-embed/react'
 
 const App = () => {
   return (
@@ -24,7 +24,7 @@ This code is creating a container with a 100% width (will match parent width) an
 ## Popup
 
 ```tsx
-import { Popup } from '@agent-widget/react'
+import { Popup } from '@agent-embed/react'
 
 const App = () => {
   return <Popup agentName="my-agent" autoShowDelay={3000} />
@@ -38,19 +38,19 @@ This code will automatically trigger the popup window after 3 seconds.
 You can use these commands:
 
 ```js
-import { open } from '@agent-widget/react'
+import { open } from '@agent-embed/react'
 
 open()
 ```
 
 ```js
-import { close } from '@agent-widget/react'
+import { close } from '@agent-embed/react'
 
 close()
 ```
 
 ```js
-import { toggle } from '@agent-widget/react'
+import { toggle } from '@agent-embed/react'
 
 toggle()
 ```
@@ -58,7 +58,7 @@ toggle()
 ## Bubble
 
 ```tsx
-import { Bubble } from '@agent-widget/react'
+import { Bubble } from '@agent-embed/react'
 
 const App = () => {
   return (
@@ -85,13 +85,13 @@ This code will show the bubble and let a preview message appear after 5 seconds.
 You can use these commands:
 
 ```js
-import { showPreviewMessage } from '@agent-widget/react'
+import { showPreviewMessage } from '@agent-embed/react'
 
 Agent.showPreviewMessage()
 ```
 
 ```js
-import { hidePreviewMessage } from '@agent-widget/react'
+import { hidePreviewMessage } from '@agent-embed/react'
 
 Agent.hidePreviewMessage()
 ```
@@ -101,19 +101,19 @@ Agent.hidePreviewMessage()
 You can use these commands:
 
 ```js
-import { open } from '@agent-widget/react'
+import { open } from '@agent-embed/react'
 
 open()
 ```
 
 ```js
-import { close } from '@agent-widget/react'
+import { close } from '@agent-embed/react'
 
 close()
 ```
 
 ```js
-import { toggle } from '@agent-widget/react'
+import { toggle } from '@agent-embed/react'
 
 toggle()
 ```

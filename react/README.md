@@ -117,24 +117,3 @@ import { toggle } from '@agent-widget/react'
 
 toggle()
 ```
-
-## Additional configuration
-
-You can prefill the bot variable values in your embed code by adding the `prefilledVariables` option. Here is an example:
-
-```tsx
-import { Standard } from '@agent-widget/react'
-
-const App = () => {
-  return (
-    <Standard
-      agentName="my-agent"
-      style={{ width: '100%', height: '600px' }}
-      prefilledVariables={{
-        'Current URL': 'https://my-site/account',
-        'User name': 'John Doe',
-      }}
-    />
-  )
-}
-```

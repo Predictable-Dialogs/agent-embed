@@ -1,5 +1,5 @@
 {
-  "name": "agent-widget",
+  "name": "@agent-widget/js",
   "version": "0.0.1",
   "description": "Javascript library to display agent widgets on your website",
   "type": "module",

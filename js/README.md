@@ -149,17 +149,3 @@ You can bind these commands on a button element, for example:
 ```html
 <button onclick="Agent.open()">Contact us</button>
 ```
-
-## Additional configuration
-
-You can prefill the bot variable values in your embed code by adding the `prefilledVariables` option. Here is an example:
-
-```js
-Agent.initStandard({
-  agentName: 'my-agent',
-  prefilledVariables: {
-    'Current URL': 'https://my-site/account',
-    'User name': 'John Doe',
-  },
-})
-```

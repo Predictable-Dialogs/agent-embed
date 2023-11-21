@@ -35,7 +35,7 @@ This code will show the bubble and let a preview message appear after 5 seconds.
 
 You can also use the `Script` component in NextJs as below:
 
-```
+```tsx
 import Script from 'next/script'
 
 <Script

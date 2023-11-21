@@ -45,7 +45,64 @@ The current implementation can be used to embed agents to a website. This is hel
       c. customCss
       d. agentName
 
+### First Server Response, would contain the theme to style the embed. 
+```json
+let agentConfig =  {
+  "theme": {
+    "general": {
+      "font": "Avenir",
+      "background": {
+        "type": "Color",
+        "content": "#ffffff"
+      }
+    },
+    "chat": {
+      "hostAvatar": {
+        "isEnabled": true,
+        "url": "https://pd-images-public.s3.ap-south-1.amazonaws.com/host-profile.png"
+      },
+      "guestAvatar": {
+        "isEnabled": true,
+        "url": "https://pd-images-public.s3.ap-south-1.amazonaws.com/guest-profile.png"
+      },
+      "hostBubbles": {
+        "backgroundColor": "#2b3e13",
+        "color": "#e8e2d6"
+      },
+      "guestBubbles": {
+        "backgroundColor": "#4b5a2a",
+        "color": "#FFFFFF"
+      },
+      "buttons": {
+        "backgroundColor": "#4b5a2a",
+        "color": "#FFFFFF"
+      },
+      "inputs": {
+        "backgroundColor": "#FFFFFF",
+        "color": "#5a5a5a",
+        "placeholderColor": "#4b5a2a"
+      }
+    }
+  },
+  "settings": {
+    "general": {
+      "isBrandingEnabled": true,
+      "isInputPrefillEnabled": true,
+      "isHideQueryParamsEnabled": true,
+      "isNewResultOnRefreshEnabled": true
+    },
+    "typingEmulation": {
+      "enabled": true,
+      "speed": 300,
+      "maxDelay": 1.5
+    },
+    "metadata": {
+      "description": "Build agents and embed them directly in your applications without a line of code."
+    }
+  }
+};
 
+```
      
 Agent embed
 Copyright (C) 2023 Agent Dialogs

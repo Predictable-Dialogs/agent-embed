@@ -12,7 +12,7 @@
 An agent embed blends the traditional concept of a widget with the more dynamic role of an "agent." This is a tool that's not just a passive interface element, but an active, intelligent participant in user interactions. It implies a certain level of autonomy and sophistication so it fits into the evolving nature of integrating AI with web technologies.
 
 ### Current usage
-The current implementation can be used to embed agents to a website. This is helps protect your AI API keys, which don't have to be exposed on the frontend.
+The current implementation can be used to embed agents to a website without exposing your API Keys, which remain on your backend.
 
 ## Usage
 ### NextJS 

@@ -104,7 +104,7 @@ The current implementation can be used to embed agents to a website. This is hel
 ```
      
 Agent embed
-Copyright (C) 2023 Agent Dialogs
+Copyright (C) 2023 Predictable Dialogs
 
 ### License
 (copied from typebot.io repository)

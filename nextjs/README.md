@@ -8,7 +8,7 @@ npm install @agent-embed/nextjs
 
 ```tsx
 const Bubble = dynamic(
-  () => import('cembed').then(module => {
+  () => import('@agent-embed/nextjs').then(module => {
     return module.Bubble}),
   { ssr: false }
 );

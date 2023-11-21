@@ -47,7 +47,7 @@ The current implementation can be used to embed agents to a website. This is hel
 
 ### First Server Response, would contain the theme to style the embed. 
 ```json
-let agentConfig =  {
+{
   "theme": {
     "general": {
       "font": "Avenir",
@@ -100,8 +100,7 @@ let agentConfig =  {
       "description": "Build agents and embed them directly in your applications without a line of code."
     }
   }
-};
-
+}
 ```
      
 Agent embed

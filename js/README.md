@@ -14,9 +14,9 @@ npm install agent-embed
 
 ### Directly in your HTML
 
-```
+```html
 <script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.1/dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.1/dist/web.js'
 
   Agent.initStandard({
     agentName: 'my-agent',

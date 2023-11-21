@@ -17,7 +17,7 @@ const Bubble = dynamic(
 const App = () => {
   return (
           <Bubble
-            agentName="options-agent"
+            agentName="agent-name"
             theme={{ button: { 
               backgroundColor: "#2b3e13",
             } }}
@@ -32,6 +32,28 @@ const App = () => {
 This code is creating a container with a 100% width (will match parent width) and 600px height.
 
 This code will show the bubble and let a preview message appear after 5 seconds.
+
+You can also use the `Script` component in NextJs as below:
+
+```
+import Script from 'next/script'
+
+<Script
+  src="https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.1/dist/web.js"
+  strategy="afterInteractive"
+  type="module"
+  onLoad={() => {
+    Agent.initBubble({
+      agentName: "agent-name",
+      theme: {
+        button: { backgroundColor: "#2b3e13" },
+        chatWindow: { backgroundColor: "#ffffff" },
+      },
+    });
+  }}
+/> 
+
+```
 
 ### Open or close the preview message
 

@@ -15,6 +15,24 @@ An agent embed blends the traditional concept of a widget with the more dynamic 
 The current implementation can be used to embed agents to a website without exposing your API Keys, which remain on your backend.
 
 ## Usage
+### Shopify Store
+
+Embed chat widget to your shopify store. 
+Go to Online Store -> Themes -> Edit the theme file, include the below script tag at the end.
+
+Note: The agent name is an id, your backend should recognize and use to start chatting.
+
+```html
+<script type="module">
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.1/dist/web.js'
+
+  Agent.initBubble({
+    agentName: 'options-agent',
+  })
+</script>
+<agent-bubble></agent-bubble>
+```
+
 ### NextJS 
 [Link to readme in nextJs folder](https://github.com/Predictable-Dialogs/agent-embed/blob/main/nextjs/README.md)
 

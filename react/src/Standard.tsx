@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import type { BotProps } from 'agent-embed'
+import type { BotProps } from '@agent-embed/js'
 import 'agent-embed/dist/web'
 
 type Props = BotProps & {

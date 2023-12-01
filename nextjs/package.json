@@ -1,6 +1,6 @@
 {
   "name": "@agent-embed/nextjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Convenient library to display agent embed on your Next.js website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
     "@rollup/plugin-node-resolve": "15.1.0",
     "@rollup/plugin-terser": "0.4.3",
     "@rollup/plugin-typescript": "11.1.2",
-    "agent-embed": "file:../js",
+    "@agent-embed/js": "file:../js",
     "@agent-embed/react": "file:../react",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",

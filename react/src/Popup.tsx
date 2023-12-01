@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import type { PopupProps } from 'agent-embed'
+import type { PopupProps } from '@agent-embed/js'
 import 'agent-embed/dist/web'
 
 type Props = PopupProps

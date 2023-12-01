@@ -1,6 +1,6 @@
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic.js'
 import React from 'react';
-import type { BotProps } from 'agent-embed';
+import type { BotProps } from '@agent-embed/js';
 
 type Props = BotProps & {
   style?: React.CSSProperties;
@@ -20,4 +20,4 @@ export const Bubble = dynamic(() => import('@agent-embed/react/src/Bubble'), {
 })
 
 
-export * from 'agent-embed'
+export * from '@agent-embed/js'

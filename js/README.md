@@ -15,15 +15,15 @@ npm install agent-embed
 ### Directly in your HTML
 
 ```html
+
 <script type="module">
   import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.1/dist/web.js'
 
-  Agent.initStandard({
-    agentName: 'my-agent',
+  Agent.initBubble({
+    agentName: 'options-agent',
   })
 </script>
-
-<agent-standard style="width: 100%; height: 600px; "></agent-standard>
+<agent-bubble></agent-bubble>
 ```
 
 ## Standard
@@ -103,7 +103,7 @@ Here is an example:
     previewMessage: {
       message: 'I have a question for you!',
       autoShowDelay: 5000,
-      avatarUrl: 'https://avatars.githubusercontent.com/u/16015833?v=4',
+      avatarUrl: 'https://avatars.githubusercontent.com/u/3472565?v=4',
     },
     theme: {
       button: { backgroundColor: '#0042DA', iconColor: '#FFFFFF' },

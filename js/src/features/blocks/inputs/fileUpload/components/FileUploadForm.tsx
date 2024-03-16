@@ -1,6 +1,6 @@
 import { SendButton } from '@/components/SendButton'
 import { BotContext, InputSubmitContent } from '@/types'
-import { guessApiHost } from '@/utils/guessApiHost'
+import { getApiEndPoint } from '@/utils/getApiEndPoint'
 import { FileInputBlock } from '@/schemas'
 import { defaultFileInputOptions } from '@/schemas/features/blocks/inputs/file'
 import { createSignal, Match, Show, Switch } from 'solid-js'
@@ -55,7 +55,7 @@ export const FileUploadForm = (props: Props) => {
     setIsUploading(true)
     const urls = await uploadFiles({
       sessionId: props.context.sessionId,
-      basePath: `${props.context.apiHost ?? guessApiHost()}/presigned-url`,
+      basePath: `${props.context.apiHost ?? getApiEndPoint()}/presigned-url`,
       files: [
         {
           file,
@@ -80,7 +80,7 @@ export const FileUploadForm = (props: Props) => {
     setIsUploading(true)
     const urls = await uploadFiles({
       sessionId: props.context.sessionId,
-      basePath: `${props.context.apiHost ?? guessApiHost()}/presigned-url`,
+      basePath: `${props.context.apiHost ?? getApiEndPoint()}/presigned-url`,
       files: files.map((file) => ({
         file: file,
         path: `${file.name}`,

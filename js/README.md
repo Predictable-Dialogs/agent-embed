@@ -6,7 +6,7 @@ Frontend library to embed Agent embeds.
 
 ### Using npm
 
-To install, simply run:
+To install, run:
 
 ```bash
 npm install agent-embed

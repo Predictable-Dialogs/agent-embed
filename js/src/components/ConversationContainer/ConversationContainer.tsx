@@ -74,7 +74,6 @@ export const ConversationContainer = (props: Props) => {
   const [hasError, setHasError] = createSignal(false)
   const [activeInputId, setActiveInputId] = createSignal<number>(0)
 
-  console.log(`Context in ConversationContainer is : ${JSON.stringify(props.context)}`);
   onMount(() => {
     ;(async () => {
       const initialChunk = chatChunks()[0]
@@ -127,9 +126,12 @@ export const ConversationContainer = (props: Props) => {
    * @returns {string} - The updated message string.
    */
   const streamMessage = (chunk: string, content: string) => {
-    console.log(`streamMessage: chunk: ${chunk}`);
-    console.log(`streamMessage: content: ${content}`);
 
+    if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
+      console.log(`streamMessage: chunk: ${chunk}`);
+      console.log(`streamMessage: content: ${content}`);
+    }
+  
     let parsedChunk: any;
     let isJson = false;
 
@@ -146,12 +148,12 @@ export const ConversationContainer = (props: Props) => {
     if (isJson) {
       if (parsedChunk.end) {
         //Delete the session id
-        console.log(`Setting session id to null`);
+        // console.log(`Setting session id to null`);
         props.setSessionId(null);
       } else {
         //Match with the sessionId from the server
         if (parsedChunk.sessionId !== props.context.sessionId) {
-          console.log(`Setting new session id to ${parsedChunk.sessionId}`);
+          // console.log(`Setting new session id to ${parsedChunk.sessionId}`);
           props.setSessionId(parsedChunk.sessionId)
         }
       }
@@ -234,7 +236,11 @@ export const ConversationContainer = (props: Props) => {
     // If current chunk type has input->type = 'text input' then stream:
     if (currentInputBlock?.type === "text input") {
       let action = {"streamOpenAiChatCompletion":{"message": message}}
-      console.log(`Starting stream with agentName: ${props.context.agentName}`)
+
+      if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
+        console.log(`Starting stream with agentName: ${props.context.agentName}`)
+      }
+      
       const response = await executeClientSideAction({
         clientSideAction: action,
         context: {

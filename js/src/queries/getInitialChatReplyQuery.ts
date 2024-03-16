@@ -1,5 +1,5 @@
 import { BotContext, InitialChatReply } from '@/types'
-import { guessApiHost } from '@/utils/guessApiHost'
+import { getApiEndPoint } from '@/utils/getApiEndPoint'
 import type { SendMessageInput, StartParams } from '@/schemas'
 import { isNotDefined, isNotEmpty, sendRequest } from '@/lib/utils'
 import {
@@ -20,6 +20,10 @@ export async function getInitialChatReplyQuery({
   apiHost?: string
 }) {
 
+  if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
+    console.log(`Debug: getInitialChatReplyQuery. apiHost: ${apiHost}`);
+  }
+
   if (isNotDefined(agentName))
     throw new Error('Agent name is required to get initial messages')
 
@@ -33,8 +37,8 @@ export async function getInitialChatReplyQuery({
   if (paymentInProgressState) removePaymentInProgressFromStorage()
   const { data, error } = await sendRequest<InitialChatReply>({
     method: 'POST',
-    // url: `${isNotEmpty(apiHost) ? apiHost : guessApiHost()}/api/v1/sendMessage`,
-    url: `${isNotEmpty(apiHost) ? apiHost : guessApiHost()}`,
+    // url: `${isNotEmpty(apiHost) ? apiHost : getApiEndPoint()}/api/v1/sendMessage`,
+    url: `${isNotEmpty(apiHost) ? apiHost : getApiEndPoint()}`,
     body: {
       startParams: paymentInProgressState
         ? undefined

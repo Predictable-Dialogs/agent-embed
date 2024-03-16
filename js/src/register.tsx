@@ -9,7 +9,14 @@ import { Popup } from './features/popup'
 import { Standard } from './features/standard'
 
 export const registerWebComponents = () => {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {
+    return
+  }
+  
+  if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
+    console.log('Registering web components...');
+  }
+
   // @ts-expect-error element incorect type
   customElement('agent-standard', defaultBotProps, Standard)
   customElement('agent-bubble', defaultBubbleProps, Bubble)

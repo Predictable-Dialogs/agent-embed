@@ -1,5 +1,5 @@
 import { ClientSideActionContext } from '@/types'
-import { guessApiHost } from '@/utils/guessApiHost'
+import { getApiEndPoint } from '@/utils/getApiEndPoint'
 import { isNotEmpty } from '@/lib/utils'
 
 // let abortController: AbortController | null = null
@@ -18,11 +18,15 @@ export const streamChat =
     try {
 
       const apiHost = context.apiHost
-      console.log(`streamChat : agentName: ${context.agentName}`)
-
+      if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
+        console.log(`Debug: streamChat. stream url: ${
+          isNotEmpty(apiHost) ? apiHost : getApiEndPoint()
+        }/streamer`);
+      }
+    
       const res = await fetch(
         `${
-          isNotEmpty(apiHost) ? apiHost : guessApiHost()
+          isNotEmpty(apiHost) ? apiHost : getApiEndPoint()
         }/streamer`,
         {
           method: 'POST',

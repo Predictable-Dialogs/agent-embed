@@ -108,13 +108,7 @@ const Input = (props: {
   isInputPrefillEnabled: boolean
   onSubmit: (answer: InputSubmitContent) => void
   onSkip: (label: string) => void
-}) => {
-  console.log('Rendering Input component with block:', JSON.stringify(props.block, null, 2));
-
-  createEffect(() => {
-    console.log('Current block type is:', props.block.type);
-  });
-  
+}) => {  
   const onSubmit = (answer: InputSubmitContent) => props.onSubmit(answer)
 
   const getPrefilledValue = () =>

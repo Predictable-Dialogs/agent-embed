@@ -28,9 +28,7 @@ npm install agent-embed
 
 ## Standard
 
-You can get the standard HTML and Javascript code by clicking on the "HTML & Javascript" button in the "Share" tab of your agent.
-
-There, you can change the container dimensions. Here is a code example:
+ Here is a code example:
 
 ```html
 <script type="module">
@@ -47,8 +45,6 @@ There, you can change the container dimensions. Here is a code example:
 This code is creating a container with a 100% width (will match parent width) and 600px height.
 
 ## Popup
-
-You can get the popup HTML and Javascript code by clicking on the "HTML & Javascript" button in the "Share" tab of your agent.
 
 Here is an example:
 
@@ -89,8 +85,6 @@ You can bind these commands on a button element, for example:
 ```
 
 ## Bubble
-
-You can get the bubble HTML and Javascript code by clicking on the "HTML & Javascript" button in the "Share" tab of your agent.
 
 Here is an example:
 

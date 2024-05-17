@@ -7,12 +7,7 @@ npm install @agent-embed/nextjs
 ## Bubble
 
 ```tsx
-const Bubble = dynamic(
-  () => import('@agent-embed/nextjs').then(module => {
-    return module.Bubble}),
-  { ssr: false }
-);
-
+import { Bubble } from '@agent-embed/nextjs'
 
 const App = () => {
   return (
@@ -28,8 +23,6 @@ const App = () => {
         )
 }
 ```
-
-This code is creating a container with a 100% width (will match parent width) and 600px height.
 
 This code will show the bubble and let a preview message appear after 5 seconds.
 
@@ -47,7 +40,6 @@ import Script from 'next/script'
       agentName: "agent-name",
       theme: {
         button: { backgroundColor: "#2b3e13" },
-        chatWindow: { backgroundColor: "#ffffff" },
       },
     });
   }}

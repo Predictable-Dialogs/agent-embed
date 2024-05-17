@@ -1,4 +1,4 @@
-## Steps to Link and Use `agent-embed` Package in Next.js Project
+## Steps to setup development environment for @agent-embed/nextjs
 
 ### Clone the Repository
 
@@ -8,24 +8,75 @@ git clone https://github.com/Predictable-Dialogs/agent-embed.git
 
 ```
 
-### Go to agent-embed/nextjs, link the local package:
+### Option 1: Use `npm link` 
+
+#### Go to agent-embed/nextjs, link the local package:
 Create a symlink in the global node_modules directory, which can be referenced in your project.
 ```
 cd agent-embed/nextjs
 npm link
 ```
 
-### Link the local package in your Next.js project:
+#### Link the local package in your Next.js project:
 Now, navigate to your project's root directory and link the previously created symlink to your project's node_modules.
 ```
 cd /path/to/your/project
 npm link @agent-embed/nextjs
 ```
 
+### Option 2: Include in package.json using `file`
+In your project update it to use the cloned @agent-embed/js.
+ "@agent-embed/nextjs": "file:../path/to/agent-embed/nextjs",
+
+
+### Update your next.config.js or next.config.mjs to use the same react instance.
+Update next.config.mjs: Open your next.config.mjs file and modify it to include the alias configuration for React.
+```
+import path from 'path';
+
+const nextConfig = {
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Resolve React to a single instance
+    config.resolve.alias['react'] = path.resolve('node_modules/react');
+
+    // Important: return the modified config
+    return config;
+  },
+};
+
+export default nextConfig;
+
+```
+
+If you are using a next.config.js, then do the below:
+```
+const path = require('path');
+
+module.exports = {
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Resolve React to a single instance
+    config.resolve.alias['react'] = path.resolve(__dirname, 'node_modules/react');
+    
+    // Important: return the modified config
+    return config;
+  },
+};
+
+```
 
 ### Import and use the agent for developemnt:
 ```
 import { Standard } from '@agent-embed/nextjs'
+
+...
+
+<Standard
+  id={'1234'}
+  agentName={'Your agent name'}
+  apiHost={"https://app.predictabledialogs.com/web/incoming"}
+  style={{ width: '400px', height: '400px' }}
+/>
+
 ```
 
 
@@ -75,13 +126,5 @@ Add Missing Dependencies:
 
 ```
 npm install @agent-embed/nextjs
-
-```
-
-Check for Extraneous Packages:
-Ensure your package.json only includes the necessary dependencies. Remove any extraneous packages listed during the npm ls react output. You can use the following command to clean up extraneous packages:
-
-```
-npm prune
 
 ```

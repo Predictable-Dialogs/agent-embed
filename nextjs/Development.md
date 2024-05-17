@@ -25,9 +25,7 @@ npm link @agent-embed/nextjs
 
 ### Import and use the agent for developemnt:
 ```
-import dynamic from 'next/dynamic';
-
-const Standard = dynamic(() => import('@agent-embed/nextjs').then((module) => module.Standard), { ssr: false });
+import { Standard } from '@agent-embed/nextjs'
 ```
 
 
@@ -51,8 +49,16 @@ npm run build -- --watch
 From your project
 ```
 npm unlink @agent-embed/nextjs
+npm unlink -g @agent-embed/nextjs
 
 ```
+
+Check the global node_modules directory is cleared: 
+```
+npm ls -g --depth=0
+npm rm -g <package1> <package2> ... <packageN>
+```
+
 Then, remove the node_modules directory and the package-lock.json file:
 ```
 rm -rf node_modules package-lock.json
@@ -68,7 +74,7 @@ npm install
 Add Missing Dependencies:
 
 ```
-npm install @agent-embed/nextjs @agent-embed/js @agent-embed/react
+npm install @agent-embed/nextjs
 
 ```
 

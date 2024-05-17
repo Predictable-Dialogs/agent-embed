@@ -89,7 +89,11 @@ Now, you can make changes to the agent-embed package. These changes will be refl
 Ensure that your package is built in watch mode if it needs to be transpiled (e.g., TypeScript to JavaScript). This way, changes are automatically compiled and available in your Next.js app.
 
 ```
-cd agent-embed/nextjs
+cd agent-embed/js
+npm run build -- --watch
+cd ../react
+npm run build -- --watch
+cd ../nextjs
 npm run build -- --watch
 ```
 

@@ -1,6 +1,6 @@
 export const OpenAiLogo = () => {
   return (
-    <svg fill="#000000" width="15.000000pt" height="15.300000pt" viewBox="0 0 24 24" role="img" 
+    <svg fill="#9CA3AF" width="15.000000pt" height="15.300000pt" viewBox="0 0 24 24" role="img" 
       xmlns="http://www.w3.org/2000/svg">
       <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
       <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>

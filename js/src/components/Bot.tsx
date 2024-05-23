@@ -288,6 +288,9 @@ const BotContent = (props: BotContentProps) => {
       >
         <LiteBadge botContainer={botContainer} />
       </Show>
+      <div class="w-full text-center text-gray-200" style="font-size: 0.5rem;">
+        {process.env.VERSION}
+      </div>
     </div>
   )
 }

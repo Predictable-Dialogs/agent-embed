@@ -40,14 +40,14 @@ export const LiteBadge = (props: Props) => {
   return (
     <a
       ref={liteBadge}
-      href={'https://openai.com/chatgpt'}
+      href={'https://predictabledialogs.com/'}
       target="_blank"
       rel="noopener noreferrer"
       class="lite-badge"
       id="lite-badge"
     >
       <OpenAiLogo />
-      <span>Powered By ChatGPT</span>
+      <span class="text-gray-400">Powered By ChatGPT </span>
     </a>
   )
 }

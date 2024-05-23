@@ -6,6 +6,8 @@ import autoprefixer from 'autoprefixer'
 import tailwindcss from 'tailwindcss'
 import typescript from '@rollup/plugin-typescript'
 import { typescriptPaths } from 'rollup-plugin-typescript-paths'
+import replace from '@rollup/plugin-replace';
+import pkg from './package.json' assert { type: 'json' };
 
 const extensions = ['.ts', '.tsx']
 
@@ -33,6 +35,10 @@ const indexConfig = {
     }),
     typescript(),
     typescriptPaths({ preserveExtensions: true }),
+    replace({
+      preventAssignment: true,
+      'process.env.VERSION': JSON.stringify(pkg.version),
+    }),
     // terser({ output: { comments: false } }),
   ],
 }

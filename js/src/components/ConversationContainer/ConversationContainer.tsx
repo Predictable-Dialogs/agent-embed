@@ -7,6 +7,7 @@ import {
   For,
   onMount,
   Show,
+  onCleanup,
 } from 'solid-js'
 import { sendMessageQuery } from '@/queries/sendMessageQuery'
 import { ChatChunk } from './ChatChunk'
@@ -21,6 +22,7 @@ import { executeClientSideAction } from '@/utils/executeClientSideActions'
 import { LoadingChunk } from './LoadingChunk'
 import { PopupBlockedToast } from './PopupBlockedToast'
 import { setStreamingMessage } from '@/utils/streamingMessageSignal'
+import { abortController, reader } from '@/features/blocks/integrations/openai/streamChat'
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -257,6 +259,7 @@ export const ConversationContainer = (props: Props) => {
     const longRequest = setTimeout(() => {
       setIsSending(true)
     }, 1000)
+    
     const { data, error } = await sendMessageQuery({
       apiHost: props.context.apiHost,
       sessionId: props.context.sessionId,
@@ -380,6 +383,16 @@ export const ConversationContainer = (props: Props) => {
   }
 
   const handleSkip = () => sendMessage(undefined)
+
+
+  onCleanup(() => {
+    if (reader) {
+      reader.cancel();
+    }
+    if (abortController) {
+      abortController.abort();
+    }
+  });
 
   let inputCounter = 0;
 

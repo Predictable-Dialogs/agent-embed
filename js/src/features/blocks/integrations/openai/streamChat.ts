@@ -2,7 +2,8 @@ import { ClientSideActionContext } from '@/types'
 import { getApiEndPoint } from '@/utils/getApiEndPoint'
 import { isNotEmpty } from '@/lib/utils'
 
-// let abortController: AbortController | null = null
+export let reader: ReadableStreamDefaultReader;
+export let abortController : AbortController | null = null;
 const secondsToWaitBeforeRetries = 3
 const maxRetryAttempts = 3
 
@@ -13,8 +14,10 @@ export const streamChat =
     // type: string | undefined,
     { onMessageStream }: { onMessageStream?: (chunk: string, message: string) => void }
   ): Promise<{ message?: string; error?: object }> => {
-    
-    let abortController = new AbortController();
+    if (!abortController) {
+      abortController = new AbortController();
+    }
+
     try {
 
       const apiHost = context.apiHost
@@ -45,18 +48,16 @@ export const streamChat =
 
       if (!res.ok) {
         console.log(`res not ok. context.retryAttempt is ${context.retryAttempt}, res.status is ${res.status}`);
-        if (
-          (context.retryAttempt ?? 0) < maxRetryAttempts &&
-          (res.status === 403 || res.status === 500 || res.status === 503)
-        ) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, secondsToWaitBeforeRetries * 1000)
-          )
+       
+        if ((context.retryAttempt ?? 0) < maxRetryAttempts &&
+            (res.status === 403 || res.status === 500 || res.status === 503)) {
+          await new Promise((resolve) => setTimeout(resolve, secondsToWaitBeforeRetries * 1000));
           return streamChat({
             ...context,
             retryAttempt: (context.retryAttempt ?? 0) + 1,
-          })(message, { onMessageStream })
+          })(message, { onMessageStream });
         }
+
         return {
           error: (await res.json()) || 'Failed to fetch the chat response.',
         }
@@ -70,7 +71,10 @@ export const streamChat =
       let accumulatedMessage = '';
       let endValue;
 
-      const reader = res.body.getReader()
+      if (!reader) {
+        reader = res.body.getReader();
+      }
+  
       const decoder = new TextDecoder()
 
       // eslint-disable-next-line no-constant-condition
@@ -84,6 +88,7 @@ export const streamChat =
         // message += chunk
         if (onMessageStream) onMessageStream(chunk, accumulatedMessage)
         if (abortController === null) {
+          console.log(`abortController is null, end stream.`)
           reader.cancel()
           break
         }
@@ -95,8 +100,12 @@ export const streamChat =
       console.error(err)
       // Ignore abort errors as they are expected.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (reader) {
+        reader.cancel();
+      }  
+
       if ((err as any).name === 'AbortError') {
-        // abortController = null
+        abortController = null
         return { error: { message: 'Request aborted' } }
       }
 

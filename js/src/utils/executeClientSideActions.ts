@@ -1,6 +1,6 @@
 import { executeChatwoot } from '@/features/blocks/integrations/chatwoot'
 import { executeGoogleAnalyticsBlock } from '@/features/blocks/integrations/googleAnalytics/utils/executeGoogleAnalytics'
-import { streamChat } from '@/features/blocks/integrations/openai/streamChat'
+import { streamChat } from '@/queries/streamChat'
 import { executeRedirect } from '@/features/blocks/logic/redirect'
 import { executeScript } from '@/features/blocks/logic/script/executeScript'
 import { executeSetVariable } from '@/features/blocks/logic/setVariable/executeSetVariable'
@@ -14,12 +14,14 @@ type Props = {
   clientSideAction: NonNullable<ChatReply['clientSideActions']>[0]
   context: ClientSideActionContext
   onMessageStream?: (chunk: string, message: string) => void
+  setIsConnecting?: (state: boolean) => void;
 }
 
 export const executeClientSideAction = async ({
   clientSideAction,
   context,
   onMessageStream,
+  setIsConnecting
 }: Props): Promise<
   | { blockedPopupUrl: string }
   | { replyToSend: string | undefined; logs?: ReplyLog[] }
@@ -46,10 +48,8 @@ export const executeClientSideAction = async ({
   if ('streamOpenAiChatCompletion' in clientSideAction) {
     const { error, message } = await streamChat(context)(
       clientSideAction.streamOpenAiChatCompletion.message,
-      // clientSideAction.streamOpenAiChatCompletion.type,
-      {
-        onMessageStream
-      }
+      onMessageStream,
+      setIsConnecting
     )
     if (error)
       return {

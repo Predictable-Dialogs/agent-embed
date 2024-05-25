@@ -21,3 +21,18 @@ export const LoadingChunk = (props: Props) => (
     </div>
   </div>
 )
+
+export const ConnectingChunk = (props: Props) => (
+  <div class="flex w-full justify-center">
+    <div class="flex flex-col items-center">
+      <div class="flex gap-2">
+        <p class="text-center text-sm text-gray-500">
+          Connecting 
+           <span class="bubble1 inline-block" style={{ 'background-color': 'transparent', 'color': 'inherit' }}>.</span>
+            <span class="bubble2 inline-block" style={{ 'background-color': 'transparent', 'color': 'inherit' }}>.</span>
+            <span class="bubble3 inline-block" style={{ 'background-color': 'transparent', 'color': 'inherit' }}>.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+)

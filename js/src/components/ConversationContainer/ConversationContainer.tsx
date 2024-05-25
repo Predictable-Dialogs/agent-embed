@@ -19,10 +19,11 @@ import {
 } from '@/types'
 import { isNotDefined } from '@/lib/utils'
 import { executeClientSideAction } from '@/utils/executeClientSideActions'
-import { LoadingChunk } from './LoadingChunk'
+import { LoadingChunk, ConnectingChunk } from './LoadingChunk'
 import { PopupBlockedToast } from './PopupBlockedToast'
 import { setStreamingMessage } from '@/utils/streamingMessageSignal'
-import { abortController, reader } from '@/features/blocks/integrations/openai/streamChat'
+import { abortController, reader } from '@/queries/streamChat'
+import { useInitialActions } from '@/hooks/useInitialActions';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -72,43 +73,47 @@ export const ConversationContainer = (props: Props) => {
   >(props.initialAgentReply.dynamicTheme)
   const [theme, setTheme] = createSignal(props.initialAgentReply.agentConfig.theme)
   const [isSending, setIsSending] = createSignal(false)
+  const [isConnecting, setIsConnecting] = createSignal(false)
   const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>()
   const [hasError, setHasError] = createSignal(false)
   const [activeInputId, setActiveInputId] = createSignal<number>(0)
 
-  onMount(() => {
-    ;(async () => {
-      const initialChunk = chatChunks()[0]
-      if (initialChunk.clientSideActions) {
-        const actionsBeforeFirstBubble = initialChunk.clientSideActions.filter(
-          (action) => isNotDefined(action.lastBubbleBlockId)
-        )
-        for (const action of actionsBeforeFirstBubble) {
-          if (
-            'streamOpenAiChatCompletion' in action ||
-            'webhookToExecute' in action
-          )
-            setIsSending(true)
-          const response = await executeClientSideAction({
-            clientSideAction: action,
-            context: {
-              apiHost: props.context.apiHost,
-              sessionId: props.context.sessionId,
-              agentName: props.context.agentName,
-              tabNumber: props.context.tabNumber
-            },
-            onMessageStream: streamMessage,
-          })
-          if (response && 'replyToSend' in response) {
-            // sendMessage(response.replyToSend, response.logs)
-            return
-          }
-          if (response && 'blockedPopupUrl' in response)
-            setBlockedPopupUrl(response.blockedPopupUrl)
-        }
-      }
-    })()
-  })
+  // onMount(() => {
+  //   const executeInitialActions = async () => {
+  //     const initialChunk = chatChunks()[0];
+  //     if (initialChunk.clientSideActions) {
+  //       const actionsBeforeFirstBubble = initialChunk.clientSideActions.filter(
+  //         (action) => isNotDefined(action.lastBubbleBlockId)
+  //       );
+  //       for (const action of actionsBeforeFirstBubble) {
+  //         if (
+  //           'streamOpenAiChatCompletion' in action ||
+  //           'webhookToExecute' in action
+  //         ) {
+  //           const response = await executeClientSideAction({
+  //             clientSideAction: action,
+  //             context: {
+  //               apiHost: props.context.apiHost,
+  //               sessionId: props.context.sessionId,
+  //               agentName: props.context.agentName,
+  //               tabNumber: props.context.tabNumber
+  //             },
+  //             onMessageStream: streamMessage,
+  //             setIsConnecting: setIsConnecting
+  //           });
+  //           if (response && 'replyToSend' in response) {
+  //             return;
+  //           }
+  //           if (response && 'blockedPopupUrl' in response) {
+  //             setBlockedPopupUrl(response.blockedPopupUrl);
+  //           }  
+  //         }
+  //       }
+  //     }
+  //   };
+  
+  //   executeInitialActions();  
+  // })
 
   createEffect(() => {
     setTheme(
@@ -128,7 +133,6 @@ export const ConversationContainer = (props: Props) => {
    * @returns {string} - The updated message string.
    */
   const streamMessage = (chunk: string, content: string) => {
-
     if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
       console.log(`streamMessage: chunk: ${chunk}`);
       console.log(`streamMessage: content: ${content}`);
@@ -193,7 +197,6 @@ export const ConversationContainer = (props: Props) => {
   }
 
   const streamTextMessage = (content: string) => {
-    console.log(`streamTextMessage: ${content}`);
     setIsSending(false)
     const lastChunk = [...chatChunks()].pop()
     if (!lastChunk) return
@@ -209,6 +212,17 @@ export const ConversationContainer = (props: Props) => {
     setStreamingMessage({ id, content })
   }
 
+  const executeInitialActions = useInitialActions({
+    chatChunks,
+    context: props.context,
+    onMessageStream: streamMessage,
+    setIsConnecting, 
+    setBlockedPopupUrl
+  });
+
+  onMount(() => {
+    executeInitialActions();
+  });
 
   createEffect(() => {
     setTheme(
@@ -430,6 +444,9 @@ export const ConversationContainer = (props: Props) => {
             />
         )}}
       </For>
+      <Show when={isConnecting()}>
+        <ConnectingChunk theme={theme()} />
+      </Show>
       <Show when={isSending()}>
         <LoadingChunk theme={theme()} />
       </Show>

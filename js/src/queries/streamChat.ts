@@ -2,31 +2,26 @@ import { ClientSideActionContext } from '@/types'
 import { getApiEndPoint } from '@/utils/getApiEndPoint'
 import { isNotEmpty } from '@/lib/utils'
 
-export let reader: ReadableStreamDefaultReader;
+export let reader: ReadableStreamDefaultReader | null;
 export let abortController : AbortController | null = null;
-const secondsToWaitBeforeRetries = 3
+const secondsToWaitBeforeRetries = 3;
+const secondsToWaitForRetryOnFail = 3;
 const maxRetryAttempts = 3
 
 export const streamChat =
   (context: ClientSideActionContext & { retryAttempt?: number }) =>
   async (
     message: string | undefined,
-    // type: string | undefined,
-    { onMessageStream }: { onMessageStream?: (chunk: string, message: string) => void }
+    onMessageStream : ((chunk: string, message: string) => void) | undefined,
+    setIsConnecting : ((state: boolean) => void) | undefined
   ): Promise<{ message?: string; error?: object }> => {
     if (!abortController) {
       abortController = new AbortController();
     }
 
     try {
-
       const apiHost = context.apiHost
-      if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
-        console.log(`Debug: streamChat. stream url: ${
-          isNotEmpty(apiHost) ? apiHost : getApiEndPoint()
-        }/streamer`);
-      }
-    
+      setIsConnecting?.(true);
       const res = await fetch(
         `${
           isNotEmpty(apiHost) ? apiHost : getApiEndPoint()
@@ -48,23 +43,22 @@ export const streamChat =
 
       if (!res.ok) {
         console.log(`res not ok. context.retryAttempt is ${context.retryAttempt}, res.status is ${res.status}`);
-       
+        setIsConnecting?.(true);
         if ((context.retryAttempt ?? 0) < maxRetryAttempts &&
             (res.status === 403 || res.status === 500 || res.status === 503)) {
           await new Promise((resolve) => setTimeout(resolve, secondsToWaitBeforeRetries * 1000));
           return streamChat({
             ...context,
             retryAttempt: (context.retryAttempt ?? 0) + 1,
-          })(message, { onMessageStream });
+          })(message, onMessageStream, setIsConnecting );
         }
-
+        setIsConnecting?.(false);
         return {
           error: (await res.json()) || 'Failed to fetch the chat response.',
         }
       }
 
       if (!res.body) {
-        console.log(`res not having body. throwing ...`);
         throw new Error('The response body is empty.')
       }
 
@@ -86,6 +80,7 @@ export const streamChat =
         }
         const chunk = decoder.decode(value)
         // message += chunk
+        setIsConnecting?.(false);
         if (onMessageStream) onMessageStream(chunk, accumulatedMessage)
         if (abortController === null) {
           console.log(`abortController is null, end stream.`)
@@ -93,16 +88,39 @@ export const streamChat =
           break
         }
       }
-      // Should I comment code below as we do not want to abort connections.
-      // abortController = null
       return { message: accumulatedMessage }
     } catch (err) {
-      console.error(err)
+      console.error(`streaming connection error: ${err}`);
       // Ignore abort errors as they are expected.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (reader) {
-        reader.cancel();
+        try {
+          reader.cancel();
+        } catch (readerError) {
+          console.error(`Error when cancelling the reader: ${readerError}`);
+        }
+        reader = null;  // Reset reader
       }  
+    
+      if (abortController) {
+        try {
+          abortController.abort();
+        } catch (abortError) {
+          console.error(`Error with abortController: ${abortError}`);
+        }
+        abortController = null; 
+      }
+    
+      setIsConnecting?.(true);
+      console.log(`retryAttempt: ${context.retryAttempt}`);
+      if ((context.retryAttempt ?? 0) < maxRetryAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, secondsToWaitForRetryOnFail * 1000));
+        return await streamChat({
+          ...context,
+          retryAttempt: (context.retryAttempt ?? 0) + 1,
+        })(message, onMessageStream, setIsConnecting );
+      }
+      setIsConnecting?.(false);
 
       if ((err as any).name === 'AbortError') {
         abortController = null

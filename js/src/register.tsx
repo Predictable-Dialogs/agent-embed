@@ -1,3 +1,4 @@
+// register.tsx
 import { customElement } from 'solid-element'
 import {
   defaultBotProps,
@@ -13,10 +14,6 @@ export const registerWebComponents = () => {
     return
   }
   
-  if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
-    console.log('Registering web components...');
-  }
-
   // @ts-expect-error element incorect type
   customElement('agent-standard', defaultBotProps, Standard)
   customElement('agent-bubble', defaultBubbleProps, Bubble)

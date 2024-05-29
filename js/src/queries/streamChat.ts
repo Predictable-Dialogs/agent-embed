@@ -1,3 +1,4 @@
+// streamChat.ts
 import { ClientSideActionContext } from '@/types'
 import { getApiEndPoint } from '@/utils/getApiEndPoint'
 import { isNotEmpty } from '@/lib/utils'
@@ -17,8 +18,7 @@ export const streamChat =
   ): Promise<{ message?: string; error?: object }> => {
     if (!abortController) {
       abortController = new AbortController();
-    }
-
+    } 
     try {
       const apiHost = context.apiHost
       setIsConnecting?.(true);
@@ -63,18 +63,45 @@ export const streamChat =
       }
 
       let accumulatedMessage = '';
-      let endValue;
-
       if (!reader) {
         reader = res.body.getReader();
+      } else {
+        // stream exists, so no need any further setup.
+        return { message: undefined }
       }
   
+
       const decoder = new TextDecoder()
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const { done, value } = await reader.read();
-        endValue = value;
+        let done, value;
+        try {
+          const result =  await reader.read();
+          done = result.done;
+          value = result. value; 
+        } catch (error) {
+          console.log('stream reset');
+          if (reader) {
+            try {
+              reader.cancel();
+            } catch (readerError) {
+              console.error(`Error when cancelling the reader: ${readerError}`);
+            }
+            reader = null;  // Reset reader
+          }  
+
+          if (abortController) {
+            try {
+              abortController.abort();
+            } catch (abortError) {
+              console.error(`Error with abortController: ${abortError}`);
+            }
+            abortController = null; 
+          }
+          break; 
+        }
+
         if (done) {
           break
         }
@@ -88,11 +115,9 @@ export const streamChat =
           break
         }
       }
-      return { message: accumulatedMessage }
+      return { message: undefined }
     } catch (err) {
-      console.error(`streaming connection error: ${err}`);
-      // Ignore abort errors as they are expected.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.log('connection reset');
       if (reader) {
         try {
           reader.cancel();

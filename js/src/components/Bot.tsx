@@ -1,15 +1,11 @@
 import { LiteBadge } from './LiteBadge'
 import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js'
-import { isNotDefined, isNotEmpty } from '@/lib/utils'
+import { isNotDefined } from '@/lib/utils'
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery'
 import { ConversationContainer } from './ConversationContainer'
 import { setIsMobile } from '@/utils/isMobileSignal'
 import { BotContext, InitialChatReply, OutgoingLog } from '@/types'
 import { ErrorMessage } from './ErrorMessage'
-import {
-  getExistingResultIdFromStorage,
-  setResultInStorage,
-} from '@/utils/storage'
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue'
 import immutableCss from '../assets/immutable.css'
 
@@ -69,9 +65,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         agentName: props.agentName,
         apiHost: props.apiHost,
         isPreview: props.isPreview ?? false,
-        resultId: isNotEmpty(props.resultId)
-          ? props.resultId
-          : getExistingResultIdFromStorage(agentIdFromProps),
+        resultId: undefined,
         startGroupId: props.startGroupId,
         prefilledVariables: {
           ...prefilledVariables,
@@ -92,12 +86,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
           return setError(new Error("The bot you're looking for doesn't exist."))
       }
       if (!data) return setError(new Error("Error! Couldn't initiate the chat."))
-
-      if (data.resultId && agentIdFromProps)
-      setResultInStorage(data.agentConfig.settings.general.rememberUser?.storage)(
-        agentIdFromProps,
-        data.resultId
-      )
 
       setSessionId(data.sessionId);
       setInitialChatReply(data);
@@ -159,11 +147,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     } else {
       tabNumber = parseInt(tabNumberString);
     }
-
-    // Cleanup logic (if needed)...
-    onCleanup(() => {
-      // any cleanup activities, if necessary.
-    });
   });
 
   
@@ -249,7 +232,7 @@ const BotContent = (props: BotContentProps) => {
   }
 
   onMount(() => {
-    if (!botContainer) return
+    if (!botContainer) { return };
     resizeObserver.observe(botContainer)
   })
 
@@ -288,7 +271,7 @@ const BotContent = (props: BotContentProps) => {
       >
         <LiteBadge botContainer={botContainer} />
       </Show>
-      <div class="w-full text-center text-gray-200" style="font-size: 0.5rem;">
+      <div class="absolute bottom-0 w-full text-center text-gray-200" style="font-size: 0.5rem;">
         {process.env.VERSION}
       </div>
     </div>

@@ -1,17 +1,5 @@
 const sessionStorageKey = 'resultId'
 
-export const getExistingResultIdFromStorage = (agentId?: string) => {
-  if (!agentId) return
-  try {
-    return (
-      sessionStorage.getItem(`${sessionStorageKey}-${agentId}`) ??
-      localStorage.getItem(`${sessionStorageKey}-${agentId}`) ??
-      undefined
-    )
-  } catch {
-    /* empty */
-  }
-}
 
 export const setResultInStorage =
   (storageType: 'local' | 'session' = 'session') =>

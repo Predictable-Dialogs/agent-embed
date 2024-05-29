@@ -46,23 +46,26 @@ export const executeClientSideAction = async ({
     return executeSetVariable(clientSideAction.setVariable.scriptToExecute)
   }
   if ('streamOpenAiChatCompletion' in clientSideAction) {
-    const { error, message } = await streamChat(context)(
-      clientSideAction.streamOpenAiChatCompletion.message,
-      onMessageStream,
-      setIsConnecting
-    )
-    if (error)
-      return {
-        replyToSend: undefined,
-        logs: [
-          {
-            status: 'error',
-            description: 'Failed to stream OpenAI completion',
-            details: JSON.stringify(error, null, 2),
-          },
-        ],
+      const { error, message } = await streamChat(context)(
+        clientSideAction.streamOpenAiChatCompletion.message,
+        onMessageStream,
+        setIsConnecting
+      );
+
+      if (error) {
+        return {
+          replyToSend: undefined,
+          logs: [
+            {
+              status: 'error',
+              description: 'Failed to stream OpenAI completion',
+              details: JSON.stringify(error, null, 2),
+            },
+          ],
+        }
       }
-    return { replyToSend: message }
+      
+      return { replyToSend: message }
   }
   if ('startPropsToInject' in clientSideAction) {
     return injectStartProps(clientSideAction.startPropsToInject)

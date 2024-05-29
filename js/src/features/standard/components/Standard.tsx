@@ -18,12 +18,13 @@ export const Standard = (
   const [isBotDisplayed, setIsBotDisplayed] = createSignal(false)
 
   const launchBot = () => {
-    setIsBotDisplayed(true)
+    setIsBotDisplayed(true);
   }
 
   const botLauncherObserver = new IntersectionObserver((intersections) => {
-    if (intersections.some((intersection) => intersection.isIntersecting))
-      launchBot()
+    if (intersections.some((intersection) => intersection.isIntersecting)) {
+      launchBot();
+    }
   })
 
   onMount(() => {

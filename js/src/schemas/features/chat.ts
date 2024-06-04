@@ -127,21 +127,18 @@ export const sendMessageInputSchema = z.object({
   message: z
     .string()
     .optional()
-    .describe(
-      'The answer to the previous chat input. Do not provide it if you are starting a new chat.'
-    ),
+    .describe('The answer to the previous chat input. Do not provide it if you are starting a new chat.'),
   sessionId: z
-    .union([z.string(), z.null()])    
+    .union([z.string(), z.null()])
     .optional()
     .describe(
       'Session ID that you get from the initial chat request to a bot. If not provided, it will create a new session.'
     ),
-  clientLogs: z
-    .array(replyLogSchema)
-    .optional()
-    .describe('Logs while executing client side actions'),
+  clientLogs: z.array(replyLogSchema).optional().describe('Logs while executing client side actions'),
   startParams: startParamsSchema.optional(),
-})
+  agentName: z.string().optional().describe('The agent name.'),
+  tabNumber: z.number().optional().describe('The browser tab number.'),
+});
 
 const runtimeOptionsSchema = paymentInputRuntimeOptionsSchema.optional()
 

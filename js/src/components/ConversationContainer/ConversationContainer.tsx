@@ -133,11 +133,6 @@ export const ConversationContainer = (props: Props) => {
    * @returns {string} - The updated message string.
    */
   const streamMessage = (chunk: string, content: string) => {
-    if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
-      console.log(`streamMessage: chunk: ${chunk}`);
-      console.log(`streamMessage: content: ${content}`);
-    }
-  
     let parsedChunk: any;
     let isJson = false;
 
@@ -154,20 +149,18 @@ export const ConversationContainer = (props: Props) => {
     if (isJson) {
       if (parsedChunk.end) {
         //Delete the session id
-        // console.log(`Setting session id to null`);
         props.setSessionId(null);
       } else {
         //Match with the sessionId from the server
         if (parsedChunk.sessionId !== props.context.sessionId) {
-          // console.log(`Setting new session id to ${parsedChunk.sessionId}`);
-          props.setSessionId(parsedChunk.sessionId)
+          props.setSessionId(parsedChunk.sessionId);
         }
       }
 
       if (parsedChunk.pdType === 'independentText') {
         // Return the independent text
         streamIndependentMessage(parsedChunk);
-      } 
+      }
     } else {
       // Treat as a normal text message
       content += chunk;
@@ -177,29 +170,27 @@ export const ConversationContainer = (props: Props) => {
 
   const streamIndependentMessage = (data: any) => {
     setIsSending(false);
-    const lastChunk = [...chatChunks()].pop()
-    if (!lastChunk) return
+    const lastChunk = [...chatChunks()].pop();
+    if (!lastChunk) return;
 
     if (data.input) {
-      setActiveInputId(prev => prev + 1);
+      setActiveInputId((prev) => prev + 1);
     }
-    
+
     setChatChunks((displayedChunks) => [
       ...displayedChunks,
       {
-        input: data.input, 
-        messages: [...chatChunks()].pop()?.streamingMessageId
-          ? data.messages.slice(1)
-          : data.messages,
+        input: data.input,
+        messages: [...chatChunks()].pop()?.streamingMessageId ? data.messages.slice(1) : data.messages,
         clientSideActions: data.clientSideActions,
       },
-    ])
-  }
+    ]);
+  };
 
   const streamTextMessage = (content: string) => {
-    setIsSending(false)
-    const lastChunk = [...chatChunks()].pop()
-    if (!lastChunk) return
+    setIsSending(false);
+    const lastChunk = [...chatChunks()].pop();
+    if (!lastChunk) return;
     const id = lastChunk.streamingMessageId ?? createUniqueId();
     if (!lastChunk.streamingMessageId)
       setChatChunks((displayedChunks) => [
@@ -208,16 +199,16 @@ export const ConversationContainer = (props: Props) => {
           messages: [],
           streamingMessageId: id,
         },
-      ])
-    setStreamingMessage({ id, content })
-  }
+      ]);
+    setStreamingMessage({ id, content });
+  };
 
   const executeInitialActions = useInitialActions({
     chatChunks,
     context: props.context,
     onMessageStream: streamMessage,
-    setIsConnecting, 
-    setBlockedPopupUrl
+    setIsConnecting,
+    setBlockedPopupUrl,
   });
 
   onMount(() => {
@@ -225,93 +216,93 @@ export const ConversationContainer = (props: Props) => {
   });
 
   createEffect(() => {
-    setTheme(
-      parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme())
-    )
-  })
+    setTheme(parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme()));
+  });
 
+  const sendMessage = async (message: string | undefined, clientLogs?: SendMessageInput['clientLogs']) => {
+    if (clientLogs) {
+      props.onNewLogs?.(clientLogs);
+    }
 
-  const sendMessage = async (
-    message: string | undefined,
-    clientLogs?: SendMessageInput['clientLogs']
-  ) => {
-    if (clientLogs) props.onNewLogs?.(clientLogs)
-    setHasError(false)
-    const currentInputBlock = [...chatChunks()].pop()?.input
-    if (currentInputBlock?.id && props.onAnswer && message)
-      props.onAnswer({ message, blockId: currentInputBlock.id })
-    if (currentInputBlock?.type === InputBlockType.FILE)
+    setHasError(false);
+
+    const currentInputBlock = [...chatChunks()].pop()?.input;
+
+    if (currentInputBlock?.id && props.onAnswer && message) {
+      props.onAnswer({ message, blockId: currentInputBlock.id });
+    }
+
+    if (currentInputBlock?.type === InputBlockType.FILE) {
       props.onNewLogs?.([
         {
           description: 'Files are not uploaded in preview mode',
           status: 'info',
         },
-      ])
+      ]);
+    }
 
     // Current chunk is {"input":{"type":"text input","options":{"labels":{"placeholder":"Type your answer...","button":"Send"},"isLong":false}},"messages":[{"type":"text","content":{"richText":[{"type":"p","children":[{"text":"What is your email address?"}]}]}}]}
     // If current chunk type has input->type = 'text input' then stream:
-    if (currentInputBlock?.type === "text input") {
-      let action = {"streamOpenAiChatCompletion":{"message": message}}
+    // if (currentInputBlock?.type === 'text input') {
+    //   let action = { streamOpenAiChatCompletion: { message: message } };
 
-      if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
-        console.log(`Starting stream with agentName: ${props.context.agentName}`)
-      }
-      
-      const response = await executeClientSideAction({
-        clientSideAction: action,
-        context: {
-          apiHost: props.context.apiHost,
-          sessionId: props.context.sessionId,
-          agentName: props.context.agentName,
-          tabNumber: props.context.tabNumber
-        },
-        onMessageStream: streamMessage,
-      })
-      return;
-    }
+    //   const response = await executeClientSideAction({
+    //     clientSideAction: action,
+    //     context: {
+    //       apiHost: props.context.apiHost,
+    //       sessionId: props.context.sessionId,
+    //       agentName: props.context.agentName,
+    //       tabNumber: props.context.tabNumber,
+    //     },
+    //     onMessageStream: streamMessage,
+    //   });
+    //   return;
+    // }
 
     const longRequest = setTimeout(() => {
-      setIsSending(true)
-    }, 1000)
-    
+      setIsSending(true);
+    }, 2000);
+
     const { data, error } = await sendMessageQuery({
       apiHost: props.context.apiHost,
       sessionId: props.context.sessionId,
+      agentName: props.context.agentName,
+      tabNumber: props.context.tabNumber,
       message,
       clientLogs,
-    })
+    });
+    clearTimeout(longRequest);
+    setIsSending(false);
 
-    clearTimeout(longRequest)
-    setIsSending(false)
     if (error) {
-      setHasError(true)
+      setHasError(true);
       props.onNewLogs?.([
         {
           description: 'Failed to send the reply',
           details: error,
           status: 'error',
         },
-      ])
+      ]);
     }
-    if (!data) return
-    if (data.logs) props.onNewLogs?.(data.logs)
-    if (data.dynamicTheme) setDynamicTheme(data.dynamicTheme)
+    if (!data) return;
+    if (data.logs) {
+      props.onNewLogs?.(data.logs);
+    }
+    if (data.dynamicTheme) {
+      setDynamicTheme(data.dynamicTheme);
+    }
     if (data.input?.id && props.onNewInputBlock) {
       props.onNewInputBlock({
         id: data.input.id,
         groupId: data.input.groupId,
-      })
+      });
     }
     if (data.clientSideActions) {
       const actionsBeforeFirstBubble = data.clientSideActions.filter((action) =>
         isNotDefined(action.lastBubbleBlockId)
-      )
+      );
       for (const action of actionsBeforeFirstBubble) {
-        if (
-          'streamOpenAiChatCompletion' in action ||
-          'webhookToExecute' in action
-        )
-          setIsSending(true)
+        if ('streamOpenAiChatCompletion' in action || 'webhookToExecute' in action) setIsSending(true);
         // Current action is {"streamOpenAiChatCompletion":{"messages":"Some content"}}
 
         const response = await executeClientSideAction({
@@ -319,85 +310,72 @@ export const ConversationContainer = (props: Props) => {
           context: {
             apiHost: props.context.apiHost,
             sessionId: props.context.sessionId,
-            agentName: props.context.agentName
+            agentName: props.context.agentName,
           },
           onMessageStream: streamMessage,
-        })
+        });
         if (response && 'replyToSend' in response) {
-
           // sendMessage(response.replyToSend, response.logs)
-          return
+          return;
         }
-        if (response && 'blockedPopupUrl' in response)
-          setBlockedPopupUrl(response.blockedPopupUrl)
+        if (response && 'blockedPopupUrl' in response) setBlockedPopupUrl(response.blockedPopupUrl);
       }
     }
 
     if (data.input) {
-      setActiveInputId(prev => prev + 1);
+      setActiveInputId((prev) => prev + 1);
     }
-    
+
     setChatChunks((displayedChunks) => [
       ...displayedChunks,
       {
         input: data.input,
-        messages: [...chatChunks()].pop()?.streamingMessageId
-          ? data.messages.slice(1)
-          : data.messages,
+        messages: [...chatChunks()].pop()?.streamingMessageId ? data.messages.slice(1) : data.messages,
         clientSideActions: data.clientSideActions,
       },
-    ])
-  }
+    ]);
+  };
 
   const autoScrollToBottom = (offsetTop?: number) => {
     setTimeout(() => {
-      chatContainer?.scrollTo(0, offsetTop ?? chatContainer.scrollHeight)
-    }, 50)
-  }
+      chatContainer?.scrollTo(0, offsetTop ?? chatContainer.scrollHeight);
+    }, 50);
+  };
 
   const handleAllBubblesDisplayed = async () => {
-    const lastChunk = [...chatChunks()].pop()
-    if (!lastChunk) return
+    const lastChunk = [...chatChunks()].pop();
+    if (!lastChunk) return;
     if (isNotDefined(lastChunk.input)) {
-      props.onEnd?.()
+      props.onEnd?.();
     }
-  }
+  };
 
   const handleNewBubbleDisplayed = async (blockId: string) => {
-    const lastChunk = [...chatChunks()].pop()
-    if (!lastChunk) return
+    const lastChunk = [...chatChunks()].pop();
+    if (!lastChunk) return;
     if (lastChunk.clientSideActions) {
-      const actionsToExecute = lastChunk.clientSideActions.filter(
-        (action) => action.lastBubbleBlockId === blockId
-      )
+      const actionsToExecute = lastChunk.clientSideActions.filter((action) => action.lastBubbleBlockId === blockId);
       for (const action of actionsToExecute) {
-        if (
-          'streamOpenAiChatCompletion' in action ||
-          'webhookToExecute' in action
-        )
-          setIsSending(true)
-        console.log(`executeClientSideAction in handleNewBubbleDisplayed`);
+        if ('streamOpenAiChatCompletion' in action || 'webhookToExecute' in action) setIsSending(true);
         const response = await executeClientSideAction({
           clientSideAction: action,
           context: {
             apiHost: props.context.apiHost,
             sessionId: props.context.sessionId,
-            agentName: props.context.agentName
+            agentName: props.context.agentName,
           },
           onMessageStream: streamMessage,
-        })
+        });
         if (response && 'replyToSend' in response) {
-          sendMessage(response.replyToSend, response.logs)
-          return
+          sendMessage(response.replyToSend, response.logs);
+          return;
         }
-        if (response && 'blockedPopupUrl' in response)
-          setBlockedPopupUrl(response.blockedPopupUrl)
+        if (response && 'blockedPopupUrl' in response) setBlockedPopupUrl(response.blockedPopupUrl);
       }
     }
-  }
+  };
 
-  const handleSkip = () => sendMessage(undefined)
-
+  const handleSkip = () => sendMessage(undefined);
 
   onCleanup(() => {
     if (reader) {
@@ -415,6 +393,9 @@ export const ConversationContainer = (props: Props) => {
       ref={chatContainer}
       class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view scroll-smooth gap-2"
     >
+      <Show when={isConnecting()}>
+        <ConnectingChunk theme={theme()} />
+      </Show>
       <For each={chatChunks()}>
         {(chatChunk, index) => {
           if (chatChunk.input) {
@@ -430,11 +411,7 @@ export const ConversationContainer = (props: Props) => {
               settings={props.initialAgentReply.agentConfig.settings}
               streamingMessageId={chatChunk.streamingMessageId}
               context={props.context}
-              hideAvatar={
-                !chatChunk.input &&
-                !chatChunk.streamingMessageId &&
-                index() < chatChunks().length - 1
-              }
+              hideAvatar={!chatChunk.input && !chatChunk.streamingMessageId && index() < chatChunks().length - 1}
               hasError={hasError() && index() === chatChunks().length - 1}
               onNewBubbleDisplayed={handleNewBubbleDisplayed}
               onAllBubblesDisplayed={handleAllBubblesDisplayed}
@@ -442,27 +419,22 @@ export const ConversationContainer = (props: Props) => {
               onScrollToBottom={autoScrollToBottom}
               onSkip={handleSkip}
             />
-        )}}
+          );
+        }}
       </For>
-      <Show when={isConnecting()}>
-        <ConnectingChunk theme={theme()} />
-      </Show>
       <Show when={isSending()}>
         <LoadingChunk theme={theme()} />
       </Show>
       <Show when={blockedPopupUrl()} keyed>
         {(blockedPopupUrl) => (
           <div class="flex justify-end">
-            <PopupBlockedToast
-              url={blockedPopupUrl}
-              onLinkClick={() => setBlockedPopupUrl(undefined)}
-            />
+            <PopupBlockedToast url={blockedPopupUrl} onLinkClick={() => setBlockedPopupUrl(undefined)} />
           </div>
         )}
       </Show>
       <BottomSpacer />
     </div>
-  )
+  );
 }
 
 const BottomSpacer = () => {

@@ -20,10 +20,6 @@ export async function getInitialChatReplyQuery({
   apiHost?: string
 }) {
 
-  if (window.localStorage.getItem('NEXT_PUBLIC_DEBUG') === 'true') {
-    console.log(`Debug: getInitialChatReplyQuery. apiHost: ${apiHost}`);
-  }
-
   if (isNotDefined(agentName))
     throw new Error('Agent name is required to get initial messages')
 

@@ -15,26 +15,21 @@ type Props = {
 }
 
 export const Buttons = (props: Props) => {
-  console.log('Rendering Buttons component with props:', JSON.stringify(props, null, 2));
-
-  let inputRef: HTMLInputElement | undefined
-  const [filteredItems, setFilteredItems] = createSignal(props.defaultItems)
+  let inputRef: HTMLInputElement | undefined;
+  const [filteredItems, setFilteredItems] = createSignal(props.defaultItems);
 
   onMount(() => {
-    if (!isMobile() && inputRef) inputRef.focus()
-  })
+    if (!isMobile() && inputRef) inputRef.focus();
+  });
 
   // eslint-disable-next-line solid/reactivity
-  const handleClick = (itemIndex: number) => () =>
-    props.onSubmit({ value: filteredItems()[itemIndex].content ?? '' })
+  const handleClick = (itemIndex: number) => () => props.onSubmit({ value: filteredItems()[itemIndex].content ?? '' });
 
   const filterItems = (inputValue: string) => {
     setFilteredItems(
-      props.defaultItems.filter((item) =>
-        item.content?.toLowerCase().includes((inputValue ?? '').toLowerCase())
-      )
-    )
-  }
+      props.defaultItems.filter((item) => item.content?.toLowerCase().includes((inputValue ?? '').toLowerCase()))
+    );
+  };
 
   return (
     <div class="flex flex-col gap-2 w-full">
@@ -43,10 +38,7 @@ export const Buttons = (props: Props) => {
           <SearchInput
             ref={inputRef}
             onInput={filterItems}
-            placeholder={
-              props.options.searchInputPlaceholder ??
-              defaultChoiceInputOptions.searchInputPlaceholder
-            }
+            placeholder={props.options.searchInputPlaceholder ?? defaultChoiceInputOptions.searchInputPlaceholder}
             onClear={() => setFilteredItems(props.defaultItems)}
           />
         </div>
@@ -55,23 +47,15 @@ export const Buttons = (props: Props) => {
       <div
         class={
           'flex flex-wrap justify-end gap-2' +
-          (props.options.isSearchable
-            ? ' overflow-y-scroll max-h-80 rounded-md hide-scrollbar'
-            : '')
+          (props.options.isSearchable ? ' overflow-y-scroll max-h-80 rounded-md hide-scrollbar' : '')
         }
       >
         <For each={filteredItems()}>
           {(item, index) => (
             <span class={'relative' + (isMobile() ? ' w-full' : '')}>
-              <Button
-                on:click={handleClick(index())}
-                data-itemid={item.id}
-                class="w-full"
-              >
+              <Button on:click={handleClick(index())} data-itemid={item.id} class="w-full">
                 {item.content}
-                {item.isUrl && (
-                  <ExternalLinkIcon class="ml-2 -mr-1 h-4 w-4" aria-hidden="true" />
-                )}
+                {item.isUrl && <ExternalLinkIcon class="ml-2 -mr-1 h-4 w-4" aria-hidden="true" />}
               </Button>
               {props.inputIndex === 0 && props.defaultItems.length === 1 && (
                 <span class="flex h-3 w-3 absolute top-0 right-0 -mt-1 -mr-1 ping">
@@ -84,5 +68,5 @@ export const Buttons = (props: Props) => {
         </For>
       </div>
     </div>
-  )
-}
+  );
+};

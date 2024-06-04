@@ -28,53 +28,42 @@ export const ChatChunk = (props: Props) => {
   const [displayedMessageIndex, setDisplayedMessageIndex] = createSignal(0)
 
   onMount(() => {
-    if (props.streamingMessageId) return
+    if (props.streamingMessageId) return;
     if (props.messages.length === 0) {
-      props.onAllBubblesDisplayed()
+      props.onAllBubblesDisplayed();
     }
-    props.onScrollToBottom(
-      inputRef?.offsetTop ? inputRef?.offsetTop - 50 : undefined
-    )
-  })
+    props.onScrollToBottom(inputRef?.offsetTop ? inputRef?.offsetTop - 50 : undefined);
+  });
 
   const displayNextMessage = async (bubbleOffsetTop?: number) => {
-    const lastBubbleBlockId = props.messages[displayedMessageIndex()].id
-    await props.onNewBubbleDisplayed(lastBubbleBlockId)
-    setDisplayedMessageIndex(
-      displayedMessageIndex() === props.messages.length
-        ? displayedMessageIndex()
-        : displayedMessageIndex() + 1
-    )
-    props.onScrollToBottom(bubbleOffsetTop)
-    if (displayedMessageIndex() === props.messages.length) {
-      props.onAllBubblesDisplayed()
+    const index = displayedMessageIndex();
+    const lastBubbleBlockId = props.messages[index].id;
+
+    await props.onNewBubbleDisplayed(lastBubbleBlockId);
+
+    // setDisplayedMessageIndex(index === props.messages.length ? index : index + 1);
+    if (index !== props.messages.length) {
+      setDisplayedMessageIndex(index + 1);
     }
-  }
+
+    props.onScrollToBottom(bubbleOffsetTop);
+    if (index === props.messages.length) {
+      props.onAllBubblesDisplayed();
+    }
+  };
 
   return (
     <div class="flex flex-col w-full min-w-0 gap-2">
       <Show when={props.messages.length > 0}>
         <div class={'flex' + (isMobile() ? ' gap-1' : ' gap-2')}>
-          <Show
-            when={
-              props.theme.chat.hostAvatar?.isEnabled &&
-              props.messages.length > 0
-            }
-          >
-            <AvatarSideContainer
-              hostAvatarSrc={props.theme.chat.hostAvatar?.url}
-              hideAvatar={props.hideAvatar}
-            />
+          <Show when={props.theme.chat.hostAvatar?.isEnabled && props.messages.length > 0}>
+            <AvatarSideContainer hostAvatarSrc={props.theme.chat.hostAvatar?.url} hideAvatar={props.hideAvatar} />
           </Show>
 
           <div
             class="flex flex-col flex-1 gap-2"
             style={{
-              'margin-right': props.theme.chat.guestAvatar?.isEnabled
-                ? isMobile()
-                  ? '32px'
-                  : '48px'
-                : undefined,
+              'margin-right': props.theme.chat.guestAvatar?.isEnabled ? (isMobile() ? '32px' : '48px') : undefined,
             }}
           >
             <For each={props.messages.slice(0, displayedMessageIndex() + 1)}>
@@ -100,9 +89,7 @@ export const ChatChunk = (props: Props) => {
           hasHostAvatar={props.theme.chat.hostAvatar?.isEnabled ?? false}
           guestAvatar={props.theme.chat.guestAvatar}
           context={props.context}
-          isInputPrefillEnabled={
-            props.settings.general.isInputPrefillEnabled ?? true
-          }
+          isInputPrefillEnabled={props.settings.general.isInputPrefillEnabled ?? true}
           hasError={props.hasError}
         />
       )}
@@ -110,20 +97,13 @@ export const ChatChunk = (props: Props) => {
         {(streamingMessageId) => (
           <div class={'flex' + (isMobile() ? ' gap-1' : ' gap-2')}>
             <Show when={props.theme.chat.hostAvatar?.isEnabled}>
-              <AvatarSideContainer
-                hostAvatarSrc={props.theme.chat.hostAvatar?.url}
-                hideAvatar={props.hideAvatar}
-              />
+              <AvatarSideContainer hostAvatarSrc={props.theme.chat.hostAvatar?.url} hideAvatar={props.hideAvatar} />
             </Show>
 
             <div
               class="flex flex-col flex-1 gap-2"
               style={{
-                'margin-right': props.theme.chat.guestAvatar?.isEnabled
-                  ? isMobile()
-                    ? '32px'
-                    : '48px'
-                  : undefined,
+                'margin-right': props.theme.chat.guestAvatar?.isEnabled ? (isMobile() ? '32px' : '48px') : undefined,
               }}
             >
               <StreamingBubble streamingMessageId={streamingMessageId} />
@@ -132,5 +112,5 @@ export const ChatChunk = (props: Props) => {
         )}
       </Show>
     </div>
-  )
+  );
 }

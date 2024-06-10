@@ -3,7 +3,7 @@
 # agent-embed
 
 ### Vision
-An agent embed blends the traditional concept of a widget with the more dynamic role of an "agent." This is a tool that's not just a passive interface element, but an active, intelligent participant in user interactions. It implies a certain level of autonomy and sophistication so it fits into the evolving nature of integrating AI with web technologies.
+An agent embed blends the traditional concept of a widget with the more dynamic role of an "agent." This tool can be an active, intelligent participant on a website. It would derive its autonomy and sophistication from the AI models running on your backend. So it fits into the evolving nature of integrating AI with web technologies.
 
 ### Current usage
 The current implementation can be used to embed agents to a website without exposing your API Keys, which remain on [predictabledialogs.com](https://predictabledialogs.com/agent/create) or on your backend.
@@ -44,19 +44,12 @@ Note: The agent name is an id, your backend should recognize and use to start ch
 
 ## Protocol to talk with a agent server
 
-1. Session initiated by agent embed using the agent name & server end point. The server responds with (initialAgentReply)
-   initialAgentReply contains:
+1. The Session would be initiated by the agent embed using the agent name & server end point. The server responds with (initialAgentReply):
        a. A theme, used for styling the agent embed. 
        b. The sessionId created on the server.
-       c. A message to show on the agent embed (optional)
-       d. A list of serverInitiatedActions - things like start streaming, execute webhooks (upload images)
+       c. A message to show on the agent embed.
+       d. A list of server capabilities (streaming, webhooks etc)
        
-2. The following is stored in the sessionData on the client:
-      a. sessionId
-      b. initialAgentReply
-      c. customCss
-      d. agentName
-
 ### First Server Response, would contain the theme to style the embed. 
 ```json
 {
@@ -116,8 +109,7 @@ Note: The agent name is an id, your backend should recognize and use to start ch
 ```
 
 ## TODO
-- Add details on how to connect to server
-- Add details on how to initiate streaming connection from client
+- Add details on how to bring up your own server
 - Add few JSON examples to demonstrate server and agent-embed communication.
 
      

@@ -90,9 +90,8 @@ const startAgentSchema = agentSchema.pick({
 const startParamsSchema = z.object({
   agentName: z
     .string()
-    .describe(
-      'Agent Name'
-    ),
+    .optional()
+    .describe("Name of the agent, temporarily here ..should be removed."),
   isPreview: z
     .boolean()
     .optional()

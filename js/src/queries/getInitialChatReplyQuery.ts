@@ -8,6 +8,7 @@ import {
 } from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage'
 
 export async function getInitialChatReplyQuery({
+  sessionId,
   agentName,
   isPreview,
   apiHost,
@@ -18,6 +19,8 @@ export async function getInitialChatReplyQuery({
 }: StartParams & {
   stripeRedirectStatus?: string
   apiHost?: string
+  agentName: string
+  sessionId: string | undefined
 }) {
 
   if (isNotDefined(agentName))
@@ -39,14 +42,15 @@ export async function getInitialChatReplyQuery({
       startParams: paymentInProgressState
         ? undefined
         : {
-            isPreview,
             agentName,
+            isPreview,
             prefilledVariables,
             startGroupId,
             resultId,
             isStreamEnabled: true,
           },
-      sessionId: paymentInProgressState?.sessionId,
+      agentName,
+      sessionId,
       message: paymentInProgressState
         ? stripeRedirectStatus === 'failed'
           ? 'fail'

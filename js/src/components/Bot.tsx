@@ -10,7 +10,6 @@ import { setCssVariablesValue } from '@/utils/setCssVariablesValue'
 import immutableCss from '../assets/immutable.css'
 
 export type BotProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agentName: string | any
   isPreview?: boolean
   resultId?: string
@@ -24,20 +23,36 @@ export type BotProps = {
   onNewLogs?: (logs: OutgoingLog[]) => void
 }
 
+
 export const Bot = (props: BotProps & { class?: string }) => {
-  const [sessionId, setSessionId] = createSignal<string | null>(null);
-  const [initialAgentReply, setInitialChatReply] = createSignal<
-    InitialChatReply | undefined
-  >()
+  const [sessionId, setSessionId] = createSignal<string | undefined>();
+  const [agentConfig, setAgentConfig] = createSignal<any | undefined>()
+  const [clientSideActions, setClientSideActions] = createSignal<any | []>([]) 
+  const [initialInput, setInitialInput] = createSignal<any | null>(null)
+  const [initialMessages, setInitialMessages] = createSignal<any | []>([])
   const [customCss, setCustomCss] = createSignal('')
   const [isInitialized, setIsInitialized] = createSignal(false)
   const [error, setError] = createSignal<Error | undefined>()
 
 
-  const getSessionData = () => {
-    const storedData = localStorage.getItem("sessionData");
-    return storedData ? JSON.parse(storedData) : null;
+
+  const getSessionId = () => {
+    const sessionId = localStorage.getItem("sessionId");
+    return sessionId ? JSON.parse(sessionId) : null;
   };
+
+  const getAgentConfig = () => {
+    const agentConfig = localStorage.getItem("agentConfig");
+    return agentConfig ? JSON.parse(agentConfig) : null;
+  };
+
+  const getCustomCss = () => {
+    const customCss = localStorage.getItem("customCss");
+    return customCss ? JSON.parse(customCss) : null;
+  };
+
+
+
   
   const initializeBot = async () => {
     setIsInitialized(true)
@@ -48,67 +63,64 @@ export const Bot = (props: BotProps & { class?: string }) => {
       prefilledVariables[key] = value
     })
 
-    let agentIdFromProps = props.agentName;
-    const storedSessionData = getSessionData();
 
-    if (storedSessionData) {
-      // If session data exists in localStorage, use it to initialize your component
-      setSessionId(storedSessionData.sessionId);
-      setInitialChatReply(storedSessionData.initialAgentReply);
-      setCustomCss(storedSessionData.customCss ?? '');
-      if (storedSessionData.agentName) {
-        agentIdFromProps = storedSessionData.agentName;
-      }
-    } else {
-      const { data, error } = await getInitialChatReplyQuery({
-        stripeRedirectStatus: urlParams.get('redirect_status') ?? undefined,
-        agentName: props.agentName,
-        apiHost: props.apiHost,
-        isPreview: props.isPreview ?? false,
-        resultId: undefined,
-        startGroupId: props.startGroupId,
-        prefilledVariables: {
-          ...prefilledVariables,
-          ...props.prefilledVariables,
-        },
-      })
-      if (error && 'code' in error && typeof error.code === 'string') {
-        if (props.isPreview ?? false) {
-          return setError(
-            new Error('An error occurred while loading the bot.', {
-              cause: error.message,
-            })
-          )
-        }
-        if (['BAD_REQUEST', 'FORBIDDEN'].includes(error.code))
-          return setError(new Error('This bot is now closed.'))
-        if (error.code === 'NOT_FOUND')
-          return setError(new Error("The bot you're looking for doesn't exist."))
-      }
-      if (!data) return setError(new Error("Error! Couldn't initiate the chat."))
+    const storedSessionId = getSessionId();
+    const storedAgentConfig = getAgentConfig();
+    const storedCustomCss = getCustomCss();
 
-      setSessionId(data.sessionId);
-      setInitialChatReply(data);
-      setCustomCss(data.agentConfig.theme.customCss ?? '')
 
-      if (data.input?.id && props.onNewInputBlock)
-      props.onNewInputBlock({
-        id: data.input.id,
-        groupId: data.input.groupId,
-      })
-      if (data.logs) props.onNewLogs?.(data.logs)
-
-      // After all your usual initializations, save the session data to localStorage
-      localStorage.setItem(
-        "sessionData",
-        JSON.stringify({
-          sessionId: data.sessionId,
-          initialAgentReply: data,
-          agentName: props.agentName,
-          customCss: data.agentConfig.theme.customCss ?? ''
-        })
-      );
+    if (storedSessionId) {
+      setSessionId(storedSessionId.sessionId);
     }
+
+    if (storedAgentConfig) {
+      setAgentConfig(storedAgentConfig.agentConfig);
+    }
+
+    if (storedCustomCss) {
+      setCustomCss(storedCustomCss.customCss);
+    }
+
+    const { data, error } = await getInitialChatReplyQuery({
+      sessionId: sessionId(),
+      stripeRedirectStatus: urlParams.get('redirect_status') ?? undefined,
+      agentName: props.agentName,
+      apiHost: props.apiHost,
+      isPreview: props.isPreview ?? false,
+      resultId: undefined,
+      startGroupId: props.startGroupId,
+      prefilledVariables: {
+        ...prefilledVariables,
+        ...props.prefilledVariables,
+      },
+    })
+    if (error && 'code' in error && typeof error.code === 'string') {
+      if (props.isPreview ?? false) {
+        return setError(
+          new Error('An error occurred while loading the bot.', {
+            cause: error.message,
+          })
+        )
+      }
+      if (['BAD_REQUEST', 'FORBIDDEN'].includes(error.code))
+        return setError(new Error('This bot is now closed.'))
+      if (error.code === 'NOT_FOUND')
+        return setError(new Error("The bot you're looking for doesn't exist."))
+    }
+    if (!data) return setError(new Error("Error! Couldn't initiate the chat."))
+    
+    setSessionId(data.sessionId);
+    setClientSideActions(data.clientSideActions);
+    setInitialInput(data.input);
+    setCustomCss(data.agentConfig.theme.customCss ?? '')
+    setAgentConfig(data.agentConfig);
+
+    if (data.input?.id && props.onNewInputBlock)
+    props.onNewInputBlock({
+      id: data.input.id,
+      groupId: data.input.groupId,
+    })
+    if (data.logs) props.onNewLogs?.(data.logs)
   }
     
   createEffect(() => {
@@ -119,14 +131,31 @@ export const Bot = (props: BotProps & { class?: string }) => {
   
   createEffect(() => {
     localStorage.setItem(
-      "sessionData",
+      "customCss",
       JSON.stringify({
-        sessionId: sessionId(),
-        initialAgentReply: initialAgentReply(),
-        agentName: props.agentName,
+        customCss: customCss()
       })
     );
   });
+
+  createEffect(() => {
+    localStorage.setItem(
+      "sessionId",
+      JSON.stringify({
+        sessionId: sessionId(),
+      })
+    );
+  });
+
+  createEffect(() => {
+    localStorage.setItem(
+      "agentConfig",
+      JSON.stringify({
+        agentConfig: agentConfig(),
+      })
+    );
+  });
+
 
   // The key used to store the last tab number
   const LAST_TAB_NUMBER_KEY = 'lastTabNumber';
@@ -161,24 +190,24 @@ export const Bot = (props: BotProps & { class?: string }) => {
       <Show when={error()} keyed>
         {(error) => <ErrorMessage error={error} />}
       </Show>
-      <Show when={initialAgentReply()} keyed>
-        {(initialAgentReply) => (
+      <Show when={agentConfig()} keyed>
+        {(agentConfigValue) => (
           <BotContent
             class={props.class}
             initialAgentReply={{
-              ...initialAgentReply,
+              messages: initialMessages(),
+              clientSideActions: clientSideActions(),
+              input: initialInput(),
               agentConfig: {
-                ...initialAgentReply.agentConfig,
-                settings: initialAgentReply.agentConfig?.settings,
-                theme: initialAgentReply.agentConfig?.theme
+                ...agentConfigValue,
               },
             }}
             context={{
               apiHost: props.apiHost,
               isPreview: (props.isPreview ?? false),
-              resultId: initialAgentReply.resultId,
+              // resultId: initialAgentReply.resultId,
               sessionId: sessionId(),
-              agentConfig: initialAgentReply.agentConfig,
+              agentConfig: agentConfigValue,
               agentName: props.agentName,
               tabNumber: tabNumber
             }}
@@ -195,7 +224,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
 }
 
 type BotContentProps = {
-  initialAgentReply: InitialChatReply
+  initialAgentReply: any
   context: BotContext
   class?: string
   onNewInputBlock?: (block: { id: string; groupId: string }) => void

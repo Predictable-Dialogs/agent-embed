@@ -69,7 +69,7 @@ export const omit: Omit = (obj, ...keys) => {
 }
 
 type UploadFileProps = {
-  sessionId: string | null
+  sessionId: string | undefined
   basePath?: string
   files: {
     file: File

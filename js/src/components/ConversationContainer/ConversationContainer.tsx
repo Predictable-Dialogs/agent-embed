@@ -76,7 +76,9 @@ export const ConversationContainer = (props: Props) => {
   const [isConnecting, setIsConnecting] = createSignal(false)
   const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>()
   const [hasError, setHasError] = createSignal(false)
-  const [activeInputId, setActiveInputId] = createSignal<number>(0)
+  const [activeInputId, setActiveInputId] = createSignal<number>(
+    props.initialAgentReply.input ? 1 : 0
+  )
 
   // onMount(() => {
   //   const executeInitialActions = async () => {
@@ -149,7 +151,7 @@ export const ConversationContainer = (props: Props) => {
     if (isJson) {
       if (parsedChunk.end) {
         //Delete the session id
-        props.setSessionId(null);
+        // props.setSessionId(null);
       } else {
         //Match with the sessionId from the server
         if (parsedChunk.sessionId !== props.context.sessionId) {
@@ -274,6 +276,7 @@ export const ConversationContainer = (props: Props) => {
     clearTimeout(longRequest);
     setIsSending(false);
 
+
     if (error) {
       setHasError(true);
       props.onNewLogs?.([
@@ -322,8 +325,11 @@ export const ConversationContainer = (props: Props) => {
       }
     }
 
+
     if (data.input) {
-      setActiveInputId((prev) => prev + 1);
+      setActiveInputId((prev) => {
+        return (prev + 1)
+      });
     }
 
     setChatChunks((displayedChunks) => [

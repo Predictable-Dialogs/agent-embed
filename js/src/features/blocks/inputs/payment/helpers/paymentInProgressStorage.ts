@@ -1,7 +1,7 @@
 import { BotContext } from '@/types'
 
 export const setPaymentInProgressInStorage = (state: {
-  sessionId: string | null
+  sessionId: string | undefined
   agentConfig: BotContext['agentConfig']
 }) => {
   sessionStorage.setItem('agentPaymentInProgress', JSON.stringify(state))

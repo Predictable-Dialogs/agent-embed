@@ -10,7 +10,7 @@ export type BotContext = {
   resultId?: string
   isPreview: boolean
   apiHost?: string
-  sessionId: string | null
+  sessionId: string | undefined
   agentName: string
   tabNumber: number
 }
@@ -28,7 +28,7 @@ export type OutgoingLog = {
 
 export type ClientSideActionContext = {
   apiHost?: string
-  sessionId: string | null
+  sessionId: string | undefined 
   agentName?: string
   tabNumber?: number
 }

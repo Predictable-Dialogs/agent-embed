@@ -11,6 +11,7 @@ import immutableCss from '../assets/immutable.css'
 
 export type BotProps = {
   agentName: string | any
+  initialPrompt?: string
   isPreview?: boolean
   resultId?: string
   startGroupId?: string
@@ -85,6 +86,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       sessionId: sessionId(),
       stripeRedirectStatus: urlParams.get('redirect_status') ?? undefined,
       agentName: props.agentName,
+      initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,
       isPreview: props.isPreview ?? false,
       resultId: undefined,
@@ -112,6 +114,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     setSessionId(data.sessionId);
     setClientSideActions(data.clientSideActions);
     setInitialInput(data.input);
+    setInitialMessages(data.messages);
     setCustomCss(data.agentConfig.theme.customCss ?? '')
     setAgentConfig(data.agentConfig);
 

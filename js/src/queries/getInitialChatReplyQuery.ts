@@ -10,6 +10,7 @@ import {
 export async function getInitialChatReplyQuery({
   sessionId,
   agentName,
+  initialPrompt,
   isPreview,
   apiHost,
   prefilledVariables,
@@ -21,6 +22,7 @@ export async function getInitialChatReplyQuery({
   apiHost?: string
   agentName: string
   sessionId: string | undefined
+  initialPrompt?: string
 }) {
 
   if (isNotDefined(agentName))
@@ -51,11 +53,7 @@ export async function getInitialChatReplyQuery({
           },
       agentName,
       sessionId,
-      message: paymentInProgressState
-        ? stripeRedirectStatus === 'failed'
-          ? 'fail'
-          : 'Success'
-        : undefined,
+      message: initialPrompt,
     } satisfies SendMessageInput,
   })
 

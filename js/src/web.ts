@@ -1,3 +1,4 @@
+// web.ts
 import { registerWebComponents } from './register';
 import { parsePredictable, injectAgentInWindow } from './window';
 

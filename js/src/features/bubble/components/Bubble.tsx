@@ -31,6 +31,8 @@ export const Bubble = (props: BubbleProps) => {
     'theme',
     'autoShowDelay',
   ])
+
+  const [initialPrompt, setInitialPrompt] = createSignal<string | undefined>();
   const [prefilledVariables, setPrefilledVariables] = createSignal(
     // eslint-disable-next-line solid/reactivity
     botProps.prefilledVariables
@@ -81,7 +83,14 @@ export const Bubble = (props: BubbleProps) => {
   const processIncomingEvent = (event: MessageEvent<CommandData>) => {
     const { data } = event
     if (!data.isFromAgent) return
-    if (data.command === 'open') openBot()
+    if (data.command === 'open') {
+      setInitialPrompt(data?.initialPrompt);
+      setPrefilledVariables((existingPrefilledVariables) => ({
+        ...existingPrefilledVariables,
+        ...data?.variables,
+      }))  
+      openBot()
+    }
     if (data.command === 'close') closeBot()
     if (data.command === 'toggle') toggleBot()
     if (data.command === 'showPreviewMessage') showMessage(data.message)
@@ -170,6 +179,7 @@ export const Bubble = (props: BubbleProps) => {
         <Show when={isBotStarted()}>
           <Bot
             {...botProps}
+            initialPrompt={initialPrompt()}
             prefilledVariables={prefilledVariables()}
             class="rounded-lg"
           />

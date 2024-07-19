@@ -1,3 +1,4 @@
+// features/popup/components/Popup.tsx
 import styles from '../../../assets/index.css'
 import {
   createSignal,
@@ -31,6 +32,7 @@ export const Popup = (props: PopupProps) => {
     'defaultOpen',
   ])
 
+  const [initialPrompt, setInitialPrompt] = createSignal<string | undefined>();
   const [prefilledVariables, setPrefilledVariables] = createSignal(
     // eslint-disable-next-line solid/reactivity
     botProps.prefilledVariables
@@ -77,7 +79,14 @@ export const Popup = (props: PopupProps) => {
   const processIncomingEvent = (event: MessageEvent<CommandData>) => {
     const { data } = event
     if (!data.isFromAgent) return
-    if (data.command === 'open') openBot()
+    if (data.command === 'open') {
+      setInitialPrompt(data.initialPrompt);
+      setPrefilledVariables((existingPrefilledVariables) => ({
+        ...existingPrefilledVariables,
+        ...data.variables,
+      }))  
+      openBot()
+    }
     if (data.command === 'close') closeBot()
     if (data.command === 'toggle') toggleBot()
     if (data.command === 'setPrefilledVariables')
@@ -135,7 +144,7 @@ export const Popup = (props: PopupProps) => {
               }}
               on:pointerdown={stopPropagation}
             >
-              <Bot {...botProps} prefilledVariables={prefilledVariables()} />
+              <Bot {...botProps} initialPrompt={initialPrompt()} prefilledVariables={prefilledVariables()} />
             </div>
           </div>
         </div>

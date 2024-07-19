@@ -1,7 +1,10 @@
+// features/command/types.ts
 import { PreviewMessageParams } from '../bubble/types'
 
 export type CommandData = {
-  isFromAgent: boolean
+  isFromAgent: boolean,
+  initialPrompt?: string,
+  variables?: Record<string, string | number | boolean>
 } & (
   | {
       command: 'open' | 'toggle' | 'close' | 'hidePreviewMessage'

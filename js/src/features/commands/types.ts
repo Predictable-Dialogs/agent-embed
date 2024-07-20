@@ -3,7 +3,7 @@ import { PreviewMessageParams } from '../bubble/types'
 
 export type CommandData = {
   isFromAgent: boolean,
-  initialPrompt?: string,
+  prompt?: string,
   variables?: Record<string, string | number | boolean>
 } & (
   | {

@@ -22,7 +22,7 @@ export const LoadingChunk = (props: Props) => (
   </div>
 )
 
-export const ConnectingChunk = (props: Props) => (
+export const ConnectingChunk = () => (
   <div class="flex w-full justify-center">
     <div class="flex flex-col items-center">
       <div class="flex gap-2">

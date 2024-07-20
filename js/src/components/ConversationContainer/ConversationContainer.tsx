@@ -57,6 +57,7 @@ type Props = {
   onEnd?: () => void
   onNewLogs?: (logs: OutgoingLog[]) => void
   setSessionId: (id: string | null) => void;
+  isConnecting?: boolean;
 }
 
 export const ConversationContainer = (props: Props) => {
@@ -399,8 +400,8 @@ export const ConversationContainer = (props: Props) => {
       ref={chatContainer}
       class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view scroll-smooth gap-2"
     >
-      <Show when={isConnecting()}>
-        <ConnectingChunk theme={theme()} />
+      <Show when={isConnecting() || props.isConnecting}>
+        <ConnectingChunk />
       </Show>
       <For each={chatChunks()}>
         {(chatChunk, index) => {

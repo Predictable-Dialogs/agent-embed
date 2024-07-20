@@ -26,6 +26,7 @@ export type BotProps = {
 
 
 export const Bot = (props: BotProps & { class?: string }) => {
+  const [isConnecting, setIsConnecting] = createSignal(false);
   const [sessionId, setSessionId] = createSignal<string | undefined>();
   const [agentConfig, setAgentConfig] = createSignal<any | undefined>()
   const [clientSideActions, setClientSideActions] = createSignal<any | []>([]) 
@@ -81,7 +82,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (storedCustomCss) {
       setCustomCss(storedCustomCss.customCss);
     }
-
+    setIsConnecting(true);
     const { data, error } = await getInitialChatReplyQuery({
       sessionId: sessionId(),
       stripeRedirectStatus: urlParams.get('redirect_status') ?? undefined,
@@ -96,6 +97,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         ...props.prefilledVariables,
       },
     })
+    setIsConnecting(false);
     if (error && 'code' in error && typeof error.code === 'string') {
       if (props.isPreview ?? false) {
         return setError(
@@ -197,6 +199,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         {(agentConfigValue) => (
           <BotContent
             class={props.class}
+            isConnecting={isConnecting()}
             initialAgentReply={{
               messages: initialMessages(),
               clientSideActions: clientSideActions(),
@@ -235,6 +238,7 @@ type BotContentProps = {
   onEnd?: () => void
   onNewLogs?: (logs: OutgoingLog[]) => void
   setSessionId: (id: string | null) => void;
+  isConnecting?: boolean;
 }
 
 const BotContent = (props: BotContentProps) => {
@@ -290,6 +294,7 @@ const BotContent = (props: BotContentProps) => {
       <div class="flex w-full h-full justify-center">
         <ConversationContainer
           context={props.context}
+          isConnecting={props.isConnecting}
           initialAgentReply={props.initialAgentReply}
           onNewInputBlock={props.onNewInputBlock}
           onAnswer={props.onAnswer}

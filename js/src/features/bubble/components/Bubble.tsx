@@ -84,11 +84,18 @@ export const Bubble = (props: BubbleProps) => {
     const { data } = event
     if (!data.isFromAgent) return
     if (data.command === 'open') {
-      setInitialPrompt(data?.initialPrompt);
-      setPrefilledVariables((existingPrefilledVariables) => ({
-        ...existingPrefilledVariables,
-        ...data?.variables,
-      }))  
+      setInitialPrompt(data?.prompt);
+      setPrefilledVariables((existingPrefilledVariables) => {
+        let updatedPrefilledVariables = { ...existingPrefilledVariables, ...data?.variables };
+        
+        // If there's a prompt, remove the 'topic' key from the prefilled variables
+        if (data?.prompt) {
+          const { topic, ...rest } = updatedPrefilledVariables;
+          updatedPrefilledVariables = rest;
+        }
+    
+        return updatedPrefilledVariables;
+      });      
       openBot()
     }
     if (data.command === 'close') closeBot()

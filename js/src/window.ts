@@ -53,11 +53,12 @@ type Agent = {
   setInputValue: typeof setInputValue
 }
 
-declare const window:
-  | {
-    Agent: Agent | undefined
-    }
-  | undefined
+declare global {
+  interface Window {
+    Agent?: Agent
+  }
+}
+  
 
 export const parsePredictable = () => ({
   initStandard,

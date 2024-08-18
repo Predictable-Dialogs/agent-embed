@@ -256,8 +256,9 @@ Agent.hidePreviewMessage(): Hide preview message from the bubble,
 
 
 You can bind these commands on a button element, for example:
+```
 <button onclick="Agent.open()">Contact us</button>
-
+```
 
      
 Agent embed

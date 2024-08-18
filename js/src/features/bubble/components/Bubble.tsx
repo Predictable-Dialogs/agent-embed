@@ -118,7 +118,7 @@ export const Bubble = (props: BubbleProps) => {
 
   const closeBot = () => {
     setIsBotOpened(false)
-    if (isBotOpened()) bubbleProps.onClose?.()
+    if (!isBotOpened()) bubbleProps.onClose?.()
   }
 
   const toggleBot = () => {

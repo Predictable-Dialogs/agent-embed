@@ -51,10 +51,10 @@ After creating an agent, the install page gives the needed embed code, which can
 
 ### Bubble Options and their meanings
 
-agentName: Defines the name of the agent. This is generated on the predictable dialogs app.
-apiHost: The value for this is "https://app.predictabledialogs.com/web/incoming". It specifies the URL of the backend service where the chat data is processed.
-initialPrompt: Sets the initial message that appears when the user first opens the chat bubble. If no initialPrompt is set, then it defaults to "Hi"
-theme: This can be used to style the bubble button and the Bubble Preview Message. The bubble button can be styled with a custom color, size, iconColor. You can also add a custom icon and a custom close icon. This is shown below.
+- agentName: Defines the name of the agent. This is generated on the predictable dialogs app.
+- apiHost: The value for this is "https://app.predictabledialogs.com/web/incoming". It specifies the URL of the backend service where the chat data is processed.
+- initialPrompt: Sets the initial message that appears when the user first opens the chat bubble. If no initialPrompt is set, then it defaults to "Hi"
+- theme: This can be used to *ONLY* style the bubble button and the Bubble Preview Message. The bubble button can be styled with a custom color, size, iconColor. You can also add a custom icon and a custom close icon. This is shown below. The chat window elements can be styled from the web app, using the theme tab.
 
 ### Styling the Bubble using the theme property:
 

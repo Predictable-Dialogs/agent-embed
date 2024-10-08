@@ -53,8 +53,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     return customCss ? JSON.parse(customCss) : null;
   };
 
-
-
   
   const initializeBot = async () => {
     setIsInitialized(true)

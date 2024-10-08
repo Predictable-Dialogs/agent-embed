@@ -1,5 +1,5 @@
 import { onCleanup, onMount } from 'solid-js'
-import { OpenAiLogo } from './icons/OpenAILogo'
+import { PredictableText } from './icons/PdLogo'
 
 type Props = {
   botContainer: HTMLDivElement | undefined
@@ -46,8 +46,7 @@ export const LiteBadge = (props: Props) => {
       class="lite-badge"
       id="lite-badge"
     >
-      <OpenAiLogo />
-      <span class="text-gray-400">Powered By ChatGPT </span>
+      <PredictableText width="70"/>
     </a>
   )
 }

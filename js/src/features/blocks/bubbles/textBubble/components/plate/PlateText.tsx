@@ -14,8 +14,12 @@ export const PlateText = (props: PlateTextProps) => {
     const safeHTML = DOMPurify.sanitize(markdown);
     setHtmlContent(safeHTML);
   });
-
+  // The -mb-5 helps in removing the space after last line introduced
+  // my mrked.
   return (
-    <span innerHTML={htmlContent()} />
+    <div 
+      innerHTML={htmlContent()}       
+      class="-mb-5"
+    />
   )
 }

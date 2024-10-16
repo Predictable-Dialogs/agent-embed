@@ -19,6 +19,7 @@ type Props = {
   message: ChatMessage
   typingEmulation: TypingEmulation
   onTransitionEnd: (offsetTop?: number) => void
+  filterResponse?: (response: string) => string
 }
 
 export const HostBubble = (props: Props) => {
@@ -33,6 +34,7 @@ export const HostBubble = (props: Props) => {
           content={props.message.content as TextBubbleContent}
           typingEmulation={props.typingEmulation}
           onTransitionEnd={onTransitionEnd}
+          filterResponse={props.filterResponse}
         />
       </Match>
       <Match when={props.message.type === BubbleBlockType.IMAGE}>

@@ -22,6 +22,7 @@ export type BotProps = {
   onInit?: () => void
   onEnd?: () => void
   onNewLogs?: (logs: OutgoingLog[]) => void
+  filterResponse?: (response: string) => string
 }
 
 
@@ -220,6 +221,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
             onNewLogs={props.onNewLogs}
             onAnswer={props.onAnswer}
             onEnd={props.onEnd}
+            filterResponse={props.filterResponse}
           />
         )}
       </Show>
@@ -236,6 +238,7 @@ type BotContentProps = {
   onEnd?: () => void
   onNewLogs?: (logs: OutgoingLog[]) => void
   setSessionId: (id: string | null) => void;
+  filterResponse?: (response: string) => string
   isConnecting?: boolean;
 }
 
@@ -298,6 +301,7 @@ const BotContent = (props: BotContentProps) => {
           onAnswer={props.onAnswer}
           onEnd={props.onEnd}
           onNewLogs={props.onNewLogs}
+          filterResponse={props.filterResponse}
           setSessionId={props.setSessionId}
         />
       </div>

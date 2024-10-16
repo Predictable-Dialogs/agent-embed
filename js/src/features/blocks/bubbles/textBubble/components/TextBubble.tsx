@@ -11,6 +11,7 @@ type Props = {
   content: TextBubbleContent
   typingEmulation: TypingEmulation
   onTransitionEnd: (offsetTop?: number) => void
+  filterResponse?: (response: string) => string
 }
 
 export const showAnimationDuration = 400
@@ -37,7 +38,10 @@ export const TextBubble = (props: Props) => {
 
   onMount(() => {
     if (!isTyping) return
-    const plainText = computePlainText(props.content.richText)
+    let plainText = computePlainText(props.content.richText)
+    if(props.filterResponse) {
+      plainText = props.filterResponse(plainText);
+    }
     const typingDuration =
       props.typingEmulation?.enabled === false
         ? 0

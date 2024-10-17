@@ -6,6 +6,7 @@ import { PlateBlock } from './plate/PlateBlock'
 import { computePlainText } from '../helpers/convertRichTextToPlainText'
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
+import { applyFilterResponse } from '../helpers/applyfilterResponse'
 
 type Props = {
   content: TextBubbleContent
@@ -39,9 +40,7 @@ export const TextBubble = (props: Props) => {
   onMount(() => {
     if (!isTyping) return
     let plainText = computePlainText(props.content.richText)
-    if(props.filterResponse) {
-      plainText = props.filterResponse(plainText);
-    }
+    plainText = applyFilterResponse(plainText, props.filterResponse);
     const typingDuration =
       props.typingEmulation?.enabled === false
         ? 0

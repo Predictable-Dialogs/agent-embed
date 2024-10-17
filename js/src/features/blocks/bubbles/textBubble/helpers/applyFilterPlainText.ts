@@ -6,7 +6,7 @@ export const applyFilterPlainText = (
     try {
       return filter(response);
     } catch(e) {
-      console.warn("Failed to apply filterResponse function to plain text response.")
+      console.warn("Failed to apply filterResponse function to plain text response.", e)
     }
   }
   return response;

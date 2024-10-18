@@ -6,7 +6,6 @@ import { PlateBlock } from './plate/PlateBlock'
 import { computePlainText } from '../helpers/convertRichTextToPlainText'
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
-import { applyFilterPlainText } from '../helpers/applyFilterPlainText'
 import { applyFilterRichText } from '../helpers/applyFilterRichText'
 import { TElement } from '@udecode/plate-common'
 
@@ -35,8 +34,6 @@ export const TextBubble = (props: Props) => {
   const onTypingEnd = () => {
     if (!isTyping()) return
     setIsTyping(false)
-    const newRichText = props.content.richText.map((richTextElement) => applyFilterRichText(richTextElement, props.filterResponse)) as TElement[];
-    setFilteredRichText(newRichText)
     setTimeout(() => {
       props.onTransitionEnd(ref?.offsetTop)
     }, showAnimationDuration)
@@ -44,8 +41,7 @@ export const TextBubble = (props: Props) => {
 
   onMount(() => {
     if (!isTyping) return
-    let plainText = computePlainText(props.content.richText)
-    plainText = applyFilterPlainText(plainText, props.filterResponse);
+    let plainText = computePlainText(props.content.richText);
     const typingDuration =
       props.typingEmulation?.enabled === false
         ? 0
@@ -54,6 +50,10 @@ export const TextBubble = (props: Props) => {
             props.typingEmulation ?? defaultTypingEmulation
           )
     typingTimeout = setTimeout(onTypingEnd, typingDuration)
+    
+    const newRichText = props.content.richText.map((richTextElement) => 
+        applyFilterRichText(richTextElement, props.filterResponse)) as TElement[];    
+    setFilteredRichText(newRichText);
   })
 
   onCleanup(() => {

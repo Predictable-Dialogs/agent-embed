@@ -57,6 +57,7 @@ type Props = {
   onEnd?: () => void
   onNewLogs?: (logs: OutgoingLog[]) => void
   setSessionId: (id: string | null) => void;
+  filterResponse?: (response: string) => string
   isConnecting?: boolean;
 }
 
@@ -425,6 +426,7 @@ export const ConversationContainer = (props: Props) => {
               onSubmit={sendMessage}
               onScrollToBottom={autoScrollToBottom}
               onSkip={handleSkip}
+              filterResponse={props.filterResponse}
             />
           );
         }}

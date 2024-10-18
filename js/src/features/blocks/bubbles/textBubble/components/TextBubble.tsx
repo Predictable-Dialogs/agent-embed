@@ -6,11 +6,14 @@ import { PlateBlock } from './plate/PlateBlock'
 import { computePlainText } from '../helpers/convertRichTextToPlainText'
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
+import { applyFilterRichText } from '../helpers/applyFilterRichText'
+import { TElement } from '@udecode/plate-common'
 
 type Props = {
   content: TextBubbleContent
   typingEmulation: TypingEmulation
   onTransitionEnd: (offsetTop?: number) => void
+  filterResponse?: (response: string) => string
 }
 
 export const showAnimationDuration = 400
@@ -26,6 +29,7 @@ let typingTimeout: NodeJS.Timeout
 export const TextBubble = (props: Props) => {
   let ref: HTMLDivElement | undefined
   const [isTyping, setIsTyping] = createSignal(true)
+  const [filteredRichText, setFilteredRichText] = createSignal(props.content.richText)
 
   const onTypingEnd = () => {
     if (!isTyping()) return
@@ -37,7 +41,7 @@ export const TextBubble = (props: Props) => {
 
   onMount(() => {
     if (!isTyping) return
-    const plainText = computePlainText(props.content.richText)
+    let plainText = computePlainText(props.content.richText);
     const typingDuration =
       props.typingEmulation?.enabled === false
         ? 0
@@ -46,6 +50,10 @@ export const TextBubble = (props: Props) => {
             props.typingEmulation ?? defaultTypingEmulation
           )
     typingTimeout = setTimeout(onTypingEnd, typingDuration)
+    
+    const newRichText = props.content.richText.map((richTextElement) => 
+        applyFilterRichText(richTextElement, props.filterResponse)) as TElement[];    
+    setFilteredRichText(newRichText);
   })
 
   onCleanup(() => {
@@ -75,7 +83,7 @@ export const TextBubble = (props: Props) => {
               height: isTyping() ? (isMobile() ? '16px' : '20px') : '100%',
             }}
           >
-            <For each={props.content.richText}>
+            <For each={filteredRichText()}>
               {(element) => <PlateBlock element={element} />}
             </For>
           </div>

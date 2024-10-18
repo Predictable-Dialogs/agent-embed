@@ -21,6 +21,7 @@ type Props = Pick<ChatReply, 'messages' | 'input'> & {
   onSubmit: (input: string) => void
   onSkip: () => void
   onAllBubblesDisplayed: () => void
+  filterResponse?: (response: string) => string
 }
 
 export const ChatChunk = (props: Props) => {
@@ -72,6 +73,7 @@ export const ChatChunk = (props: Props) => {
                   message={message}
                   typingEmulation={props.settings.typingEmulation}
                   onTransitionEnd={displayNextMessage}
+                  filterResponse={props.filterResponse}
                 />
               )}
             </For>

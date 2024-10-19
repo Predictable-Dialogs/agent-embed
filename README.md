@@ -3,6 +3,36 @@ An agent can be created by going to [htps://predictabledialogs.com/agents/create
 
 The [agent-embed](https://github.com/Predictable-Dialogs/agent-embed) repository provides components which can be embedded on a website and communicates with the predictable dialogs backend which in turn talks to the openAI LLM models. It currently provides components for chat. The chat components it provides are Bubbles, Standard, Popup and Button. 
 
+
+## Introduction
+The embed code can be added to HTML or JS, here is an example to add the embed code to HTML 
+
+```html
+<script type="module">
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
+  Agent.initStandard({
+    agentName: "your assistant name",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    initialPrompt: 'Tell me a joke',
+    filterResponse: function(response) {
+      const annotationRegex = /【\d+:\d+†[^\s】]+】/g;
+      return response.replace(annotationRegex, "");
+    }
+  });
+</script>
+
+```
+In the above we are adding a Standard widget - `Agent.initStandard`, 
+similarly the Bubble - `Agent.initBubble` and Popup - `Agent.initPopup` are initialized. 
+
+The `initialPrompt` prop is used only when the initialResponse is disabled on the server. Otherwise, if the initialResponse is enabled, the server's initial response will be returned, regardless of the initialPrompt.
+
+The `filterResponse` prop accepts a function that processes the AI's response. This function takes the response as an argument and allows for custom handling, such as filtering out annotations. The function should return the modified response, which will then be displayed in the widget.
+
+The `apiHost` prop points to the Predictable Dialogs backend, but it can also be configured to use your own backend.
+
+The `agentName` prop specifies the Predictable Dialogs agent name, but it can also be the agent name from your own backend.
+
 ## Standard Setup and Initialization
  You can get the Standard embed code by clicking on "Install" tab of your agent and select "Standard" in the embed type. Here is an example of how it would look in html.
 
@@ -285,6 +315,6 @@ details.
 
 See <https://www.gnu.org/licenses/>.
 
-For further inquiries or to contact us, you can reach Agent Dialogs at 
+For further inquiries or to contact us, you can reach Predictable Dialogs at 
 jai@predictabledialogs.com.
 

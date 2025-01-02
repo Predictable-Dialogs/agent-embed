@@ -295,14 +295,6 @@ Agent embed
 Copyright (C) 2023 Predictable Dialogs
 
 ### License
-(copied from typebot.io repository)
-
-This program is a modification of the software available at 
-https://github.com/baptisteArno/typebot.io/tree/main/packages/embeds. 
-The original software is created and maintained by Baptiste Arnaud and 
-contributors, and it is licensed under the GNU Affero General Public License 
-version 3.
-
 This program, Agent embed, is free software: you can redistribute 
 it and/or modify it under the terms of the GNU Affero General Public License as 
 published by the Free Software Foundation, either version 3 of the License, or 
@@ -315,6 +307,8 @@ details.
 
 See <https://www.gnu.org/licenses/>.
 
-For further inquiries or to contact us, you can reach Predictable Dialogs at 
-jai@predictabledialogs.com.
+This program is a modification of the software available at 
+https://github.com/baptisteArno/typebot.io/tree/main/packages/embeds. 
+The original software was licensed under the GNU Affero General Public License 
+version 3.
 

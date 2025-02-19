@@ -16,6 +16,7 @@ export const defaultBotProps: BotProps = {
   apiHost: undefined,
   resultId: undefined,
   filterResponse: undefined,
+  stream: false,
 }
 
 export const defaultPopupProps: PopupProps = {

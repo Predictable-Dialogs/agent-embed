@@ -58,6 +58,7 @@ type Props = {
   onNewLogs?: (logs: OutgoingLog[]) => void
   setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string
+  stream?: boolean;
   isConnecting?: boolean;
 }
 
@@ -81,43 +82,6 @@ export const ConversationContainer = (props: Props) => {
   const [activeInputId, setActiveInputId] = createSignal<number>(
     props.initialAgentReply.input ? 1 : 0
   )
-
-  // onMount(() => {
-  //   const executeInitialActions = async () => {
-  //     const initialChunk = chatChunks()[0];
-  //     if (initialChunk.clientSideActions) {
-  //       const actionsBeforeFirstBubble = initialChunk.clientSideActions.filter(
-  //         (action) => isNotDefined(action.lastBubbleBlockId)
-  //       );
-  //       for (const action of actionsBeforeFirstBubble) {
-  //         if (
-  //           'streamOpenAiChatCompletion' in action ||
-  //           'webhookToExecute' in action
-  //         ) {
-  //           const response = await executeClientSideAction({
-  //             clientSideAction: action,
-  //             context: {
-  //               apiHost: props.context.apiHost,
-  //               sessionId: props.context.sessionId,
-  //               agentName: props.context.agentName,
-  //               tabNumber: props.context.tabNumber
-  //             },
-  //             onMessageStream: streamMessage,
-  //             setIsConnecting: setIsConnecting
-  //           });
-  //           if (response && 'replyToSend' in response) {
-  //             return;
-  //           }
-  //           if (response && 'blockedPopupUrl' in response) {
-  //             setBlockedPopupUrl(response.blockedPopupUrl);
-  //           }  
-  //         }
-  //       }
-  //     }
-  //   };
-  
-  //   executeInitialActions();  
-  // })
 
   createEffect(() => {
     setTheme(
@@ -244,24 +208,6 @@ export const ConversationContainer = (props: Props) => {
         },
       ]);
     }
-
-    // Current chunk is {"input":{"type":"text input","options":{"labels":{"placeholder":"Type your answer...","button":"Send"},"isLong":false}},"messages":[{"type":"text","content":{"richText":[{"type":"p","children":[{"text":"What is your email address?"}]}]}}]}
-    // If current chunk type has input->type = 'text input' then stream:
-    // if (currentInputBlock?.type === 'text input') {
-    //   let action = { streamOpenAiChatCompletion: { message: message } };
-
-    //   const response = await executeClientSideAction({
-    //     clientSideAction: action,
-    //     context: {
-    //       apiHost: props.context.apiHost,
-    //       sessionId: props.context.sessionId,
-    //       agentName: props.context.agentName,
-    //       tabNumber: props.context.tabNumber,
-    //     },
-    //     onMessageStream: streamMessage,
-    //   });
-    //   return;
-    // }
 
     const longRequest = setTimeout(() => {
       setIsSending(true);

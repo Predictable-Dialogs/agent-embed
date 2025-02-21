@@ -1,9 +1,7 @@
 import { ChatReply, SendMessageInput, Theme } from '@/schemas'
-import { InputBlockType } from '@/schemas/features/blocks/inputs/enums'
 import {
   createEffect,
   createSignal,
-  createUniqueId,
   For,
   onMount,
   Show,
@@ -21,9 +19,10 @@ import { isNotDefined } from '@/lib/utils'
 import { executeClientSideAction } from '@/utils/executeClientSideActions'
 import { LoadingChunk, ConnectingChunk } from './LoadingChunk'
 import { PopupBlockedToast } from './PopupBlockedToast'
-import { setStreamingMessage } from '@/utils/streamingMessageSignal'
 import { abortController, reader } from '@/queries/streamChat'
 import { useInitialActions } from '@/hooks/useInitialActions';
+import { useChat } from '@ai-sdk/solid';
+import { BubbleBlockType } from '@/schemas'
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -67,7 +66,10 @@ export const ConversationContainer = (props: Props) => {
   const [chatChunks, setChatChunks] = createSignal<ChatChunkType[]>([
     {
       input: props.initialAgentReply.input,
-      messages: props.initialAgentReply.messages,
+      messages: props.initialAgentReply.messages.map((msg: any) => ({
+        ...msg,
+        role: 'assistant' // Add role to initial messages
+      })),
       clientSideActions: props.initialAgentReply.clientSideActions,
     },
   ])
@@ -82,99 +84,18 @@ export const ConversationContainer = (props: Props) => {
   const [activeInputId, setActiveInputId] = createSignal<number>(
     props.initialAgentReply.input ? 1 : 0
   )
-
+  const [files, setFiles] = createSignal<FileList | undefined>(undefined);
+  let fileInputRef: HTMLInputElement | undefined;
+  
   createEffect(() => {
     setTheme(
       parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme())
     )
   })
 
-  /**
-   * Process a chunk of data from the server.
-   * 
-   * This function tries to parse the chunk as JSON and checks for a 'type' property.
-   * Depending on the 'type' property, it either returns independent text or appends to the existing message.
-   * If the chunk is not JSON or doesn't have a 'type' property, it's treated as a normal text message.
-   * 
-   * @param {string} chunk - The chunk of data to process.
-   * @param {string} message - The existing message string to which new text might be appended.
-   * @returns {string} - The updated message string.
-   */
-  const streamMessage = (chunk: string, content: string) => {
-    let parsedChunk: any;
-    let isJson = false;
-
-    // Try to parse the chunk as JSON
-    try {
-      parsedChunk = JSON.parse(chunk);
-      isJson = true;
-    } catch (e) {
-      // Not a JSON, continue as a text message
-      console.log(`Failed to parse response`);
-      isJson = false;
-    }
-
-    if (isJson) {
-      if (parsedChunk.end) {
-        //Delete the session id
-        // props.setSessionId(null);
-      } else {
-        //Match with the sessionId from the server
-        if (parsedChunk.sessionId !== props.context.sessionId) {
-          props.setSessionId(parsedChunk.sessionId);
-        }
-      }
-
-      if (parsedChunk.pdType === 'independentText') {
-        // Return the independent text
-        streamIndependentMessage(parsedChunk);
-      }
-    } else {
-      // Treat as a normal text message
-      content += chunk;
-      streamTextMessage(content);
-    }
-  };
-
-  const streamIndependentMessage = (data: any) => {
-    setIsSending(false);
-    const lastChunk = [...chatChunks()].pop();
-    if (!lastChunk) return;
-
-    if (data.input) {
-      setActiveInputId((prev) => prev + 1);
-    }
-
-    setChatChunks((displayedChunks) => [
-      ...displayedChunks,
-      {
-        input: data.input,
-        messages: [...chatChunks()].pop()?.streamingMessageId ? data.messages.slice(1) : data.messages,
-        clientSideActions: data.clientSideActions,
-      },
-    ]);
-  };
-
-  const streamTextMessage = (content: string) => {
-    setIsSending(false);
-    const lastChunk = [...chatChunks()].pop();
-    if (!lastChunk) return;
-    const id = lastChunk.streamingMessageId ?? createUniqueId();
-    if (!lastChunk.streamingMessageId)
-      setChatChunks((displayedChunks) => [
-        ...displayedChunks,
-        {
-          messages: [],
-          streamingMessageId: id,
-        },
-      ]);
-    setStreamingMessage({ id, content });
-  };
-
   const executeInitialActions = useInitialActions({
     chatChunks,
     context: props.context,
-    onMessageStream: streamMessage,
     setIsConnecting,
     setBlockedPopupUrl,
   });
@@ -186,33 +107,76 @@ export const ConversationContainer = (props: Props) => {
   createEffect(() => {
     setTheme(parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme()));
   });
+  
+  const chatStreamFunctions = props.stream ? useChat({
+    api: 'http://localhost:8001/web/stream_',
+    streamProtocol: 'text',
+    experimental_prepareRequestBody({ messages }) {
+      return {
+        message: messages[messages.length - 1].content,
+        sessionId: props.context.sessionId,
+        agentName: props.context.agentName,
+      };
+    },
+    onResponse: response => {
+      console.log('Received HTTP response from server:', response);
+    },
+  }) : null;
 
+  const streamingHandlers = () => {
+    if (!props.stream || !chatStreamFunctions) return undefined;
+    
+    return {
+      onInput: chatStreamFunctions.handleInputChange as (e: Event) => void,
+      onSubmit: (e: Event) => {
+        e.preventDefault();
+        chatStreamFunctions.handleSubmit(e, {
+          experimental_attachments: files(),
+        });
+  
+        // Reset form
+        setFiles(undefined);
+        if (fileInputRef) {
+          fileInputRef.value = '';
+        }
+      }
+    };
+  };
+
+  /**
+   * This is our new “lifted” callback for user input:
+   * It adds a new message with `role: "user"`, then triggers the sendMessage flow.
+   */
+  const handleUserInput = async (userText: string) => {
+    // Add user’s message to the conversation
+    const userMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      type: BubbleBlockType.TEXT,
+      content: { text: userText },
+    };
+
+    setChatChunks((displayedChunks) => [
+      ...displayedChunks,
+      {
+        messages: [userMessage],
+      },
+    ]);
+
+    // Now that we’ve updated the UI, we can send the message to the server
+    // to get the assistant’s new reply, etc.
+    await sendMessage(userText);
+  }
+  
   const sendMessage = async (message: string | undefined, clientLogs?: SendMessageInput['clientLogs']) => {
-    if (clientLogs) {
-      props.onNewLogs?.(clientLogs);
-    }
-
+    console.log(`send message: ${message}`);
     setHasError(false);
-
-    const currentInputBlock = [...chatChunks()].pop()?.input;
-
-    if (currentInputBlock?.id && props.onAnswer && message) {
-      props.onAnswer({ message, blockId: currentInputBlock.id });
-    }
-
-    if (currentInputBlock?.type === InputBlockType.FILE) {
-      props.onNewLogs?.([
-        {
-          description: 'Files are not uploaded in preview mode',
-          status: 'info',
-        },
-      ]);
-    }
 
     const longRequest = setTimeout(() => {
       setIsSending(true);
     }, 2000);
 
+    
     const { data, error } = await sendMessageQuery({
       apiHost: props.context.apiHost,
       sessionId: props.context.sessionId,
@@ -223,57 +187,23 @@ export const ConversationContainer = (props: Props) => {
     });
     clearTimeout(longRequest);
     setIsSending(false);
-
-
-    if (error) {
-      setHasError(true);
-      props.onNewLogs?.([
-        {
-          description: 'Failed to send the reply',
-          details: error,
-          status: 'error',
-        },
-      ]);
+        if (error) {
+    setHasError(true);
+    props.onNewLogs?.([
+      {
+        description: 'Failed to send the reply',
+        details: error,
+        status: 'error',
+      },
+    ]);
     }
     if (!data) return;
-    if (data.logs) {
-      props.onNewLogs?.(data.logs);
-    }
-    if (data.dynamicTheme) {
-      setDynamicTheme(data.dynamicTheme);
-    }
-    if (data.input?.id && props.onNewInputBlock) {
-      props.onNewInputBlock({
-        id: data.input.id,
-        groupId: data.input.groupId,
-      });
-    }
-    if (data.clientSideActions) {
-      const actionsBeforeFirstBubble = data.clientSideActions.filter((action) =>
-        isNotDefined(action.lastBubbleBlockId)
-      );
-      for (const action of actionsBeforeFirstBubble) {
-        if ('streamOpenAiChatCompletion' in action || 'webhookToExecute' in action) setIsSending(true);
-        // Current action is {"streamOpenAiChatCompletion":{"messages":"Some content"}}
 
-        const response = await executeClientSideAction({
-          clientSideAction: action,
-          context: {
-            apiHost: props.context.apiHost,
-            sessionId: props.context.sessionId,
-            agentName: props.context.agentName,
-          },
-          onMessageStream: streamMessage,
-        });
-        if (response && 'replyToSend' in response) {
-          // sendMessage(response.replyToSend, response.logs)
-          return;
-        }
-        if (response && 'blockedPopupUrl' in response) setBlockedPopupUrl(response.blockedPopupUrl);
-      }
-    }
-
-
+    const messagesWithRole = data.messages.map((m: any) => ({
+      ...m,
+      role: 'assistant' as const,
+    }));
+  
     if (data.input) {
       setActiveInputId((prev) => {
         return (prev + 1)
@@ -284,7 +214,7 @@ export const ConversationContainer = (props: Props) => {
       ...displayedChunks,
       {
         input: data.input,
-        messages: [...chatChunks()].pop()?.streamingMessageId ? data.messages.slice(1) : data.messages,
+        messages: messagesWithRole,
         clientSideActions: data.clientSideActions,
       },
     ]);
@@ -298,6 +228,8 @@ export const ConversationContainer = (props: Props) => {
 
   const handleAllBubblesDisplayed = async () => {
     const lastChunk = [...chatChunks()].pop();
+    console.log(`handleAllBubblesDisplayed: the lastChunk is ${JSON.stringify(lastChunk)}`);
+
     if (!lastChunk) return;
     if (isNotDefined(lastChunk.input)) {
       props.onEnd?.();
@@ -306,11 +238,12 @@ export const ConversationContainer = (props: Props) => {
 
   const handleNewBubbleDisplayed = async (blockId: string) => {
     const lastChunk = [...chatChunks()].pop();
+    console.log(`handleNewBubbleDisplayed: blockId is ${blockId}, the lastChunk is ${JSON.stringify(lastChunk)}`);
     if (!lastChunk) return;
     if (lastChunk.clientSideActions) {
       const actionsToExecute = lastChunk.clientSideActions.filter((action) => action.lastBubbleBlockId === blockId);
       for (const action of actionsToExecute) {
-        if ('streamOpenAiChatCompletion' in action || 'webhookToExecute' in action) setIsSending(true);
+        if ('webhookToExecute' in action) setIsSending(true);
         const response = await executeClientSideAction({
           clientSideAction: action,
           context: {
@@ -318,7 +251,6 @@ export const ConversationContainer = (props: Props) => {
             sessionId: props.context.sessionId,
             agentName: props.context.agentName,
           },
-          onMessageStream: streamMessage,
         });
         if (response && 'replyToSend' in response) {
           sendMessage(response.replyToSend, response.logs);
@@ -342,6 +274,20 @@ export const ConversationContainer = (props: Props) => {
 
   let inputCounter = 0;
 
+  createEffect(() => {
+    const chunks = chatChunks()
+    console.log('chatChunks updated:', chunks );
+    chunks.map((chunk, index) => {
+      console.log(`messages in chunk #${index} are: `,JSON.stringify(chunk.messages));
+      // console.log(JSON.stringify(chunk.input))
+    });
+  });
+  
+  // createEffect(() => {
+  //   const ms = chatStreamFunctions?.messages();
+  //   console.log('Stream messages updated:', JSON.stringify(ms));
+  // });  
+  
   return (
     <div
       ref={chatContainer}
@@ -369,10 +315,11 @@ export const ConversationContainer = (props: Props) => {
               hasError={hasError() && index() === chatChunks().length - 1}
               onNewBubbleDisplayed={handleNewBubbleDisplayed}
               onAllBubblesDisplayed={handleAllBubblesDisplayed}
-              onSubmit={sendMessage}
+              onSubmit={handleUserInput}
               onScrollToBottom={autoScrollToBottom}
               onSkip={handleSkip}
               filterResponse={props.filterResponse}
+              streamingHandlers={streamingHandlers()}
             />
           );
         }}

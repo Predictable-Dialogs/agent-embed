@@ -20,52 +20,20 @@ type Props = {
 export const executeClientSideAction = async ({
   clientSideAction,
   context,
-  onMessageStream,
   setIsConnecting
 }: Props): Promise<
   | { blockedPopupUrl: string }
   | { replyToSend: string | undefined; logs?: ReplyLog[] }
   | void
 > => {
-  if ('chatwoot' in clientSideAction) {
-    return executeChatwoot(clientSideAction.chatwoot)
-  }
   if ('googleAnalytics' in clientSideAction) {
     return executeGoogleAnalyticsBlock(clientSideAction.googleAnalytics)
-  }
-  if ('scriptToExecute' in clientSideAction) {
-    return executeScript(clientSideAction.scriptToExecute)
   }
   if ('redirect' in clientSideAction) {
     return executeRedirect(clientSideAction.redirect)
   }
-  if ('wait' in clientSideAction) {
-    return executeWait(clientSideAction.wait)
-  }
   if ('setVariable' in clientSideAction) {
     return executeSetVariable(clientSideAction.setVariable.scriptToExecute)
-  }
-  if ('streamOpenAiChatCompletion' in clientSideAction) {
-      const { error, message } = await streamChat(context)(
-        clientSideAction.streamOpenAiChatCompletion.message,
-        onMessageStream,
-        setIsConnecting
-      );
-
-      if (error) {
-        return {
-          replyToSend: undefined,
-          logs: [
-            {
-              status: 'error',
-              description: 'Failed to stream OpenAI completion',
-              details: JSON.stringify(error, null, 2),
-            },
-          ],
-        }
-      }
-      
-      return { replyToSend: message }
   }
   if ('startPropsToInject' in clientSideAction) {
     return injectStartProps(clientSideAction.startPropsToInject)

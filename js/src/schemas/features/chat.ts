@@ -51,17 +51,25 @@ const embedMessageSchema = z.object({
     .merge(z.object({ height: z.number().optional() })),
 })
 
-const chatMessageSchema = z
-  .object({ id: z.string() })
-  .and(
-    z.discriminatedUnion('type', [
-      textMessageSchema,
-      imageMessageSchema,
-      videoMessageSchema,
-      audioMessageSchema,
-      embedMessageSchema,
-    ])
-  )
+const chatMessageSchema = z.object({ 
+  id: z.string(),
+  role: z.enum(["assistant", "user"]).optional(), 
+  type: z.enum([
+    BubbleBlockType.TEXT,
+    BubbleBlockType.IMAGE,
+    BubbleBlockType.VIDEO,
+    BubbleBlockType.AUDIO,
+    BubbleBlockType.EMBED
+  ]),
+  content: z.union([
+    textBubbleContentSchema,
+    imageBubbleContentSchema,
+    videoBubbleContentSchema,
+    audioBubbleContentSchema,
+    embedBubbleContentSchema
+  ])
+ })
+  
 
 const scriptToExecuteSchema = z.object({
   content: z.string(),
@@ -204,16 +212,8 @@ const clientSideActionSchema = z
   )
 
 export const chatReplySchema = z.object({
-  messages: z.array(chatMessageSchema),
-  input: z
-    .discriminatedUnion('type', [...inputBlockSchemas])
-    .and(
-      z.object({
-        prefilledValue: z.string().optional(),
-        runtimeOptions: runtimeOptionsSchema.optional(),
-      })
-    )
-    .optional(),
+  messages: z.any(),
+  input: z.any(),
   clientSideActions: z.array(clientSideActionSchema).optional(),
   sessionId: z.string().optional(),
   agentConfig: agentSchema
@@ -233,3 +233,10 @@ export type RuntimeOptions = z.infer<typeof runtimeOptionsSchema>
 export type StartAgent = z.infer<typeof startAgentSchema>
 export type ReplyLog = z.infer<typeof replyLogSchema>
 export type StartPropsToInject = z.infer<typeof startPropsToInjectSchema>
+
+export type Message = {
+  id: string
+  role: "user" | "assistant"
+  type: BubbleBlockType
+  content: any
+}

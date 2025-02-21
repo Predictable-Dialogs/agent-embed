@@ -6,7 +6,6 @@ import { ChatChunk as ChatChunkType, BotContext } from '@/types';
 type UseInitialActionsProps = {
   chatChunks: () => ChatChunkType[];
   context: BotContext;
-  onMessageStream: (chunk: string, content: string) => void;
   setIsConnecting: SetState<boolean>,
   setBlockedPopupUrl: SetState<string | undefined>
 };
@@ -29,7 +28,6 @@ export function useInitialActions(
         const response = await executeClientSideAction({
           clientSideAction: action,
           context: props.context,
-          onMessageStream: props.onMessageStream,
           setIsConnecting: props.setIsConnecting
         });
 

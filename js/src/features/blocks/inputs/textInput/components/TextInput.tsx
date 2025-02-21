@@ -5,24 +5,50 @@ import { InputSubmitContent } from '@/types'
 import { isMobile } from '@/utils/isMobileSignal'
 import type { TextInputBlock } from '@/schemas'
 import { createSignal, onCleanup, onMount } from 'solid-js'
+import { JSX } from 'solid-js/jsx-runtime'
 
 type Props = {
   block: TextInputBlock
   defaultValue?: string
   onSubmit: (value: InputSubmitContent) => void
+  streamingHandlers?: {
+    onInput?: (e: Event) => void;
+    onSubmit: (e: Event) => void
+  }
 }
 
 export const TextInput = (props: Props) => {
   const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '')
   let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined
 
-  const handleInput = (inputValue: string) => setInputValue(inputValue)
+  const handleInput = (e: Event) => {
+    console.log(`on input ...${JSON.stringify(props.streamingHandlers)}`)
+
+    const target = e.currentTarget as HTMLInputElement | HTMLTextAreaElement;
+    setInputValue(target.value);
+    
+    if (props.streamingHandlers?.onInput) {
+      console.log(`on streaming input ...`)
+      props.streamingHandlers.onInput(e);
+    }
+  }
 
   const checkIfInputIsValid = () =>
     inputValue() !== '' && inputRef?.reportValidity()
 
   const submit = () => {
-    if (checkIfInputIsValid()) props.onSubmit({ value: inputValue() })
+    console.log(`on  submit ...`)
+
+    if (!checkIfInputIsValid()) return
+
+    if (props.streamingHandlers) {
+      console.log(`on streaming submit ...`)
+      const event = new Event('submit')
+      props.streamingHandlers.onSubmit(event)
+    } else {
+      console.log(`on block submit ...`)
+      props.onSubmit({ value: inputValue() })
+    }
   }
 
   const submitWhenEnter = (e: KeyboardEvent) => {
@@ -62,7 +88,7 @@ export const TextInput = (props: Props) => {
       {props.block.options.isLong ? (
         <Textarea
           ref={inputRef as HTMLTextAreaElement}
-          onInput={handleInput}
+          onInput={(e) => handleInput(e)}
           onKeyDown={submitIfCtrlEnter}
           value={inputValue()}
           placeholder={
@@ -72,7 +98,7 @@ export const TextInput = (props: Props) => {
       ) : (
         <ShortTextInput
           ref={inputRef as HTMLInputElement}
-          onInput={handleInput}
+          onInput={(e) => handleInput(e)}
           value={inputValue()}
           placeholder={
             props.block.options?.labels?.placeholder ?? 'Type your answer...'

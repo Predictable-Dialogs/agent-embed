@@ -3,7 +3,7 @@ import { JSX } from 'solid-js/jsx-runtime'
 
 type ShortTextInputProps = {
   ref: HTMLInputElement | undefined
-  onInput: (value: string) => void
+  onInput: (e: Event) => void
 } & Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'onInput'>
 
 export const ShortTextInput = (props: ShortTextInputProps) => {
@@ -15,7 +15,7 @@ export const ShortTextInput = (props: ShortTextInputProps) => {
       class="focus:outline-none bg-transparent px-4 py-4 flex-1 w-full text-input"
       type="text"
       style={{ 'font-size': '16px' }}
-      onInput={(e) => local.onInput(e.currentTarget.value)}
+      onInput={(e) => local.onInput(e)}
       {...others}
     />
   )

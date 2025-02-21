@@ -2,16 +2,12 @@ import type {
   ChatReply,
   ChoiceInputBlock,
   DateInputOptions,
-  EmailInputBlock,
   FileInputBlock,
-  NumberInputBlock,
   PaymentInputOptions,
-  PhoneNumberInputBlock,
   RatingInputBlock,
   RuntimeOptions,
   TextInputBlock,
   Theme,
-  UrlInputBlock,
   PictureChoiceBlock,
 } from '../schemas'
 import { createEffect } from 'solid-js'
@@ -19,10 +15,6 @@ import { InputBlockType } from '@/schemas/features/blocks/inputs/enums'
 import { GuestBubble } from './bubbles/GuestBubble'
 import { BotContext, InputSubmitContent } from '@/types'
 import { TextInput } from '@/features/blocks/inputs/textInput'
-import { NumberInput } from '@/features/blocks/inputs/number'
-import { EmailInput } from '@/features/blocks/inputs/email'
-import { UrlInput } from '@/features/blocks/inputs/url'
-import { PhoneInput } from '@/features/blocks/inputs/phone'
 import { DateForm } from '@/features/blocks/inputs/date'
 import { RatingForm } from '@/features/blocks/inputs/rating'
 import { FileUploadForm } from '@/features/blocks/inputs/fileUpload'
@@ -47,6 +39,10 @@ type Props = {
   hasError: boolean
   onSubmit: (answer: string) => void
   onSkip: () => void
+  streamingHandlers?: {
+    onInput?: (e: Event) => void;
+    onSubmit: (e: Event) => void;
+  }
 }
 
 export const InputChatBlock = (props: Props) => {
@@ -64,13 +60,6 @@ export const InputChatBlock = (props: Props) => {
 
   return (
     <Switch>
-      <Match when={answer() && !props.hasError}>
-        <GuestBubble
-          message={answer() as string}
-          showAvatar={props.guestAvatar?.isEnabled ?? false}
-          avatarSrc={props.guestAvatar?.url && props.guestAvatar.url}
-        />
-      </Match>
       <Match when={isNotDefined(answer()) || props.hasError}>
         {props.inputIndex === props.activeInputId && 
           <div
@@ -108,6 +97,10 @@ const Input = (props: {
   isInputPrefillEnabled: boolean
   onSubmit: (answer: InputSubmitContent) => void
   onSkip: (label: string) => void
+  streamingHandlers?: {
+    onInput?: (e: Event) => void;
+    onSubmit: (e: Event) => void;
+  }
 }) => {  
   const onSubmit = (answer: InputSubmitContent) => props.onSubmit(answer)
 
@@ -128,37 +121,7 @@ const Input = (props: {
           block={props.block as TextInputBlock}
           defaultValue={getPrefilledValue()}
           onSubmit={onSubmit}
-        />
-      </Match>
-      <Match when={props.block.type === InputBlockType.NUMBER}>
-        <NumberInput
-          block={props.block as NumberInputBlock}
-          defaultValue={getPrefilledValue()}
-          onSubmit={onSubmit}
-        />
-      </Match>
-      <Match when={props.block.type === InputBlockType.EMAIL}>
-        <EmailInput
-          block={props.block as EmailInputBlock}
-          defaultValue={getPrefilledValue()}
-          onSubmit={onSubmit}
-        />
-      </Match>
-      <Match when={props.block.type === InputBlockType.URL}>
-        <UrlInput
-          block={props.block as UrlInputBlock}
-          defaultValue={getPrefilledValue()}
-          onSubmit={onSubmit}
-        />
-      </Match>
-      <Match when={props.block.type === InputBlockType.PHONE}>
-        <PhoneInput
-          labels={(props.block as PhoneNumberInputBlock).options.labels}
-          defaultCountryCode={
-            (props.block as PhoneNumberInputBlock).options.defaultCountryCode
-          }
-          defaultValue={getPrefilledValue()}
-          onSubmit={onSubmit}
+          streamingHandlers={props.streamingHandlers}
         />
       </Match>
       <Match when={props.block.type === InputBlockType.DATE}>

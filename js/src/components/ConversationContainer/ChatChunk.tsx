@@ -98,9 +98,7 @@ export const ChatChunk = (props: Props) => {
                     </div>
                   </Match>
                   <Match when={message.role === 'user'}>
-                    <div
-                      class="flex flex-col flex-1"
-                    >
+                    <div class="flex flex-col flex-1">
                       <GuestBubble
                         message={message.content.text} // or however you store user text
                         showAvatar={props.theme.chat.guestAvatar?.isEnabled ?? false}
@@ -134,13 +132,20 @@ export const ChatChunk = (props: Props) => {
         {(streamingMessageId) => (
           <div class={'flex' + (isMobile() ? ' gap-1' : ' gap-2')}>
             <Show when={props.theme.chat.hostAvatar?.isEnabled}>
-              <AvatarSideContainer hostAvatarSrc={props.theme.chat.hostAvatar?.url} hideAvatar={props.hideAvatar} />
+              <AvatarSideContainer
+                hostAvatarSrc={props.theme.chat.hostAvatar?.url}
+                hideAvatar={props.hideAvatar}
+              />
             </Show>
 
             <div
               class="flex flex-col flex-1 gap-2"
               style={{
-                'margin-right': props.theme.chat.guestAvatar?.isEnabled ? (isMobile() ? '32px' : '48px') : undefined,
+                'margin-right': props.theme.chat.guestAvatar?.isEnabled
+                  ? isMobile()
+                    ? '32px'
+                    : '48px'
+                  : undefined,
               }}
             >
               <StreamingBubble streamingMessageId={streamingMessageId} />

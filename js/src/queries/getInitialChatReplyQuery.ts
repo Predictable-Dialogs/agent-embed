@@ -1,11 +1,11 @@
-import { BotContext, InitialChatReply } from '@/types'
-import { getApiEndPoint } from '@/utils/getApiEndPoint'
-import type { SendMessageInput, StartParams } from '@/schemas'
-import { isNotDefined, isNotEmpty, sendRequest } from '@/lib/utils'
+import { BotContext, InitialChatReply } from '@/types';
+import { getApiEndPoint } from '@/utils/getApiEndPoint';
+import type { SendMessageInput, StartParams } from '@/schemas';
+import { isNotDefined, isNotEmpty, sendRequest } from '@/lib/utils';
 import {
   getPaymentInProgressInStorage,
   removePaymentInProgressFromStorage,
-} from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage'
+} from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage';
 
 export async function getInitialChatReplyQuery({
   sessionId,
@@ -18,24 +18,22 @@ export async function getInitialChatReplyQuery({
   resultId,
   stripeRedirectStatus,
 }: StartParams & {
-  stripeRedirectStatus?: string
-  apiHost?: string
-  agentName: string
-  sessionId: string | undefined
-  initialPrompt?: string
+  stripeRedirectStatus?: string;
+  apiHost?: string;
+  agentName: string;
+  sessionId: string | undefined;
+  initialPrompt?: string;
 }) {
+  if (isNotDefined(agentName)) throw new Error('Agent name is required to get initial messages');
 
-  if (isNotDefined(agentName))
-    throw new Error('Agent name is required to get initial messages')
-
-  const paymentInProgressStateStr = getPaymentInProgressInStorage() ?? undefined
+  const paymentInProgressStateStr = getPaymentInProgressInStorage() ?? undefined;
   const paymentInProgressState = paymentInProgressStateStr
     ? (JSON.parse(paymentInProgressStateStr) as {
-        sessionId: string
-        agentConfig: BotContext['agentConfig']
+        sessionId: string;
+        agentConfig: BotContext['agentConfig'];
       })
-    : undefined
-  if (paymentInProgressState) removePaymentInProgressFromStorage()
+    : undefined;
+  if (paymentInProgressState) removePaymentInProgressFromStorage();
   const { data, error } = await sendRequest<InitialChatReply>({
     method: 'POST',
     // url: `${isNotEmpty(apiHost) ? apiHost : getApiEndPoint()}/api/v1/sendMessage`,
@@ -55,17 +53,15 @@ export async function getInitialChatReplyQuery({
       sessionId,
       message: initialPrompt,
     } satisfies SendMessageInput,
-  })
+  });
 
   return {
     data: data
       ? {
           ...data,
-          ...(paymentInProgressState
-            ? { agentConfig: paymentInProgressState.agentConfig }
-            : {}),
+          ...(paymentInProgressState ? { agentConfig: paymentInProgressState.agentConfig } : {}),
         }
       : undefined,
     error,
-  }
+  };
 }

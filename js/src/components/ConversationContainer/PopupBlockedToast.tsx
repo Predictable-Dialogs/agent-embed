@@ -1,7 +1,7 @@
 type Props = {
-  url: string
-  onLinkClick: () => void
-}
+  url: string;
+  onLinkClick: () => void;
+};
 
 export const PopupBlockedToast = (props: Props) => {
   return (
@@ -12,8 +12,8 @@ export const PopupBlockedToast = (props: Props) => {
       <div class="flex flex-col gap-1">
         <span class=" text-sm font-semibold text-gray-900">Popup blocked</span>
         <div class="text-sm font-normal">
-          The bot wants to open a new tab but it was blocked by your broswer. It
-          needs a manual approval.
+          The bot wants to open a new tab but it was blocked by your broswer. It needs a manual
+          approval.
         </div>
       </div>
 
@@ -27,5 +27,5 @@ export const PopupBlockedToast = (props: Props) => {
         Continue in new tab
       </a>
     </div>
-  )
-}
+  );
+};

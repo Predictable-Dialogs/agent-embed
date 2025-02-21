@@ -1,25 +1,19 @@
-import { createSignal, Show } from 'solid-js'
-import {
-  BubbleTheme,
-  ButtonTheme,
-  PreviewMessageParams,
-  PreviewMessageTheme,
-} from '../types'
+import { createSignal, Show } from 'solid-js';
+import { BubbleTheme, ButtonTheme, PreviewMessageParams, PreviewMessageTheme } from '../types';
 
 export type PreviewMessageProps = Pick<BubbleTheme, 'placement'> &
   Pick<PreviewMessageParams, 'avatarUrl' | 'message'> & {
-    buttonSize: ButtonTheme['size']
-    previewMessageTheme?: PreviewMessageTheme
-    onClick: () => void
-    onCloseClick: () => void
-  }
+    buttonSize: ButtonTheme['size'];
+    previewMessageTheme?: PreviewMessageTheme;
+    onClick: () => void;
+    onCloseClick: () => void;
+  };
 
-const defaultBackgroundColor = '#F7F8FF'
-const defaultTextColor = '#303235'
+const defaultBackgroundColor = '#F7F8FF';
+const defaultTextColor = '#303235';
 
 export const PreviewMessage = (props: PreviewMessageProps) => {
-  const [isPreviewMessageHovered, setIsPreviewMessageHovered] =
-    createSignal(false)
+  const [isPreviewMessageHovered, setIsPreviewMessageHovered] = createSignal(false);
 
   return (
     <div
@@ -31,8 +25,7 @@ export const PreviewMessage = (props: PreviewMessageProps) => {
         (props.placement === 'left' ? ' left-5' : ' right-5')
       }
       style={{
-        'background-color':
-          props.previewMessageTheme?.backgroundColor ?? defaultBackgroundColor,
+        'background-color': props.previewMessageTheme?.backgroundColor ?? defaultBackgroundColor,
         color: props.previewMessageTheme?.textColor ?? defaultTextColor,
         'z-index': 42424242,
       }}
@@ -57,13 +50,13 @@ export const PreviewMessage = (props: PreviewMessageProps) => {
       </Show>
       <p>{props.message}</p>
     </div>
-  )
-}
+  );
+};
 
 const CloseButton = (props: {
-  isHovered: boolean
-  previewMessageTheme?: PreviewMessageTheme
-  onClick: () => void
+  isHovered: boolean;
+  previewMessageTheme?: PreviewMessageTheme;
+  onClick: () => void;
 }) => (
   <button
     class={
@@ -71,15 +64,13 @@ const CloseButton = (props: {
       (props.isHovered ? 'opacity-100' : 'opacity-0')
     }
     onClick={(e) => {
-      e.stopPropagation()
-      return props.onClick()
+      e.stopPropagation();
+      return props.onClick();
     }}
     style={{
       'background-color':
-        props.previewMessageTheme?.closeButtonBackgroundColor ??
-        defaultBackgroundColor,
-      color:
-        props.previewMessageTheme?.closeButtonIconColor ?? defaultTextColor,
+        props.previewMessageTheme?.closeButtonBackgroundColor ?? defaultBackgroundColor,
+      color: props.previewMessageTheme?.closeButtonIconColor ?? defaultTextColor,
     }}
   >
     <svg
@@ -95,4 +86,4 @@ const CloseButton = (props: {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   </button>
-)
+);

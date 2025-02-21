@@ -1,8 +1,8 @@
-import { createSignal, onCleanup, onMount } from 'solid-js'
-import { isMobile } from '@/utils/isMobileSignal'
-import { Avatar } from '../avatars/Avatar'
+import { createSignal, onCleanup, onMount } from 'solid-js';
+import { isMobile } from '@/utils/isMobileSignal';
+import { Avatar } from '../avatars/Avatar';
 
-type Props = { hostAvatarSrc?: string; hideAvatar?: boolean }
+type Props = { hostAvatarSrc?: string; hideAvatar?: boolean };
 
 export const AvatarSideContainer = (props: Props) => {
   let avatarContainer: HTMLDivElement | undefined;
@@ -27,7 +27,10 @@ export const AvatarSideContainer = (props: Props) => {
   return (
     <div
       ref={avatarContainer}
-      class={'flex flex-shrink-0 items-center relative agent-avatar-container ' + (isMobile() ? 'w-6' : 'w-10')}
+      class={
+        'flex flex-shrink-0 items-center relative agent-avatar-container ' +
+        (isMobile() ? 'w-6' : 'w-10')
+      }
     >
       <div
         class={
@@ -44,4 +47,4 @@ export const AvatarSideContainer = (props: Props) => {
       </div>
     </div>
   );
-}
+};

@@ -1,28 +1,16 @@
-import { ChatReply, SendMessageInput, Theme } from '@/schemas'
-import {
-  createEffect,
-  createSignal,
-  For,
-  onMount,
-  Show,
-  onCleanup,
-} from 'solid-js'
-import { sendMessageQuery } from '@/queries/sendMessageQuery'
-import { ChatChunk } from './ChatChunk'
-import {
-  BotContext,
-  ChatChunk as ChatChunkType,
-  InitialChatReply,
-  OutgoingLog,
-} from '@/types'
-import { isNotDefined } from '@/lib/utils'
-import { executeClientSideAction } from '@/utils/executeClientSideActions'
-import { LoadingChunk, ConnectingChunk } from './LoadingChunk'
-import { PopupBlockedToast } from './PopupBlockedToast'
-import { abortController, reader } from '@/queries/streamChat'
+import { ChatReply, SendMessageInput, Theme } from '@/schemas';
+import { createEffect, createSignal, For, onMount, Show, onCleanup } from 'solid-js';
+import { sendMessageQuery } from '@/queries/sendMessageQuery';
+import { ChatChunk } from './ChatChunk';
+import { BotContext, ChatChunk as ChatChunkType, InitialChatReply, OutgoingLog } from '@/types';
+import { isNotDefined } from '@/lib/utils';
+import { executeClientSideAction } from '@/utils/executeClientSideActions';
+import { LoadingChunk, ConnectingChunk } from './LoadingChunk';
+import { PopupBlockedToast } from './PopupBlockedToast';
+import { abortController, reader } from '@/queries/streamChat';
 import { useInitialActions } from '@/hooks/useInitialActions';
 import { useChat } from '@ai-sdk/solid';
-import { BubbleBlockType } from '@/schemas'
+import { BubbleBlockType } from '@/schemas';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -46,52 +34,50 @@ const parseDynamicTheme = (
           }
         : initialTheme.chat.guestAvatar,
   },
-})
+});
 
 type Props = {
-  initialAgentReply: InitialChatReply
-  context: BotContext
-  onNewInputBlock?: (ids: { id: string; groupId: string }) => void
-  onAnswer?: (answer: { message: string; blockId: string }) => void
-  onEnd?: () => void
-  onNewLogs?: (logs: OutgoingLog[]) => void
+  initialAgentReply: InitialChatReply;
+  context: BotContext;
+  onNewInputBlock?: (ids: { id: string; groupId: string }) => void;
+  onAnswer?: (answer: { message: string; blockId: string }) => void;
+  onEnd?: () => void;
+  onNewLogs?: (logs: OutgoingLog[]) => void;
   setSessionId: (id: string | null) => void;
-  filterResponse?: (response: string) => string
+  filterResponse?: (response: string) => string;
   stream?: boolean;
   isConnecting?: boolean;
-}
+};
 
 export const ConversationContainer = (props: Props) => {
-  let chatContainer: HTMLDivElement | undefined
+  let chatContainer: HTMLDivElement | undefined;
   const [chatChunks, setChatChunks] = createSignal<ChatChunkType[]>([
     {
       input: props.initialAgentReply.input,
       messages: props.initialAgentReply.messages.map((msg: any) => ({
         ...msg,
-        role: 'assistant' // Add role to initial messages
+        role: 'assistant', // Add role to initial messages
       })),
       clientSideActions: props.initialAgentReply.clientSideActions,
     },
-  ])
-  const [dynamicTheme, setDynamicTheme] = createSignal<
-    ChatReply['dynamicTheme']
-  >(props.initialAgentReply.dynamicTheme)
-  const [theme, setTheme] = createSignal(props.initialAgentReply.agentConfig.theme)
-  const [isSending, setIsSending] = createSignal(false)
-  const [isConnecting, setIsConnecting] = createSignal(false)
-  const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>()
-  const [hasError, setHasError] = createSignal(false)
+  ]);
+  const [dynamicTheme, setDynamicTheme] = createSignal<ChatReply['dynamicTheme']>(
+    props.initialAgentReply.dynamicTheme
+  );
+  const [theme, setTheme] = createSignal(props.initialAgentReply.agentConfig.theme);
+  const [isSending, setIsSending] = createSignal(false);
+  const [isConnecting, setIsConnecting] = createSignal(false);
+  const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>();
+  const [hasError, setHasError] = createSignal(false);
   const [activeInputId, setActiveInputId] = createSignal<number>(
     props.initialAgentReply.input ? 1 : 0
-  )
+  );
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
   let fileInputRef: HTMLInputElement | undefined;
-  
+
   createEffect(() => {
-    setTheme(
-      parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme())
-    )
-  })
+    setTheme(parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme()));
+  });
 
   const executeInitialActions = useInitialActions({
     chatChunks,
@@ -107,25 +93,27 @@ export const ConversationContainer = (props: Props) => {
   createEffect(() => {
     setTheme(parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme()));
   });
-  
-  const chatStreamFunctions = props.stream ? useChat({
-    api: 'http://localhost:8001/web/stream_',
-    streamProtocol: 'text',
-    experimental_prepareRequestBody({ messages }) {
-      return {
-        message: messages[messages.length - 1].content,
-        sessionId: props.context.sessionId,
-        agentName: props.context.agentName,
-      };
-    },
-    onResponse: response => {
-      console.log('Received HTTP response from server:', response);
-    },
-  }) : null;
+
+  const chatStreamFunctions = props.stream
+    ? useChat({
+        api: 'http://localhost:8001/web/stream_',
+        streamProtocol: 'text',
+        experimental_prepareRequestBody({ messages }) {
+          return {
+            message: messages[messages.length - 1].content,
+            sessionId: props.context.sessionId,
+            agentName: props.context.agentName,
+          };
+        },
+        onResponse: (response) => {
+          console.log('Received HTTP response from server:', response);
+        },
+      })
+    : null;
 
   const streamingHandlers = () => {
     if (!props.stream || !chatStreamFunctions) return undefined;
-    
+
     return {
       onInput: chatStreamFunctions.handleInputChange as (e: Event) => void,
       onSubmit: (e: Event) => {
@@ -133,13 +121,13 @@ export const ConversationContainer = (props: Props) => {
         chatStreamFunctions.handleSubmit(e, {
           experimental_attachments: files(),
         });
-  
+
         // Reset form
         setFiles(undefined);
         if (fileInputRef) {
           fileInputRef.value = '';
         }
-      }
+      },
     };
   };
 
@@ -166,9 +154,12 @@ export const ConversationContainer = (props: Props) => {
     // Now that we’ve updated the UI, we can send the message to the server
     // to get the assistant’s new reply, etc.
     await sendMessage(userText);
-  }
-  
-  const sendMessage = async (message: string | undefined, clientLogs?: SendMessageInput['clientLogs']) => {
+  };
+
+  const sendMessage = async (
+    message: string | undefined,
+    clientLogs?: SendMessageInput['clientLogs']
+  ) => {
     console.log(`send message: ${message}`);
     setHasError(false);
 
@@ -176,7 +167,6 @@ export const ConversationContainer = (props: Props) => {
       setIsSending(true);
     }, 2000);
 
-    
     const { data, error } = await sendMessageQuery({
       apiHost: props.context.apiHost,
       sessionId: props.context.sessionId,
@@ -187,15 +177,15 @@ export const ConversationContainer = (props: Props) => {
     });
     clearTimeout(longRequest);
     setIsSending(false);
-        if (error) {
-    setHasError(true);
-    props.onNewLogs?.([
-      {
-        description: 'Failed to send the reply',
-        details: error,
-        status: 'error',
-      },
-    ]);
+    if (error) {
+      setHasError(true);
+      props.onNewLogs?.([
+        {
+          description: 'Failed to send the reply',
+          details: error,
+          status: 'error',
+        },
+      ]);
     }
     if (!data) return;
 
@@ -203,10 +193,10 @@ export const ConversationContainer = (props: Props) => {
       ...m,
       role: 'assistant' as const,
     }));
-  
+
     if (data.input) {
       setActiveInputId((prev) => {
-        return (prev + 1)
+        return prev + 1;
       });
     }
 
@@ -238,10 +228,16 @@ export const ConversationContainer = (props: Props) => {
 
   const handleNewBubbleDisplayed = async (blockId: string) => {
     const lastChunk = [...chatChunks()].pop();
-    console.log(`handleNewBubbleDisplayed: blockId is ${blockId}, the lastChunk is ${JSON.stringify(lastChunk)}`);
+    console.log(
+      `handleNewBubbleDisplayed: blockId is ${blockId}, the lastChunk is ${JSON.stringify(
+        lastChunk
+      )}`
+    );
     if (!lastChunk) return;
     if (lastChunk.clientSideActions) {
-      const actionsToExecute = lastChunk.clientSideActions.filter((action) => action.lastBubbleBlockId === blockId);
+      const actionsToExecute = lastChunk.clientSideActions.filter(
+        (action) => action.lastBubbleBlockId === blockId
+      );
       for (const action of actionsToExecute) {
         if ('webhookToExecute' in action) setIsSending(true);
         const response = await executeClientSideAction({
@@ -275,19 +271,19 @@ export const ConversationContainer = (props: Props) => {
   let inputCounter = 0;
 
   createEffect(() => {
-    const chunks = chatChunks()
-    console.log('chatChunks updated:', chunks );
+    const chunks = chatChunks();
+    console.log('chatChunks updated:', chunks);
     chunks.map((chunk, index) => {
-      console.log(`messages in chunk #${index} are: `,JSON.stringify(chunk.messages));
+      console.log(`messages in chunk #${index} are: `, JSON.stringify(chunk.messages));
       // console.log(JSON.stringify(chunk.input))
     });
   });
-  
+
   // createEffect(() => {
   //   const ms = chatStreamFunctions?.messages();
   //   console.log('Stream messages updated:', JSON.stringify(ms));
-  // });  
-  
+  // });
+
   return (
     <div
       ref={chatContainer}
@@ -311,7 +307,11 @@ export const ConversationContainer = (props: Props) => {
               settings={props.initialAgentReply.agentConfig.settings}
               streamingMessageId={chatChunk.streamingMessageId}
               context={props.context}
-              hideAvatar={!chatChunk.input && !chatChunk.streamingMessageId && index() < chatChunks().length - 1}
+              hideAvatar={
+                !chatChunk.input &&
+                !chatChunk.streamingMessageId &&
+                index() < chatChunks().length - 1
+              }
               hasError={hasError() && index() === chatChunks().length - 1}
               onNewBubbleDisplayed={handleNewBubbleDisplayed}
               onAllBubblesDisplayed={handleAllBubblesDisplayed}
@@ -330,15 +330,18 @@ export const ConversationContainer = (props: Props) => {
       <Show when={blockedPopupUrl()} keyed>
         {(blockedPopupUrl) => (
           <div class="flex justify-end">
-            <PopupBlockedToast url={blockedPopupUrl} onLinkClick={() => setBlockedPopupUrl(undefined)} />
+            <PopupBlockedToast
+              url={blockedPopupUrl}
+              onLinkClick={() => setBlockedPopupUrl(undefined)}
+            />
           </div>
         )}
       </Show>
       <BottomSpacer />
     </div>
   );
-}
+};
 
 const BottomSpacer = () => {
-  return <div class="w-full h-32 flex-shrink-0" />
-}
+  return <div class="w-full h-32 flex-shrink-0" />;
+};

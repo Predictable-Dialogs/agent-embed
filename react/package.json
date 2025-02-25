@@ -1,6 +1,6 @@
 {
   "name": "@agent-embed/react",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Convenient library to display Agent embed on your React website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,6 +39,6 @@
     "typescript": "5.1.6"
   },
   "peerDependencies": {
-    "react": "18.x"
+    "react": ">=18.x <20.0.0"
   }
 }

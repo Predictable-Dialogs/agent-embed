@@ -1,6 +1,6 @@
 {
   "name": "@agent-embed/nextjs",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Convenient library to display agent embed on your Next.js website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,6 +35,6 @@
     "typescript": "5.1.6"
   },
   "peerDependencies": {
-    "next": "12.x || 13.x"
+    "next": ">=12.x <16.0.0"
   }
 }

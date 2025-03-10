@@ -1,10 +1,11 @@
 import { LiteBadge } from './LiteBadge';
-import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { createEffect, createSignal, onMount, Show, onCleanup, Switch, Match } from 'solid-js';
 import { isNotDefined } from '@/lib/utils';
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { ConversationContainer } from './ConversationContainer';
+import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext, InitialChatReply, OutgoingLog } from '@/types';
+import { BotContext, OutgoingLog } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import immutableCss from '../assets/immutable.css';
@@ -287,18 +288,36 @@ const BotContent = (props: BotContentProps) => {
       }
     >
       <div class="flex w-full h-full justify-center">
-        <ConversationContainer
-          context={props.context}
-          isConnecting={props.isConnecting}
-          initialAgentReply={props.initialAgentReply}
-          onNewInputBlock={props.onNewInputBlock}
-          onAnswer={props.onAnswer}
-          onEnd={props.onEnd}
-          onNewLogs={props.onNewLogs}
-          filterResponse={props.filterResponse}
-          stream={props.stream}
-          setSessionId={props.setSessionId}
-        />
+        <Switch>
+          <Match when={props.stream}>
+            <StreamConversation
+              context={props.context}
+              isConnecting={props.isConnecting}
+              initialAgentReply={props.initialAgentReply}
+              onNewInputBlock={props.onNewInputBlock}
+              onAnswer={props.onAnswer}
+              onEnd={props.onEnd}
+              onNewLogs={props.onNewLogs}
+              filterResponse={props.filterResponse}
+              stream={props.stream}
+              setSessionId={props.setSessionId}
+            />
+          </Match>
+          <Match when={!props.stream}>
+          <ConversationContainer
+              context={props.context}
+              isConnecting={props.isConnecting}
+              initialAgentReply={props.initialAgentReply}
+              onNewInputBlock={props.onNewInputBlock}
+              onAnswer={props.onAnswer}
+              onEnd={props.onEnd}
+              onNewLogs={props.onNewLogs}
+              filterResponse={props.filterResponse}
+              stream={props.stream}
+              setSessionId={props.setSessionId}
+            />
+          </Match>
+        </Switch>
       </div>
       <Show when={props.initialAgentReply.agentConfig.settings.general.isBrandingEnabled}>
         <LiteBadge botContainer={botContainer} />

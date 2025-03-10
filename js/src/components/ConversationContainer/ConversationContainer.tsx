@@ -9,8 +9,7 @@ import { LoadingChunk, ConnectingChunk } from './LoadingChunk';
 import { PopupBlockedToast } from './PopupBlockedToast';
 import { abortController, reader } from '@/queries/streamChat';
 import { useInitialActions } from '@/hooks/useInitialActions';
-import { useChat } from '@ai-sdk/solid';
-import { BubbleBlockType } from '@/schemas';
+import { transformMessage } from '@/utils/transformMessages';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -54,10 +53,9 @@ export const ConversationContainer = (props: Props) => {
   const [chatChunks, setChatChunks] = createSignal<ChatChunkType[]>([
     {
       input: props.initialAgentReply.input,
-      messages: props.initialAgentReply.messages.map((msg: any) => ({
-        ...msg,
-        role: 'assistant', // Add role to initial messages
-      })),
+      messages: props.initialAgentReply.messages.map((msg: any) => 
+        transformMessage(msg, 'assistant', props.initialAgentReply.input)
+      ),
       clientSideActions: props.initialAgentReply.clientSideActions,
     },
   ]);
@@ -72,8 +70,6 @@ export const ConversationContainer = (props: Props) => {
   const [activeInputId, setActiveInputId] = createSignal<number>(
     props.initialAgentReply.input ? 1 : 0
   );
-  const [files, setFiles] = createSignal<FileList | undefined>(undefined);
-  let fileInputRef: HTMLInputElement | undefined;
 
   createEffect(() => {
     setTheme(parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme()));
@@ -94,54 +90,14 @@ export const ConversationContainer = (props: Props) => {
     setTheme(parseDynamicTheme(props.initialAgentReply.agentConfig.theme, dynamicTheme()));
   });
 
-  const chatStreamFunctions = props.stream
-    ? useChat({
-        api: 'http://localhost:8001/web/stream_',
-        streamProtocol: 'text',
-        experimental_prepareRequestBody({ messages }) {
-          return {
-            message: messages[messages.length - 1].content,
-            sessionId: props.context.sessionId,
-            agentName: props.context.agentName,
-          };
-        },
-        onResponse: (response) => {
-          console.log('Received HTTP response from server:', response);
-        },
-      })
-    : null;
-
-  const streamingHandlers = () => {
-    if (!props.stream || !chatStreamFunctions) return undefined;
-
-    return {
-      onInput: chatStreamFunctions.handleInputChange as (e: Event) => void,
-      onSubmit: (e: Event) => {
-        e.preventDefault();
-        chatStreamFunctions.handleSubmit(e, {
-          experimental_attachments: files(),
-        });
-
-        // Reset form
-        setFiles(undefined);
-        if (fileInputRef) {
-          fileInputRef.value = '';
-        }
-      },
-    };
-  };
-
-  /**
-   * This is our new “lifted” callback for user input:
-   * It adds a new message with `role: "user"`, then triggers the sendMessage flow.
-   */
   const handleUserInput = async (userText: string) => {
     // Add user’s message to the conversation
     const userMessage = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID(), 
+      createdAt: new Date().toISOString(),
       role: 'user',
-      type: BubbleBlockType.TEXT,
-      content: { text: userText },
+      content: userText,
+      parts: [] // empty parts array for now
     };
 
     setChatChunks((displayedChunks) => [
@@ -160,7 +116,6 @@ export const ConversationContainer = (props: Props) => {
     message: string | undefined,
     clientLogs?: SendMessageInput['clientLogs']
   ) => {
-    console.log(`send message: ${message}`);
     setHasError(false);
 
     const longRequest = setTimeout(() => {
@@ -189,11 +144,11 @@ export const ConversationContainer = (props: Props) => {
     }
     if (!data) return;
 
-    const messagesWithRole = data.messages.map((m: any) => ({
-      ...m,
-      role: 'assistant' as const,
-    }));
-
+    // Transform server messages to the new shape using our helper
+    const messagesWithRole = data.messages.map((m: any) =>
+      transformMessage(m, 'assistant')
+    );
+    
     if (data.input) {
       setActiveInputId((prev) => {
         return prev + 1;
@@ -218,7 +173,6 @@ export const ConversationContainer = (props: Props) => {
 
   const handleAllBubblesDisplayed = async () => {
     const lastChunk = [...chatChunks()].pop();
-    console.log(`handleAllBubblesDisplayed: the lastChunk is ${JSON.stringify(lastChunk)}`);
 
     if (!lastChunk) return;
     if (isNotDefined(lastChunk.input)) {
@@ -228,11 +182,6 @@ export const ConversationContainer = (props: Props) => {
 
   const handleNewBubbleDisplayed = async (blockId: string) => {
     const lastChunk = [...chatChunks()].pop();
-    console.log(
-      `handleNewBubbleDisplayed: blockId is ${blockId}, the lastChunk is ${JSON.stringify(
-        lastChunk
-      )}`
-    );
     if (!lastChunk) return;
     if (lastChunk.clientSideActions) {
       const actionsToExecute = lastChunk.clientSideActions.filter(
@@ -269,21 +218,7 @@ export const ConversationContainer = (props: Props) => {
   });
 
   let inputCounter = 0;
-
-  createEffect(() => {
-    const chunks = chatChunks();
-    console.log('chatChunks updated:', chunks);
-    chunks.map((chunk, index) => {
-      console.log(`messages in chunk #${index} are: `, JSON.stringify(chunk.messages));
-      // console.log(JSON.stringify(chunk.input))
-    });
-  });
-
-  // createEffect(() => {
-  //   const ms = chatStreamFunctions?.messages();
-  //   console.log('Stream messages updated:', JSON.stringify(ms));
-  // });
-
+    
   return (
     <div
       ref={chatContainer}
@@ -292,6 +227,7 @@ export const ConversationContainer = (props: Props) => {
       <Show when={isConnecting() || props.isConnecting}>
         <ConnectingChunk />
       </Show>
+
       <For each={chatChunks()}>
         {(chatChunk, index) => {
           if (chatChunk.input) {
@@ -319,11 +255,11 @@ export const ConversationContainer = (props: Props) => {
               onScrollToBottom={autoScrollToBottom}
               onSkip={handleSkip}
               filterResponse={props.filterResponse}
-              streamingHandlers={streamingHandlers()}
             />
           );
         }}
       </For>
+
       <Show when={isSending()}>
         <LoadingChunk theme={theme()} />
       </Show>

@@ -1,7 +1,7 @@
 import { BotContext, ChatChunk as ChatChunkType } from '@/types';
 import { isMobile } from '@/utils/isMobileSignal';
 import type { ChatReply, Settings, Theme } from '@/schemas';
-import { createSignal, For, onMount, Show } from 'solid-js';
+import { createSignal, createEffect, createMemo, For, onMount, Show } from 'solid-js';
 import { HostBubble } from '../bubbles/HostBubble';
 import { InputChatBlock } from '../InputChatBlock';
 import { AvatarSideContainer } from './AvatarSideContainer';
@@ -24,10 +24,6 @@ type Props = Pick<ChatReply, 'messages' | 'input'> & {
   onSkip: () => void;
   onAllBubblesDisplayed: () => void;
   filterResponse?: (response: string) => string;
-  streamingHandlers?: {
-    onInput?: (e: Event) => void;
-    onSubmit: (e: Event) => void;
-  };
 };
 
 export const ChatChunk = (props: Props) => {
@@ -47,7 +43,6 @@ export const ChatChunk = (props: Props) => {
     //Execute action for the last block.
     await props.onNewBubbleDisplayed(lastBubbleBlockId);
 
-    // setDisplayedMessageIndex(index === props.messages.length ? index : index + 1);
     if (index !== props.messages.length) {
       console.log(`Incrementing displayed message index`);
       setDisplayedMessageIndex(index + 1);
@@ -59,7 +54,7 @@ export const ChatChunk = (props: Props) => {
       props.onAllBubblesDisplayed();
     }
   };
-
+    
   return (
     <div class="flex flex-col w-full min-w-0 gap-2">
       <Show when={props.messages.length > 0}>
@@ -100,7 +95,7 @@ export const ChatChunk = (props: Props) => {
                   <Match when={message.role === 'user'}>
                     <div class="flex flex-col flex-1">
                       <GuestBubble
-                        message={message.content.text} // or however you store user text
+                        message={message.content} // or however you store user text
                         showAvatar={props.theme.chat.guestAvatar?.isEnabled ?? false}
                         avatarSrc={props.theme.chat.guestAvatar?.url}
                       />
@@ -125,9 +120,8 @@ export const ChatChunk = (props: Props) => {
           context={props.context}
           isInputPrefillEnabled={props.settings.general.isInputPrefillEnabled ?? true}
           hasError={props.hasError}
-          streamingHandlers={props.streamingHandlers}
         />
-      )}
+      )} 
       <Show when={props.streamingMessageId} keyed>
         {(streamingMessageId) => (
           <div class={'flex' + (isMobile() ? ' gap-1' : ' gap-2')}>

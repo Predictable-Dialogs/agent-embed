@@ -1,13 +1,14 @@
 import { BotContext, ChatChunk as ChatChunkType } from '@/types';
 import { isMobile } from '@/utils/isMobileSignal';
 import type { ChatReply, Settings, Theme } from '@/schemas';
-import { createSignal, createEffect, createMemo, For, onMount, Show } from 'solid-js';
+import { createSignal, For, onMount, Show } from 'solid-js';
 import { HostBubble } from '../bubbles/HostBubble';
 import { InputChatBlock } from '../InputChatBlock';
 import { AvatarSideContainer } from './AvatarSideContainer';
+import { StreamingBubble } from '../bubbles/StreamingBubble';
 import { Match, Switch } from 'solid-js';
 import { GuestBubble } from '../bubbles/GuestBubble';
-import { StreamingBubble } from '../bubbles/StreamingBubble';
+
 
 type Props = Pick<ChatReply, 'messages' | 'input'> & {
   theme: Theme;
@@ -31,12 +32,10 @@ export const ChatChunk = (props: Props) => {
   const [displayedMessageIndex, setDisplayedMessageIndex] = createSignal(0);
 
   onMount(() => {
-    if (props.streamingMessageId) return;
     props.onScrollToBottom(inputRef?.offsetTop ? inputRef?.offsetTop - 50 : undefined);
   });
 
   const displayNextMessage = async (bubbleOffsetTop?: number) => {
-    console.log(`displayNextMessage: ${displayedMessageIndex()}`);
     const index = displayedMessageIndex();
     const lastBubbleBlockId = props.messages[index].id;
 
@@ -44,7 +43,6 @@ export const ChatChunk = (props: Props) => {
     await props.onNewBubbleDisplayed(lastBubbleBlockId);
 
     if (index !== props.messages.length) {
-      console.log(`Incrementing displayed message index`);
       setDisplayedMessageIndex(index + 1);
     }
 
@@ -61,7 +59,6 @@ export const ChatChunk = (props: Props) => {
         <div class={'flex' + (isMobile() ? ' gap-1' : ' gap-2')}>
           <For each={props.messages.slice(0, displayedMessageIndex() + 1)}>
             {(message) => {
-              console.log('Rendering message:', JSON.stringify(message));
               return (
                 <Switch fallback={null}>
                   <Match when={message.role === 'assistant'}>

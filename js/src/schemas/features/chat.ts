@@ -234,9 +234,9 @@ export type StartAgent = z.infer<typeof startAgentSchema>
 export type ReplyLog = z.infer<typeof replyLogSchema>
 export type StartPropsToInject = z.infer<typeof startPropsToInjectSchema>
 
-export type Message = {
-  id: string
-  role: "user" | "assistant"
-  type: BubbleBlockType
-  content: any
-}
+// export type Message = {
+//   id: string
+//   role: "user" | "assistant"
+//   type: BubbleBlockType
+//   content: any
+// }

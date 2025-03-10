@@ -7,7 +7,6 @@ import { isNotDefined } from '@/lib/utils';
 import { executeClientSideAction } from '@/utils/executeClientSideActions';
 import { LoadingChunk, ConnectingChunk } from './LoadingChunk';
 import { PopupBlockedToast } from './PopupBlockedToast';
-import { abortController, reader } from '@/queries/streamChat';
 import { useInitialActions } from '@/hooks/useInitialActions';
 import { transformMessage } from '@/utils/transformMessages';
 
@@ -44,7 +43,6 @@ type Props = {
   onNewLogs?: (logs: OutgoingLog[]) => void;
   setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string;
-  stream?: boolean;
   isConnecting?: boolean;
 };
 
@@ -207,15 +205,6 @@ export const ConversationContainer = (props: Props) => {
   };
 
   const handleSkip = () => sendMessage(undefined);
-
-  onCleanup(() => {
-    if (reader) {
-      reader.cancel();
-    }
-    if (abortController) {
-      abortController.abort();
-    }
-  });
 
   let inputCounter = 0;
     

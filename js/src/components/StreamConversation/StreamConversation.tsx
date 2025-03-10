@@ -40,7 +40,6 @@ type Props = {
   onNewLogs?: (logs: OutgoingLog[]) => void;
   setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string;
-  stream?: boolean;
   isConnecting?: boolean;
 };
 
@@ -101,7 +100,7 @@ export const StreamConversation = (props: Props) => {
     });
   
   const streamingHandlers = createMemo(() => {
-    if (!props.stream || !handleInputChange || !handleSubmit) return undefined;
+    if (!handleInputChange || !handleSubmit) return undefined;
 
     return {
       onInput: handleInputChange as (e: Event) => void,

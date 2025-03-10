@@ -299,7 +299,6 @@ const BotContent = (props: BotContentProps) => {
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
-              stream={props.stream}
               setSessionId={props.setSessionId}
             />
           </Match>
@@ -313,7 +312,6 @@ const BotContent = (props: BotContentProps) => {
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
-              stream={props.stream}
               setSessionId={props.setSessionId}
             />
           </Match>

@@ -1,29 +1,12 @@
 import type {
-  ChatReply,
-  ChoiceInputBlock,
-  DateInputOptions,
-  FileInputBlock,
-  PaymentInputOptions,
-  RatingInputBlock,
-  RuntimeOptions,
-  TextInputBlock,
-  Theme,
-  PictureChoiceBlock,
+  ChatReply, TextInputBlock,
+  Theme
 } from '../schemas';
-import { InputBlockType } from '@/schemas/features/blocks/inputs/enums';
 import { BotContext, InputSubmitContent } from '@/types';
 import { TextInput } from '@/features/blocks/inputs/textInput';
-import { DateForm } from '@/features/blocks/inputs/date';
-import { RatingForm } from '@/features/blocks/inputs/rating';
-import { FileUploadForm } from '@/features/blocks/inputs/fileUpload';
-import { createSignal, createEffect, Switch, Match } from 'solid-js';
+import { createSignal, Switch, Match } from 'solid-js';
 import { isNotDefined } from '@/lib/utils';
 import { isMobile } from '@/utils/isMobileSignal';
-import { PaymentForm } from '@/features/blocks/inputs/payment';
-import { MultipleChoicesForm } from '@/features/blocks/inputs/buttons/components/MultipleChoicesForm';
-import { Buttons } from '@/features/blocks/inputs/buttons/components/Buttons';
-import { SinglePictureChoice } from '@/features/blocks/inputs/pictureChoice/SinglePictureChoice';
-import { MultiplePictureChoice } from '@/features/blocks/inputs/pictureChoice/MultiplePictureChoice';
 
 type Props = {
   ref: HTMLDivElement | undefined;
@@ -51,10 +34,6 @@ export const InputChatBlock = (props: Props) => {
     setAnswer(label);
     props.onSkip();
   };
-
-  createEffect(() => {
-    console.log('InputChatBlock Props:', props);
-  });
 
   return (
     <Switch>
@@ -98,11 +77,6 @@ const Input = (props: {
   const getPrefilledValue = () =>
     props.isInputPrefillEnabled ? props.block?.prefilledValue : undefined;
 
-  const submitPaymentSuccess = () =>
-    props.onSubmit({
-      value: (props.block.options as PaymentInputOptions).labels.success ?? 'Success',
-    });
-
   return (
     <TextInput
       block={props.block as TextInputBlock}
@@ -112,9 +86,3 @@ const Input = (props: {
     />
   );
 };
-
-const isButtonsBlock = (block: ChatReply['input']): ChoiceInputBlock | undefined =>
-  block?.type === InputBlockType.CHOICE ? block : undefined;
-
-const isPictureChoiceBlock = (block: ChatReply['input']): PictureChoiceBlock | undefined =>
-  block?.type === InputBlockType.PICTURE_CHOICE ? block : undefined;

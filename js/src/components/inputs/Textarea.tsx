@@ -4,7 +4,7 @@ import { JSX } from 'solid-js/jsx-runtime'
 
 type TextareaProps = {
   ref: HTMLTextAreaElement | undefined
-  onInput: (value: string) => void
+  onInput: (e: Event) => void
 } & Omit<JSX.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onInput'>
 
 export const Textarea = (props: TextareaProps) => {
@@ -19,7 +19,7 @@ export const Textarea = (props: TextareaProps) => {
       required
       style={{ 'font-size': '16px' }}
       autofocus={!isMobile()}
-      onInput={(e) => local.onInput(e.currentTarget.value)}
+      onInput={(e) => local.onInput(e)}
       {...others}
     />
   )

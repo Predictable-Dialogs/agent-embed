@@ -1,10 +1,10 @@
 import type {
   ChatReply, TextInputBlock,
   Theme
-} from '../schemas';
+} from '../../schemas';
 import { BotContext, InputSubmitContent } from '@/types';
 import { TextInput } from '@/features/blocks/inputs/textInput';
-import { createSignal, Switch, Match } from 'solid-js';
+import { createSignal, createEffect, Switch, Match } from 'solid-js';
 import { isNotDefined } from '@/lib/utils';
 import { isMobile } from '@/utils/isMobileSignal';
 
@@ -13,32 +13,31 @@ type Props = {
   block: NonNullable<ChatReply['input']>;
   hasHostAvatar: boolean;
   guestAvatar?: Theme['chat']['guestAvatar'];
-  inputIndex: number;
-  activeInputId: number;
   context: BotContext;
   isInputPrefillEnabled: boolean;
   hasError: boolean;
-  onSubmit: (answer: string) => void;
-  onSkip: () => void;
+  streamingHandlers?: {
+    onInput?: (e: Event) => void;
+    onSubmit: (e: Event) => void;
+  };
 };
 
-export const InputChatBlock = (props: Props) => {
-  const [answer, setAnswer] = createSignal<string>();
+export const StreamInput = (props: Props) => {
+  // const [answer, setAnswer] = createSignal<string>();
 
-  const handleSubmit = async ({ label, value }: InputSubmitContent) => {
-    setAnswer(label ?? value);
-    props.onSubmit(value ?? label);
-  };
+  // const handleSubmit = async ({ label, value }: InputSubmitContent) => {
+  //   setAnswer(label ?? value);
+  // };
 
-  const handleSkip = (label: string) => {
-    setAnswer(label);
-    props.onSkip();
-  };
+  // const handleSkip = (label: string) => {
+  //   setAnswer(label);
+  // };
+
+  createEffect(() => {
+    console.log('StreamInput Props:', props);
+  });
 
   return (
-    <Switch>
-      <Match when={isNotDefined(answer()) || props.hasError}> 
-        {props.inputIndex === props.activeInputId && (
           <div
             class="flex justify-end animate-fade-in gap-2"
             data-blockid={props.block?.id}
@@ -52,27 +51,22 @@ export const InputChatBlock = (props: Props) => {
             <Input
               context={props.context}
               block={props.block}
-              inputIndex={props.inputIndex}
               isInputPrefillEnabled={props.isInputPrefillEnabled}
-              onSubmit={handleSubmit}
-              onSkip={handleSkip}
+              streamingHandlers={props.streamingHandlers}
             />
           </div>
-         )}
-        </Match>
-    </Switch>
   );
 };
 
 const Input = (props: {
   context: BotContext;
   block: NonNullable<ChatReply['input']>;
-  inputIndex: number;
   isInputPrefillEnabled: boolean;
-  onSubmit: (answer: InputSubmitContent) => void;
-  onSkip: (label: string) => void;
+  streamingHandlers?: {
+    onInput?: (e: Event) => void;
+    onSubmit: (e: Event) => void;
+  };
 }) => {
-  const onSubmit = (answer: InputSubmitContent) => props.onSubmit(answer);
 
   const getPrefilledValue = () =>
     props.isInputPrefillEnabled ? props.block?.prefilledValue : undefined;
@@ -81,8 +75,7 @@ const Input = (props: {
     <TextInput
       block={props.block as TextInputBlock}
       defaultValue={getPrefilledValue()}
-      onSubmit={onSubmit}
-      streamingHandlers={undefined}
+      streamingHandlers={props.streamingHandlers}
     />
   );
 };

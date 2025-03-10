@@ -12,9 +12,10 @@
   },
   "license": "AGPL-3.0-or-later",
   "dependencies": {
+    "@ai-sdk/solid": "^1.1.19",
     "@stripe/stripe-js": "1.54.1",
     "@udecode/plate-common": "^21.1.5",
-    "dompurify": "^3.1.6",
+    "dompurify": "^3.2.4",
     "eventsource-parser": "^1.0.0",
     "marked": "^14.0.0",
     "solid-element": "1.7.1",
@@ -22,8 +23,10 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@ai-sdk/ui-utils": "^1.1.17",
     "@babel/preset-typescript": "7.22.5",
     "@rollup/plugin-babel": "6.0.3",
+    "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "15.1.0",
     "@rollup/plugin-replace": "^5.0.5",
     "@rollup/plugin-terser": "0.4.3",

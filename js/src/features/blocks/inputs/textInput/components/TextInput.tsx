@@ -9,29 +9,48 @@ import { createSignal, onCleanup, onMount } from 'solid-js'
 type Props = {
   block: TextInputBlock
   defaultValue?: string
-  onSubmit: (value: InputSubmitContent) => void
+  onSubmit?: (value: InputSubmitContent) => void
+  streamingHandlers?: {
+    onInput?: (e: Event) => void;
+    onSubmit?: (e: Event) => void
+  }
 }
 
 export const TextInput = (props: Props) => {
   const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '')
   let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined
 
-  const handleInput = (inputValue: string) => setInputValue(inputValue)
+  const handleInput = (e: Event) => {
+    const target = e.currentTarget as HTMLInputElement | HTMLTextAreaElement;
+    setInputValue(target.value);
+    
+    if (props.streamingHandlers?.onInput) {
+      props.streamingHandlers.onInput(e);
+    }
+  }
 
   const checkIfInputIsValid = () =>
     inputValue() !== '' && inputRef?.reportValidity()
 
   const submit = () => {
-    if (checkIfInputIsValid()) props.onSubmit({ value: inputValue() })
+
+    if (!checkIfInputIsValid()) return
+
+    if (props.streamingHandlers?.onSubmit) {
+      const event = new Event('submit')
+      props.streamingHandlers?.onSubmit(event)
+    } else if (props.onSubmit) {
+      props.onSubmit({ value: inputValue() })
+    }
   }
 
   const submitWhenEnter = (e: KeyboardEvent) => {
-    if (props.block.options.isLong) return
+    if (props.block?.options?.isLong) return
     if (e.key === 'Enter') submit()
   }
 
   const submitIfCtrlEnter = (e: KeyboardEvent) => {
-    if (!props.block.options.isLong) return
+    if (!props.block?.options?.isLong) return
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit()
   }
 
@@ -55,27 +74,27 @@ export const TextInput = (props: Props) => {
       class={'flex items-end justify-between pr-2 agent-input w-full'}
       data-testid="input"
       style={{
-        'max-width': props.block.options.isLong ? undefined : '350px',
+        'max-width': props.block?.options?.isLong ? undefined : '350px',
       }}
       onKeyDown={submitWhenEnter}
     >
-      {props.block.options.isLong ? (
+      {props.block?.options?.isLong ? (
         <Textarea
           ref={inputRef as HTMLTextAreaElement}
-          onInput={handleInput}
+          onInput={(e) => handleInput(e)}
           onKeyDown={submitIfCtrlEnter}
           value={inputValue()}
           placeholder={
-            props.block.options?.labels?.placeholder ?? 'Type your answer...'
+            props.block?.options?.labels?.placeholder ?? 'Type your answer...'
           }
         />
       ) : (
         <ShortTextInput
           ref={inputRef as HTMLInputElement}
-          onInput={handleInput}
+          onInput={(e) => handleInput(e)}
           value={inputValue()}
           placeholder={
-            props.block.options?.labels?.placeholder ?? 'Type your answer...'
+            props.block?.options?.labels?.placeholder ?? 'Type your answer...'
           }
         />
       )}
@@ -85,7 +104,7 @@ export const TextInput = (props: Props) => {
         class="my-2 ml-2"
         on:click={submit}
       >
-        {props.block.options?.labels?.button ?? 'Send'}
+        {props.block?.options?.labels?.button ?? 'Send'}
       </SendButton>
     </div>
   )

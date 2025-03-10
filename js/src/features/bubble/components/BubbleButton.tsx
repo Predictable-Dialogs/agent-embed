@@ -1,21 +1,20 @@
-import { Show } from 'solid-js'
-import { isNotDefined, isSvgSrc } from '@/lib/utils'
-import { BubbleTheme, ButtonTheme } from '../types'
-import { isLight } from '@/lib/hexToRgb'
-import { clsx } from 'clsx'
+import { Show } from 'solid-js';
+import { isNotDefined, isSvgSrc } from '@/lib/utils';
+import { BubbleTheme, ButtonTheme } from '../types';
+import { isLight } from '@/lib/hexToRgb';
+import { clsx } from 'clsx';
 
 type Props = Pick<BubbleTheme, 'placement'> &
   ButtonTheme & {
-    isBotOpened: boolean
-    toggleBot: () => void
-  }
+    isBotOpened: boolean;
+    toggleBot: () => void;
+  };
 
-const defaultButtonColor = '#0042DA'
-const defaultDarkIconColor = '#27272A'
-const defaultLightIconColor = '#fff'
+const defaultButtonColor = '#0042DA';
+const defaultDarkIconColor = '#27272A';
+const defaultLightIconColor = '#fff';
 
-const isImageSrc = (src: string) =>
-  src.startsWith('http') || src.startsWith('data:image/svg+xml')
+const isImageSrc = (src: string) => src.startsWith('http') || src.startsWith('data:image/svg+xml');
 
 export const BubbleButton = (props: Props) => (
   <button
@@ -93,9 +92,7 @@ export const BubbleButton = (props: Props) => (
         }}
         class={clsx(
           'absolute duration-200 transition',
-          props.isBotOpened
-            ? 'scale-100 rotate-0 opacity-100'
-            : 'scale-0 -rotate-180 opacity-0',
+          props.isBotOpened ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-180 opacity-0',
           props.size === 'large' ? ' w-9' : ' w-7'
         )}
       >
@@ -106,17 +103,13 @@ export const BubbleButton = (props: Props) => (
         />
       </svg>
     </Show>
-    <Show
-      when={props.customCloseIconSrc && isImageSrc(props.customCloseIconSrc)}
-    >
+    <Show when={props.customCloseIconSrc && isImageSrc(props.customCloseIconSrc)}>
       <img
         part="button-icon"
         src={props.customCloseIconSrc}
         class={clsx(
           'absolute duration-200 transition',
-          props.isBotOpened
-            ? 'scale-100 rotate-0 opacity-100'
-            : 'scale-0 -rotate-180 opacity-0',
+          props.isBotOpened ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-180 opacity-0',
           isSvgSrc(props.customCloseIconSrc)
             ? props.size === 'large'
               ? 'w-9 h-9'
@@ -127,15 +120,11 @@ export const BubbleButton = (props: Props) => (
         alt="Bubble button close icon"
       />
     </Show>
-    <Show
-      when={props.customCloseIconSrc && !isImageSrc(props.customCloseIconSrc)}
-    >
+    <Show when={props.customCloseIconSrc && !isImageSrc(props.customCloseIconSrc)}>
       <span
         class={clsx(
           'absolute text-4xl duration-200 transition',
-          props.isBotOpened
-            ? 'scale-100 rotate-0 opacity-100'
-            : 'scale-0 -rotate-180 opacity-0'
+          props.isBotOpened ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-180 opacity-0'
         )}
         style={{
           'font-family':
@@ -146,4 +135,4 @@ export const BubbleButton = (props: Props) => (
       </span>
     </Show>
   </button>
-)
+);

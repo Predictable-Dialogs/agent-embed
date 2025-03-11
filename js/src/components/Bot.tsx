@@ -87,7 +87,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     setIsConnecting(true);
     const { data, error } = await getInitialChatReplyQuery({
       sessionId: sessionId(),
-      stripeRedirectStatus: urlParams.get('redirect_status') ?? undefined,
       agentName: props.agentName,
       initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,

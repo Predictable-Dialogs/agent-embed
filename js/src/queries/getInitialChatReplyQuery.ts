@@ -1,11 +1,7 @@
-import { BotContext, InitialChatReply } from '@/types';
+import { InitialChatReply } from '@/types';
 import { getApiEndPoint } from '@/utils/getApiEndPoint';
 import type { SendMessageInput, StartParams } from '@/schemas';
 import { isNotDefined, isNotEmpty, sendRequest } from '@/lib/utils';
-import {
-  getPaymentInProgressInStorage,
-  removePaymentInProgressFromStorage,
-} from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage';
 
 export async function getInitialChatReplyQuery({
   sessionId,
@@ -16,9 +12,7 @@ export async function getInitialChatReplyQuery({
   prefilledVariables,
   startGroupId,
   resultId,
-  stripeRedirectStatus,
 }: StartParams & {
-  stripeRedirectStatus?: string;
   apiHost?: string;
   agentName: string;
   sessionId: string | undefined;
@@ -26,22 +20,11 @@ export async function getInitialChatReplyQuery({
 }) {
   if (isNotDefined(agentName)) throw new Error('Agent name is required to get initial messages');
 
-  const paymentInProgressStateStr = getPaymentInProgressInStorage() ?? undefined;
-  const paymentInProgressState = paymentInProgressStateStr
-    ? (JSON.parse(paymentInProgressStateStr) as {
-        sessionId: string;
-        agentConfig: BotContext['agentConfig'];
-      })
-    : undefined;
-  if (paymentInProgressState) removePaymentInProgressFromStorage();
   const { data, error } = await sendRequest<InitialChatReply>({
     method: 'POST',
-    // url: `${isNotEmpty(apiHost) ? apiHost : getApiEndPoint()}/api/v1/sendMessage`,
     url: `${isNotEmpty(apiHost) ? apiHost : getApiEndPoint()}`,
     body: {
-      startParams: paymentInProgressState
-        ? undefined
-        : {
+      startParams: {
             agentName,
             isPreview,
             prefilledVariables,
@@ -56,12 +39,7 @@ export async function getInitialChatReplyQuery({
   });
 
   return {
-    data: data
-      ? {
-          ...data,
-          ...(paymentInProgressState ? { agentConfig: paymentInProgressState.agentConfig } : {}),
-        }
-      : undefined,
+    data,
     error,
   };
 }

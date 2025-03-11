@@ -37,6 +37,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [customCss, setCustomCss] = createSignal('');
   const [isInitialized, setIsInitialized] = createSignal(false);
   const [error, setError] = createSignal<Error | undefined>();
+  const [isDebugMode, setIsDebugMode] = createSignal(false);
 
   const getSessionId = () => {
     const sessionId = localStorage.getItem('sessionId');
@@ -53,8 +54,14 @@ export const Bot = (props: BotProps & { class?: string }) => {
     return customCss ? JSON.parse(customCss) : null;
   };
 
+  const checkDebugMode = () => {
+    const debugFlag = localStorage.getItem('debugMode');
+    return debugFlag === 'true';
+  };
+
   const initializeBot = async () => {
     setIsInitialized(true);
+    setIsDebugMode(checkDebugMode());
     const urlParams = new URLSearchParams(location.search);
     props.onInit?.();
     const prefilledVariables: { [key: string]: string } = {};
@@ -94,19 +101,16 @@ export const Bot = (props: BotProps & { class?: string }) => {
     });
     setIsConnecting(false);
     if (error && 'code' in error && typeof error.code === 'string') {
-      if (props.isPreview ?? false) {
-        return setError(
-          new Error('An error occurred while loading the bot.', {
-            cause: error.message,
-          })
-        );
-      }
       if (['BAD_REQUEST', 'FORBIDDEN'].includes(error.code))
-        return setError(new Error('This bot is now closed.'));
-      if (error.code === 'NOT_FOUND')
-        return setError(new Error("The bot you're looking for doesn't exist."));
+        return setError(new Error('This agent is now closed.'));
     }
-    if (!data) return setError(new Error("Error! Couldn't initiate the chat."));
+
+    if (error && 'statusCode' in error && typeof error.statusCode === 'number') {
+      if (error.statusCode === 404)
+        return setError(new Error("The agent you're looking for doesn't exist."));
+    }
+
+    if (!data) return setError(new Error("Couldn't initiate the chat."));
 
     setSessionId(data.sessionId);
     setClientSideActions(data.clientSideActions);
@@ -216,6 +220,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
             onEnd={props.onEnd}
             filterResponse={props.filterResponse}
             stream={props.stream}
+            isDebugMode={isDebugMode()}
           />
         )}
       </Show>
@@ -235,6 +240,7 @@ type BotContentProps = {
   filterResponse?: (response: string) => string;
   stream?: boolean;
   isConnecting?: boolean;
+  isDebugMode?: boolean;
 };
 
 const BotContent = (props: BotContentProps) => {
@@ -320,9 +326,11 @@ const BotContent = (props: BotContentProps) => {
       <Show when={props.initialAgentReply.agentConfig.settings.general.isBrandingEnabled}>
         <LiteBadge botContainer={botContainer} />
       </Show>
-      <div class="absolute bottom-0 w-full text-center text-gray-200" style="font-size: 0.5rem;">
-        {process.env.VERSION}
-      </div>
+      <Show when={props.isDebugMode}>
+        <div class="absolute bottom-0 w-full text-center text-gray-500" style="font-size: 0.5rem;">
+          {process.env.VERSION}
+        </div>
+      </Show>
     </div>
   );
 };

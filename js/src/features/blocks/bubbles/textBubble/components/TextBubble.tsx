@@ -30,7 +30,7 @@ export const TextBubble = (props: Props) => {
   const [filteredText, setFilteredText] = createSignal(props.content)
 
   const onTypingEnd = () => {
-    // if (!isTyping()) return
+    if (!isTyping()) return
     setIsTyping(false)
     setTimeout(() => {
       props.onTransitionEnd(ref?.offsetTop)
@@ -49,8 +49,8 @@ export const TextBubble = (props: Props) => {
           )
     typingTimeout = setTimeout(onTypingEnd, typingDuration)
     
-    // const newText = applyFilterText(props.content, props.filterResponse);    
-    // setFilteredText(newText);
+    const newText = applyFilterText(props.content, props.filterResponse);    
+    setFilteredText(newText);
   })
 
   onCleanup(() => {
@@ -80,8 +80,7 @@ export const TextBubble = (props: Props) => {
               height: isTyping() ? (isMobile() ? '16px' : '20px') : '100%',
             }}
           >
-            {props.content}
-            {/* <PlateText content={filteredText()} /> */}
+            <PlateText content={filteredText()} />
           </div>
         </div>
       </div>

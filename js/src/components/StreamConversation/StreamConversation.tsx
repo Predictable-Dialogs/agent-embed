@@ -2,10 +2,12 @@ import { ChatReply, Theme } from '@/schemas';
 import { createEffect, createSignal, createMemo, For, Show } from 'solid-js';
 import { ChatChunk } from './ChatChunk';
 import { BotContext, InitialChatReply, OutgoingLog } from '@/types';
-import { LoadingChunk, ConnectingChunk } from './LoadingChunk';
+import { LoadingChunk, ConnectingChunk, ErrorChunk } from './LoadingChunk';
 import { PopupBlockedToast } from './PopupBlockedToast';
 import { useChat } from '@ai-sdk/solid';
 import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
+import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
+import { isNotEmpty } from '@/lib/utils';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -56,10 +58,8 @@ export const StreamConversation = (props: Props) => {
   const [activeInputId, setActiveInputId] = createSignal<number>(
     props.initialAgentReply.input ? 1 : 0
   );
-  const [inputIndex, setInputIndex] = createSignal<number>(
-    props.initialAgentReply.input ? 1 : 0
-  );
   const [displayIndex, setdisplayIndex] = createSignal('#HIDE');
+  let longRequest: NodeJS.Timeout;
 
 
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
@@ -74,28 +74,36 @@ export const StreamConversation = (props: Props) => {
   });
 
   const {
+    status,
     messages,
+    setMessages,
+    data,
+    error,
     handleInputChange,
     handleSubmit
   } = useChat({
-      api: 'http://localhost:8001/web/stream_',
-      streamProtocol: 'text',
+      api: `${isNotEmpty(props.context.apiStreamHost) ? props.context.apiStreamHost : getApiStreamEndPoint()}`,
+      streamProtocol: 'data',
       initialMessages: props.initialAgentReply.messages.map((msg: any) =>
-        transformMessage({...msg, id: '0'}, 'assistant', props.initialAgentReply.input)
+        transformMessage({...msg }, 'assistant', props.initialAgentReply.input)
       ),  
       experimental_prepareRequestBody({ messages }) {
         return {
           message: messages[messages.length - 1].content,
+          // messages: messages,
           sessionId: props.context.sessionId,
           agentName: props.context.agentName,
         };
       },
       onResponse: (response) => {
-        setInputIndex((prev) => prev + 1);
-        console.log('Received HTTP response from server:', response);
       },
-      onFinish: () => {
+      onFinish: (message, options) => {
         setActiveInputId((prev) => prev + 1);    
+      },
+      onError: (error) => {
+        clearTimeout(longRequest);
+        setIsSending(false);
+        console.error('Error in chat:', error);
       }
     });
   
@@ -107,7 +115,9 @@ export const StreamConversation = (props: Props) => {
       onSubmit: (e: Event) => {
         e.preventDefault();
         setdisplayIndex('#HIDE');
-        console.log(`streaming submit ...`);
+        longRequest = setTimeout(() => {
+          setIsSending(true);
+        }, 2000);
         handleSubmit(e, {
           experimental_attachments: files(),
         });
@@ -131,13 +141,11 @@ export const StreamConversation = (props: Props) => {
   const onDisplayAssistantMessage = async (bubbleOffsetTop?: number) => {
     const currentMessages = messages();
     const lastMessageId = currentMessages?.[currentMessages.length - 1]?.id;
-    console.log(`setting displayed message index: ${lastMessageId}`);
     if(lastMessageId) {
       setdisplayIndex(lastMessageId);
     }
     autoScrollToBottom(bubbleOffsetTop);
   };
-  
     
   return (
     <div
@@ -149,12 +157,15 @@ export const StreamConversation = (props: Props) => {
       </Show>
 
       <For each={messages()}>
-        {(message) => {
-          console.log("🔄 <For> Executing for message:", JSON.stringify(message));          
-          
+        {(message) => {        
           const inputValue = message.role === 'assistant' ? 
             ((message as EnhancedUIMessage).input || props.initialAgentReply.input) : 
             undefined;
+          
+          if (message.role === 'assistant') {
+            clearTimeout(longRequest);
+            setIsSending(false);
+          }
 
           return (
             <ChatChunk
@@ -179,6 +190,11 @@ export const StreamConversation = (props: Props) => {
       <Show when={isSending()}>
         <LoadingChunk theme={theme()} />
       </Show>
+
+      <Show when={error()}>
+        <ErrorChunk message={error()?.message} theme={theme()} />
+      </Show>
+
       <Show when={blockedPopupUrl()} keyed>
         {(blockedPopupUrl) => (
           <div class="flex justify-end">

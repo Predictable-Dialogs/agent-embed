@@ -1,14 +1,12 @@
 import { BotContext, ChatChunk as ChatChunkType } from '@/types';
 import { isMobile } from '@/utils/isMobileSignal';
 import type { ChatReply, Settings, Theme } from '@/schemas';
-import { createSignal, createEffect, createMemo, For, onMount, Show } from 'solid-js';
+import { onMount, Show } from 'solid-js';
 import { HostBubble } from '../bubbles/HostBubble';
 import { AvatarSideContainer } from './AvatarSideContainer';
 import { Match, Switch } from 'solid-js';
 import { GuestBubble } from '../bubbles/GuestBubble';
-import { StreamingBubble } from '../bubbles/StreamingBubble';
 import { StreamInput } from './StreamInput';
-import { EnhancedUIMessage } from '@/utils/transformMessages';
 
 type Props =  {
   message: any;
@@ -35,11 +33,6 @@ export const ChatChunk = (props: Props) => {
   onMount(() => {
     if (props.streamingMessageId) return;
     props.onScrollToBottom(inputRef?.offsetTop ? inputRef?.offsetTop - 50 : undefined);
-  });
-
-  createEffect(() => {
-    console.log('ChatChunk Props:', props);
-    console.log('displayIndex:', props.displayIndex);
   });
 
   return (

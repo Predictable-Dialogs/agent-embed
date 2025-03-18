@@ -12,7 +12,7 @@
   },
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@ai-sdk/solid": "1.1.21",
+    "@ai-sdk/solid": "1.1.23",
     "@stripe/stripe-js": "1.54.1",
     "@udecode/plate-common": "^21.1.5",
     "dompurify": "^3.2.4",
@@ -23,7 +23,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@ai-sdk/ui-utils": "1.1.17",
+    "@ai-sdk/ui-utils": "1.1.19",
     "@babel/preset-typescript": "7.22.5",
     "@rollup/plugin-babel": "6.0.3",
     "@rollup/plugin-commonjs": "^28.0.2",

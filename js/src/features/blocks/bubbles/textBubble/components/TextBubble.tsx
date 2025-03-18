@@ -1,6 +1,6 @@
 import { TypingBubble } from '@/components'
 import type { TypingEmulation } from '@/schemas'
-import { createSignal, onCleanup, onMount } from 'solid-js'
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js'
 import { computeTypingDuration } from '../helpers/computeTypingDuration'
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
@@ -29,6 +29,11 @@ export const TextBubble = (props: Props) => {
   const [isTyping, setIsTyping] = createSignal(true)
   const [filteredText, setFilteredText] = createSignal(props.content)
 
+  createEffect(async () => {
+    const newText = applyFilterText(props.content, props.filterResponse);    
+    setFilteredText(newText);
+  });
+  
   const onTypingEnd = () => {
     if (!isTyping()) return
     setIsTyping(false)
@@ -39,7 +44,6 @@ export const TextBubble = (props: Props) => {
 
   onMount(() => {
     if (!isTyping) return
-    // let plainText = computePlainText(props.content.richText);
     const typingDuration =
       props.typingEmulation?.enabled === false
         ? 0

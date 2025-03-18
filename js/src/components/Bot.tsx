@@ -18,6 +18,7 @@ export type BotProps = {
   startGroupId?: string;
   prefilledVariables?: Record<string, unknown>;
   apiHost?: string;
+  apiStreamHost?: string;
   onNewInputBlock?: (ids: { id: string; groupId: string }) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onInit?: () => void;
@@ -205,8 +206,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
             }}
             context={{
               apiHost: props.apiHost,
+              apiStreamHost: props.apiStreamHost,
               isPreview: props.isPreview ?? false,
-              // resultId: initialAgentReply.resultId,
               sessionId: sessionId(),
               agentConfig: agentConfigValue,
               agentName: props.agentName,

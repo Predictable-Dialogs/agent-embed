@@ -7,7 +7,8 @@ type Props = {
   theme: Theme;
 };
 
-export const LoadingChunk = (props: Props) => (
+export const LoadingChunk = (props: Props) => {
+  return (
   <div class="flex w-full">
     <div class="flex flex-col w-full min-w-0">
       <div class="flex gap-2">
@@ -18,7 +19,27 @@ export const LoadingChunk = (props: Props) => (
       </div>
     </div>
   </div>
-);
+)};
+
+type ErrorProps = {
+  theme: Theme;
+  message: string | undefined;
+};
+
+export const ErrorChunk = (props: ErrorProps) => {
+  return (
+  <div class="flex w-full">
+    <div class="flex flex-col w-full min-w-0">
+      <div class="flex gap-2">
+        <Show when={props.theme.chat.hostAvatar?.isEnabled}>
+          <AvatarSideContainer hostAvatarSrc={props.theme.chat.hostAvatar?.url} />
+        </Show>
+        {props.message}
+      </div>
+    </div>
+  </div>
+)};
+
 
 export const ConnectingChunk = () => (
   <div class="flex w-full justify-center">

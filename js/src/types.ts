@@ -10,6 +10,7 @@ export type BotContext = {
   resultId?: string
   isPreview: boolean
   apiHost?: string
+  apiStreamHost?: string
   sessionId: string | undefined
   agentName: string
   tabNumber: number

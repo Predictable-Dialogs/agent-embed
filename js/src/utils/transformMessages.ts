@@ -19,7 +19,7 @@ export const transformMessage = (msg: any, roleOverride?: 'assistant' | 'user', 
     content = msg.content.text;
   }
 
-  const transformedMessage: EnhancedUIMessage = {
+  const transformedMessage = {
     id: msg.id || crypto.randomUUID(),
     createdAt: msg.createdAt || new Date().toISOString(),
     role,

@@ -9,13 +9,18 @@ export type PlateTextProps = {
 export const PlateText = (props: PlateTextProps) => {
   const [htmlContent, setHtmlContent] = createSignal('');
 
-  // onMount(async () => {
-  //   const markdown = await marked(props.content);
-  //   const safeHTML = DOMPurify.sanitize(markdown);
-  //   setHtmlContent(safeHTML);
-  // });
+  onMount(() => {
+    DOMPurify.addHook('afterSanitizeAttributes', function(node) {
+      if (node.nodeName === 'A') {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+  });
+
   createEffect(async () => {
-    const markdown = await marked(props.content);
+    // const markdown = await marked(props.content);
+    const markdown = await marked.parse(props.content);
     const safeHTML = DOMPurify.sanitize(markdown);
     setHtmlContent(safeHTML);
   });

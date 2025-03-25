@@ -1,4 +1,3 @@
-import { createEffect } from 'solid-js';
 import { TextBubble } from '@/features/blocks/bubbles/textBubble';
 import type {
   TypingEmulation

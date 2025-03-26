@@ -8,6 +8,7 @@ import { useChat } from '@ai-sdk/solid';
 import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
 import { isNotEmpty } from '@/lib/utils';
+import { InputBottom } from './InputBottom';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -205,6 +206,20 @@ export const StreamConversation = (props: Props) => {
           </div>
         )}
       </Show>
+      {props.initialAgentReply.input && (props.initialAgentReply.input?.options?.placement === "bottom") && (
+        <div class="absolute bottom-0 left-0 right-0 p-3 z-10">
+          <InputBottom
+            ref={undefined}
+            block={props.initialAgentReply.input}
+            hasHostAvatar={theme().chat.hostAvatar?.isEnabled ?? false}
+            guestAvatar={theme().chat.guestAvatar}
+            context={props.context}
+            isInputPrefillEnabled={false}
+            hasError={hasError()}
+            streamingHandlers={streamingHandlers()}
+            />
+          </div>
+      )} 
       <BottomSpacer />
     </div>
   );

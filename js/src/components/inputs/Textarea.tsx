@@ -14,7 +14,7 @@ export const Textarea = (props: TextareaProps) => {
     <textarea
       ref={local.ref}
       class="focus:outline-none bg-transparent px-4 py-4 flex-1 w-full text-input"
-      rows={6}
+      rows={2}
       data-testid="textarea"
       required
       style={{ 'font-size': '16px' }}

@@ -78,7 +78,7 @@ export const ChatChunk = (props: Props) => {
           </Match>
         </Switch>
       </div>
-      {props.input && (props.message.id === props.displayIndex) && (
+      {props.input && (props.input?.options?.placement !== "bottom") && (props.message.id === props.displayIndex) && (
         <StreamInput
           ref={inputRef}
           block={props.input}

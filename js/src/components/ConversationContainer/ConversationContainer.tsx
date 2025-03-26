@@ -124,7 +124,6 @@ export const ConversationContainer = (props: Props) => {
       apiHost: props.context.apiHost,
       sessionId: props.context.sessionId,
       agentName: props.context.agentName,
-      tabNumber: props.context.tabNumber,
       message,
       clientLogs,
     });

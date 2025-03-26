@@ -159,27 +159,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     );
   });
 
-  // The key used to store the last tab number
-  const LAST_TAB_NUMBER_KEY = 'lastTabNumber';
-
-  let tabNumber: number;
-  createEffect(() => {
-    // Check if we have a tab number for the current session
-    let tabNumberString = sessionStorage.getItem('tabNumber');
-
-    if (!tabNumberString) {
-      // If not, get the last tab number from localStorage, increment it and save
-      const lastTabNumber = parseInt(localStorage.getItem(LAST_TAB_NUMBER_KEY) || '0');
-      tabNumber = lastTabNumber + 1;
-      localStorage.setItem(LAST_TAB_NUMBER_KEY, tabNumber.toString());
-      sessionStorage.setItem('tabNumber', tabNumber.toString());
-      // Trigger the storage event for other tabs
-      window.dispatchEvent(new Event('storage'));
-    } else {
-      tabNumber = parseInt(tabNumberString);
-    }
-  });
-
   onCleanup(() => {
     setIsInitialized(false);
   });
@@ -211,7 +190,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
               sessionId: sessionId(),
               agentConfig: agentConfigValue,
               agentName: props.agentName,
-              tabNumber: tabNumber,
             }}
             setSessionId={setSessionId}
             onNewInputBlock={props.onNewInputBlock}

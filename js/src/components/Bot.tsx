@@ -121,15 +121,14 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const handleSessionExpired = () => {
     // Clear local storage
     localStorage.removeItem(getStorageKey('sessionId'));
-    localStorage.removeItem(getStorageKey('agentConfig'));
-    localStorage.removeItem(getStorageKey('customCss'));
     localStorage.removeItem(getStorageKey('chatMessages'));
-    // Clear persisted messages signal
     setPersistedMessages([]);
     // Delay to show expiration message, then reinitialize
     setTimeout(() => {
-      initializeBot().then(() => setIsInitialized(true));
-    }, 1500); // Display "expired" message for 1 second
+      initializeBot().then(() => { 
+        setIsInitialized(true);
+      });
+    }, 1500); // Display "expired" message for 1.5 seconds
   };
 
   // maybe we should store the data.input as well?
@@ -148,12 +147,14 @@ export const Bot = (props: BotProps & { class?: string }) => {
       if(storedCustomCss) setCustomCss(storedCustomCss || '');
       setIsInitialized(true);
     } else {
-      initializeBot().then(() => setIsInitialized(true));
+      initializeBot().then(() => {
+        setIsInitialized(true);
+      });
     }
   });
 
   createEffect(() => {
-    if (customCss() !== '') {
+    if (customCss()) {
       localStorage.setItem(
         getStorageKey('customCss'),
         JSON.stringify(customCss())

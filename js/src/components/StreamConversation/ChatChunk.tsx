@@ -25,15 +25,11 @@ type Props =  {
     onInput?: (e: Event) => void;
     onSubmit: (e: Event) => void;
   };
+  isPersisted: boolean;
 };
 
 export const ChatChunk = (props: Props) => {
   let inputRef: HTMLDivElement | undefined;
-
-  onMount(() => {
-    if (props.streamingMessageId) return;
-    props.onScrollToBottom(inputRef?.offsetTop ? inputRef?.offsetTop - 50 : undefined);
-  });
 
   return (
     <div class="flex flex-col w-full min-w-0 gap-2">
@@ -46,6 +42,7 @@ export const ChatChunk = (props: Props) => {
               <AvatarSideContainer
                 hostAvatarSrc={props.theme.chat.hostAvatar?.url}
                 hideAvatar={props.hideAvatar}
+                isPersisted={props.isPersisted}
               />
             </Show>
 
@@ -64,6 +61,7 @@ export const ChatChunk = (props: Props) => {
                 typingEmulation={props.settings.typingEmulation}
                 onTransitionEnd={props.onDisplayAssistantMessage}
                 filterResponse={props.filterResponse}
+                isPersisted={props.isPersisted}
               />
             </div>
           </Match>
@@ -73,6 +71,7 @@ export const ChatChunk = (props: Props) => {
                 message={props.message.content} // or however you store user text
                 showAvatar={props.theme.chat.guestAvatar?.isEnabled ?? false}
                 avatarSrc={props.theme.chat.guestAvatar?.url}
+                isPersisted={props.isPersisted}
               />
             </div>
           </Match>

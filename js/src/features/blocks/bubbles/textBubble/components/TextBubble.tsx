@@ -12,6 +12,7 @@ type Props = {
   typingEmulation: TypingEmulation
   onTransitionEnd: (offsetTop?: number) => void
   filterResponse?: (response: string) => string
+  isPersisted?: boolean
 }
 
 export const showAnimationDuration = 400
@@ -62,11 +63,19 @@ export const TextBubble = (props: Props) => {
   })
 
   return (
-    <div class="flex flex-col animate-fade-in" ref={ref}>
+    <div 
+      class={"flex flex-col" + (props.isPersisted ? '' : ' animate-fade-in')} 
+      ref={ref}
+    >
       <div class="flex w-full items-center">
-        <div class="flex relative items-start agent-host-bubble">
+        <div 
+          class="flex relative items-start agent-host-bubble"
+        >
           <div
-            class="flex items-center absolute px-4 py-2 bubble-typing "
+            class={clsx(
+              "flex items-center absolute px-4 py-2 bubble-typing",
+              props.isPersisted && "no-transition"
+            )}            
             style={{
               width: isTyping() ? '64px' : '100%',
               height: isTyping() ? '32px' : '100%',
@@ -77,8 +86,9 @@ export const TextBubble = (props: Props) => {
           </div>
           <div
             class={clsx(
-              'overflow-hidden text-fade-in mx-4 my-2 whitespace-pre-wrap slate-html-container relative text-ellipsis',
-              isTyping() ? 'opacity-0' : 'opacity-100'
+              'overflow-hidden mx-4 my-2 whitespace-pre-wrap slate-html-container relative text-ellipsis',
+              isTyping() ? 'opacity-0' : 'opacity-100',
+              props.isPersisted ? '' : ' text-fade-in'
             )}
             style={{
               height: isTyping() ? (isMobile() ? '16px' : '20px') : '100%',

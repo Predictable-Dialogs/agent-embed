@@ -30,7 +30,6 @@ export type BotProps = {
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
-  const [isConnecting, setIsConnecting] = createSignal(false);
   const [sessionId, setSessionId] = createSignal<string | undefined>();
   const [agentConfig, setAgentConfig] = createSignal<any | undefined>();
   const [clientSideActions, setClientSideActions] = createSignal<any | []>([]);
@@ -42,23 +41,27 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [isDebugMode, setIsDebugMode] = createSignal(false);
   const [persistedMessages, setPersistedMessages] = createSignal<any[]>([]);
 
+  const getStorageKey = (key: string) => {
+    return props.agentName ? `${props.agentName}_${key}` : key;
+  };
+
   const getSessionId = () => {
-    const sessionId = localStorage.getItem('sessionId');
+    const sessionId = localStorage.getItem(getStorageKey('sessionId'));
     return sessionId ? JSON.parse(sessionId) : null;
   };
 
   const getAgentConfig = () => {
-    const agentConfig = localStorage.getItem('agentConfig');
+    const agentConfig = localStorage.getItem(getStorageKey('agentConfig'));
     return agentConfig ? JSON.parse(agentConfig) : null;
   };
 
   const getCustomCss = () => {
-    const customCss = localStorage.getItem('customCss');
+    const customCss = localStorage.getItem(getStorageKey('customCss'));
     return customCss ? JSON.parse(customCss) : null;
   };
 
   const getPersistedMessages = () => {
-    const messages = localStorage.getItem('chatMessages');
+    const messages = localStorage.getItem(getStorageKey('chatMessages'));
     return messages ? JSON.parse(messages) : [];
   };
 
@@ -68,7 +71,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
   };
 
   const initializeBot = async () => {
-    setIsConnecting(true);
     const urlParams = new URLSearchParams(location.search);
     props.onInit?.();
     const prefilledVariables: { [key: string]: string } = {};
@@ -89,7 +91,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
         ...props.prefilledVariables,
       },
     });
-    setIsConnecting(false);
     if (error && 'code' in error && typeof error.code === 'string') {
       if (['BAD_REQUEST', 'FORBIDDEN'].includes(error.code))
         return setError(new Error('This agent is now closed.'));
@@ -117,6 +118,20 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (data.logs) props.onNewLogs?.(data.logs);
   };
 
+  const handleSessionExpired = () => {
+    // Clear local storage
+    localStorage.removeItem(getStorageKey('sessionId'));
+    localStorage.removeItem(getStorageKey('agentConfig'));
+    localStorage.removeItem(getStorageKey('customCss'));
+    localStorage.removeItem(getStorageKey('chatMessages'));
+    // Clear persisted messages signal
+    setPersistedMessages([]);
+    // Delay to show expiration message, then reinitialize
+    setTimeout(() => {
+      initializeBot().then(() => setIsInitialized(true));
+    }, 1500); // Display "expired" message for 1 second
+  };
+
   // maybe we should store the data.input as well?
   onMount(() => {
     setIsDebugMode(checkDebugMode());
@@ -140,7 +155,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   createEffect(() => {
     if (customCss() !== '') {
       localStorage.setItem(
-        'customCss',
+        getStorageKey('customCss'),
         JSON.stringify(customCss())
       );
     }
@@ -149,7 +164,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   createEffect(() => {
     if (sessionId()) {
       localStorage.setItem(
-        'sessionId',
+        getStorageKey('sessionId'),
         JSON.stringify(sessionId())
       );  
     }
@@ -158,7 +173,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   createEffect(() => {
     if (agentConfig()) {
       localStorage.setItem(
-        'agentConfig',
+        getStorageKey('agentConfig'),
         JSON.stringify(agentConfig())
       );  
     }
@@ -179,7 +194,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
         {(agentConfigValue) => (
           <BotContent
             class={props.class}
-            isConnecting={isConnecting()}
             initialAgentReply={{
               messages: initialMessages(),
               clientSideActions: clientSideActions(),
@@ -195,7 +209,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
               agentConfig: agentConfigValue,
               agentName: props.agentName,
             }}
-            setSessionId={setSessionId}
             onNewInputBlock={props.onNewInputBlock}
             onNewLogs={props.onNewLogs}
             onAnswer={props.onAnswer}
@@ -203,6 +216,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
             filterResponse={props.filterResponse}
             stream={props.stream}
             isDebugMode={isDebugMode()}
+            onSessionExpired={handleSessionExpired}
           />
         )}
       </Show>
@@ -220,11 +234,10 @@ type BotContentProps = {
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;
-  setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
-  isConnecting?: boolean;
   isDebugMode?: boolean;
+  onSessionExpired?: () => void;
 };
 
 const BotContent = (props: BotContentProps) => {
@@ -282,7 +295,6 @@ const BotContent = (props: BotContentProps) => {
           <Match when={props.stream}>
             <StreamConversation
               context={props.context}
-              isConnecting={props.isConnecting}
               initialAgentReply={props.initialAgentReply}
               persistedMessages={props.persistedMessages}
               agentConfig={props.agentConfig}
@@ -291,20 +303,18 @@ const BotContent = (props: BotContentProps) => {
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
-              setSessionId={props.setSessionId}
+              onSessionExpired={props.onSessionExpired}
             />
           </Match>
           <Match when={!props.stream}>
           <ConversationContainer
               context={props.context}
-              isConnecting={props.isConnecting}
               initialAgentReply={{...props.initialAgentReply, agentConfig: props.agentConfig}}
               onNewInputBlock={props.onNewInputBlock}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
-              setSessionId={props.setSessionId}
             />
           </Match>
         </Switch>

@@ -2,7 +2,7 @@ import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show } from 'solid-js';
 import { ChatChunk } from './ChatChunk';
 import { BotContext, InitialChatReply, OutgoingLog } from '@/types';
-import { LoadingChunk, ConnectingChunk, ErrorChunk } from './LoadingChunk';
+import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { PopupBlockedToast } from './PopupBlockedToast';
 import { useChat } from '@ai-sdk/solid';
 import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
@@ -42,9 +42,8 @@ type Props = {
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;
-  setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string;
-  isConnecting?: boolean;
+  onSessionExpired?: () => void;
 };
 
 export const StreamConversation = (props: Props) => {
@@ -54,7 +53,6 @@ export const StreamConversation = (props: Props) => {
   );
   const [theme, setTheme] = createSignal(props.agentConfig.theme);
   const [isSending, setIsSending] = createSignal(false);
-  const [isConnecting, setIsConnecting] = createSignal(false);
   const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>();
   const [hasError, setHasError] = createSignal(false);
   const [activeInputId, setActiveInputId] = createSignal<number>(
@@ -111,12 +109,18 @@ export const StreamConversation = (props: Props) => {
       onError: (error) => {
         clearTimeout(longRequest);
         setIsSending(false);
-        console.error('Error in chat:', error);
+        if (error.message === 'Session expired. Starting a new session.') { 
+          props.onSessionExpired?.();
+        }
       }
-    });
+  });
+  
+  const getStorageKey = (key: string) => {
+    return props.context.agentName ? `${props.context.agentName}_${key}` : key;
+  };
   
   createEffect(() => {
-    localStorage.setItem('chatMessages', JSON.stringify(messages()));
+    localStorage.setItem(getStorageKey('chatMessages'), JSON.stringify(messages()));
   });
 
   const streamingHandlers = createMemo(() => {
@@ -147,11 +151,23 @@ export const StreamConversation = (props: Props) => {
     const currentMessages = messages();
     if (currentMessages.length > 0) {
       const lastMessage = currentMessages?.[currentMessages.length - 1];
-      if(lastMessage?.id && (lastMessage as EnhancedUIMessage).isPersisted) {
-        //Set display index so the input is shown after the last persisted message
+      // If the last message is from a user and is persisted, remove it
+      if (lastMessage.role === 'user' && (lastMessage as EnhancedUIMessage).isPersisted) {
+        const filteredMessages = currentMessages.slice(0, -1);
+        setMessages(filteredMessages);
+        
+        // If we have messages left, use the last one for displayIndex
+        if (filteredMessages.length > 0) {
+          const newLastMessage = filteredMessages[filteredMessages.length - 1];
+          if (newLastMessage.id) {
+            setdisplayIndex(newLastMessage.id);
+          }
+        }
+      } else if (lastMessage.id && (lastMessage as EnhancedUIMessage).isPersisted) {
+        // Set display index for the last persisted message (if it's not a user message)
         setdisplayIndex(lastMessage.id);
       }
-      
+
       setTimeout(() => {        
         chatContainer?.scrollTo({
           top: chatContainer.scrollHeight,
@@ -188,10 +204,6 @@ export const StreamConversation = (props: Props) => {
       ref={chatContainer}
       class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2"
     >
-      <Show when={isConnecting() || props.isConnecting}>
-        <ConnectingChunk />
-      </Show>
-
       <For each={messages()}>
         {(message) => {        
           const inputValue = message.role === 'assistant' ? 

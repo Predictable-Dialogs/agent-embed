@@ -41,9 +41,7 @@ type Props = {
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;
-  setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string;
-  isConnecting?: boolean;
 };
 
 export const ConversationContainer = (props: Props) => {
@@ -62,7 +60,6 @@ export const ConversationContainer = (props: Props) => {
   );
   const [theme, setTheme] = createSignal(props.initialAgentReply.agentConfig.theme);
   const [isSending, setIsSending] = createSignal(false);
-  const [isConnecting, setIsConnecting] = createSignal(false);
   const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>();
   const [hasError, setHasError] = createSignal(false);
   const [activeInputId, setActiveInputId] = createSignal<number>(
@@ -76,7 +73,6 @@ export const ConversationContainer = (props: Props) => {
   const executeInitialActions = useInitialActions({
     chatChunks,
     context: props.context,
-    setIsConnecting,
     setBlockedPopupUrl,
   });
 
@@ -212,10 +208,6 @@ export const ConversationContainer = (props: Props) => {
       ref={chatContainer}
       class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view scroll-smooth gap-2"
     >
-      <Show when={isConnecting() || props.isConnecting}>
-        <ConnectingChunk />
-      </Show>
-
       <For each={chatChunks()}>
         {(chatChunk, index) => {
           if (chatChunk.input) {

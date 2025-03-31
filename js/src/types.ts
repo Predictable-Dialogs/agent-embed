@@ -13,7 +13,6 @@ export type BotContext = {
   apiStreamHost?: string
   sessionId: string | undefined
   agentName: string
-  tabNumber: number
 }
 
 export type InitialChatReply = ChatReply & {
@@ -31,7 +30,6 @@ export type ClientSideActionContext = {
   apiHost?: string
   sessionId: string | undefined 
   agentName?: string
-  tabNumber?: number
 }
 
 export type ChatChunk = Pick<

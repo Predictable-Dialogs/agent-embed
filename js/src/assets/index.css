@@ -387,3 +387,15 @@ select option {
   color: var(--agent-input-color);
   background-color: var(--agent-input-bg-color);
 }
+
+.no-transition {
+  transition: none !important;
+}
+
+.chat-container {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.chat-container.ready {
+  opacity: 1;
+}

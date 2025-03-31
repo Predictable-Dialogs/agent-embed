@@ -144,7 +144,6 @@ export const sendMessageInputSchema = z.object({
   clientLogs: z.array(replyLogSchema).optional().describe('Logs while executing client side actions'),
   startParams: startParamsSchema.optional(),
   agentName: z.string().optional().describe('The agent name.'),
-  tabNumber: z.number().optional().describe('The browser tab number.'),
 });
 
 const runtimeOptionsSchema = paymentInputRuntimeOptionsSchema.optional()

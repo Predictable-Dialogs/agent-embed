@@ -26,10 +26,10 @@ export type BotProps = {
   onNewLogs?: (logs: OutgoingLog[]) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
+  persistSession?: boolean;
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
-  const [isConnecting, setIsConnecting] = createSignal(false);
   const [sessionId, setSessionId] = createSignal<string | undefined>();
   const [agentConfig, setAgentConfig] = createSignal<any | undefined>();
   const [clientSideActions, setClientSideActions] = createSignal<any | []>([]);
@@ -39,20 +39,30 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [isInitialized, setIsInitialized] = createSignal(false);
   const [error, setError] = createSignal<Error | undefined>();
   const [isDebugMode, setIsDebugMode] = createSignal(false);
+  const [persistedMessages, setPersistedMessages] = createSignal<any[]>([]);
+
+  const getStorageKey = (key: string) => {
+    return props.agentName ? `${props.agentName}_${key}` : key;
+  };
 
   const getSessionId = () => {
-    const sessionId = localStorage.getItem('sessionId');
+    const sessionId = localStorage.getItem(getStorageKey('sessionId'));
     return sessionId ? JSON.parse(sessionId) : null;
   };
 
   const getAgentConfig = () => {
-    const agentConfig = localStorage.getItem('agentConfig');
+    const agentConfig = localStorage.getItem(getStorageKey('agentConfig'));
     return agentConfig ? JSON.parse(agentConfig) : null;
   };
 
   const getCustomCss = () => {
-    const customCss = localStorage.getItem('customCss');
+    const customCss = localStorage.getItem(getStorageKey('customCss'));
     return customCss ? JSON.parse(customCss) : null;
+  };
+
+  const getPersistedMessages = () => {
+    const messages = localStorage.getItem(getStorageKey('chatMessages'));
+    return messages ? JSON.parse(messages) : [];
   };
 
   const checkDebugMode = () => {
@@ -61,8 +71,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
   };
 
   const initializeBot = async () => {
-    setIsInitialized(true);
-    setIsDebugMode(checkDebugMode());
     const urlParams = new URLSearchParams(location.search);
     props.onInit?.();
     const prefilledVariables: { [key: string]: string } = {};
@@ -70,22 +78,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
       prefilledVariables[key] = value;
     });
 
-    const storedSessionId = getSessionId();
-    const storedAgentConfig = getAgentConfig();
-    const storedCustomCss = getCustomCss();
-
-    if (storedSessionId) {
-      setSessionId(storedSessionId.sessionId);
-    }
-
-    if (storedAgentConfig) {
-      setAgentConfig(storedAgentConfig.agentConfig);
-    }
-
-    if (storedCustomCss) {
-      setCustomCss(storedCustomCss.customCss);
-    }
-    setIsConnecting(true);
     const { data, error } = await getInitialChatReplyQuery({
       sessionId: sessionId(),
       agentName: props.agentName,
@@ -99,7 +91,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
         ...props.prefilledVariables,
       },
     });
-    setIsConnecting(false);
     if (error && 'code' in error && typeof error.code === 'string') {
       if (['BAD_REQUEST', 'FORBIDDEN'].includes(error.code))
         return setError(new Error('This agent is now closed.'));
@@ -112,12 +103,12 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
     if (!data) return setError(new Error("Couldn't initiate the chat."));
 
-    setSessionId(data.sessionId);
-    setClientSideActions(data.clientSideActions);
-    setInitialInput(data.input);
-    setInitialMessages(data.messages);
+    if (data.sessionId) setSessionId(data.sessionId);
+    if (data.clientSideActions) setClientSideActions(data.clientSideActions);
+    if (data.input) setInitialInput(data.input);
+    if (data.messages) setInitialMessages(data.messages);
     setCustomCss(data.agentConfig.theme.customCss ?? '');
-    setAgentConfig(data.agentConfig);
+    if (data.agentConfig) setAgentConfig(data.agentConfig);
 
     if (data.input?.id && props.onNewInputBlock)
       props.onNewInputBlock({
@@ -127,56 +118,65 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (data.logs) props.onNewLogs?.(data.logs);
   };
 
-  createEffect(() => {
-    if (isNotDefined(props.agentName) || isInitialized()) return;
-    initializeBot().then();
-  });
+  const handleSessionExpired = () => {
+    // Clear local storage
+    localStorage.removeItem(getStorageKey('sessionId'));
+    localStorage.removeItem(getStorageKey('chatMessages'));
+    setPersistedMessages([]);
+    // Delay to show expiration message, then reinitialize
+    setTimeout(() => {
+      initializeBot().then(() => { 
+        setIsInitialized(true);
+      });
+    }, 1500); // Display "expired" message for 1.5 seconds
+  };
 
-  createEffect(() => {
-    localStorage.setItem(
-      'customCss',
-      JSON.stringify({
-        customCss: customCss(),
-      })
-    );
-  });
+  // maybe we should store the data.input as well?
+  onMount(() => {
+    setIsDebugMode(checkDebugMode());
+    const storedSessionId = getSessionId();
+    const storedAgentConfig = getAgentConfig();
+    const storedCustomCss = getCustomCss();
+    const storedMessages = getPersistedMessages();
 
-  createEffect(() => {
-    localStorage.setItem(
-      'sessionId',
-      JSON.stringify({
-        sessionId: sessionId(),
-      })
-    );
-  });
-
-  createEffect(() => {
-    localStorage.setItem(
-      'agentConfig',
-      JSON.stringify({
-        agentConfig: agentConfig(),
-      })
-    );
-  });
-
-  // The key used to store the last tab number
-  const LAST_TAB_NUMBER_KEY = 'lastTabNumber';
-
-  let tabNumber: number;
-  createEffect(() => {
-    // Check if we have a tab number for the current session
-    let tabNumberString = sessionStorage.getItem('tabNumber');
-
-    if (!tabNumberString) {
-      // If not, get the last tab number from localStorage, increment it and save
-      const lastTabNumber = parseInt(localStorage.getItem(LAST_TAB_NUMBER_KEY) || '0');
-      tabNumber = lastTabNumber + 1;
-      localStorage.setItem(LAST_TAB_NUMBER_KEY, tabNumber.toString());
-      sessionStorage.setItem('tabNumber', tabNumber.toString());
-      // Trigger the storage event for other tabs
-      window.dispatchEvent(new Event('storage'));
+    if (props.stream && props.persistSession && storedMessages.length > 0 && storedSessionId && storedAgentConfig) {
+      // If persisted data exists, use it and mark as initialized
+      if (storedMessages) setPersistedMessages(storedMessages);
+      if (storedSessionId) setSessionId(storedSessionId);
+      if (storedAgentConfig) setAgentConfig(storedAgentConfig);
+      if(storedCustomCss) setCustomCss(storedCustomCss || '');
+      setIsInitialized(true);
     } else {
-      tabNumber = parseInt(tabNumberString);
+      initializeBot().then(() => {
+        setIsInitialized(true);
+      });
+    }
+  });
+
+  createEffect(() => {
+    if (customCss()) {
+      localStorage.setItem(
+        getStorageKey('customCss'),
+        JSON.stringify(customCss())
+      );
+    }
+  });
+
+  createEffect(() => {
+    if (sessionId()) {
+      localStorage.setItem(
+        getStorageKey('sessionId'),
+        JSON.stringify(sessionId())
+      );  
+    }
+  });
+
+  createEffect(() => {
+    if (agentConfig()) {
+      localStorage.setItem(
+        getStorageKey('agentConfig'),
+        JSON.stringify(agentConfig())
+      );  
     }
   });
 
@@ -195,15 +195,13 @@ export const Bot = (props: BotProps & { class?: string }) => {
         {(agentConfigValue) => (
           <BotContent
             class={props.class}
-            isConnecting={isConnecting()}
             initialAgentReply={{
               messages: initialMessages(),
               clientSideActions: clientSideActions(),
               input: initialInput(),
-              agentConfig: {
-                ...agentConfigValue,
-              },
             }}
+            persistedMessages={persistedMessages()}
+            agentConfig={agentConfigValue}
             context={{
               apiHost: props.apiHost,
               apiStreamHost: props.apiStreamHost,
@@ -211,9 +209,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               sessionId: sessionId(),
               agentConfig: agentConfigValue,
               agentName: props.agentName,
-              tabNumber: tabNumber,
             }}
-            setSessionId={setSessionId}
             onNewInputBlock={props.onNewInputBlock}
             onNewLogs={props.onNewLogs}
             onAnswer={props.onAnswer}
@@ -221,6 +217,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
             filterResponse={props.filterResponse}
             stream={props.stream}
             isDebugMode={isDebugMode()}
+            onSessionExpired={handleSessionExpired}
           />
         )}
       </Show>
@@ -230,17 +227,18 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
 type BotContentProps = {
   initialAgentReply: any;
+  persistedMessages: any[];
+  agentConfig: any;
   context: BotContext;
   class?: string;
   onNewInputBlock?: (block: { id: string; groupId: string }) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;
-  setSessionId: (id: string | null) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
-  isConnecting?: boolean;
   isDebugMode?: boolean;
+  onSessionExpired?: () => void;
 };
 
 const BotContent = (props: BotContentProps) => {
@@ -255,12 +253,12 @@ const BotContent = (props: BotContentProps) => {
     if (
       existingFont
         ?.getAttribute('href')
-        ?.includes(props.initialAgentReply.agentConfig?.theme?.general?.font ?? 'Open Sans')
+        ?.includes(props.agentConfig?.theme?.general?.font ?? 'Open Sans')
     )
       return;
     const font = document.createElement('link');
     font.href = `https://fonts.bunny.net/css2?family=${
-      props.initialAgentReply.agentConfig?.theme?.general?.font ?? 'Open Sans'
+      props.agentConfig?.theme?.general?.font ?? 'Open Sans'
     }:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');')`;
     font.rel = 'stylesheet';
     font.id = 'bot-font';
@@ -277,7 +275,7 @@ const BotContent = (props: BotContentProps) => {
   createEffect(() => {
     injectCustomFont();
     if (!botContainer) return;
-    setCssVariablesValue(props.initialAgentReply.agentConfig.theme, botContainer);
+    setCssVariablesValue(props.agentConfig.theme, botContainer);
   });
 
   onCleanup(() => {
@@ -298,32 +296,31 @@ const BotContent = (props: BotContentProps) => {
           <Match when={props.stream}>
             <StreamConversation
               context={props.context}
-              isConnecting={props.isConnecting}
               initialAgentReply={props.initialAgentReply}
+              persistedMessages={props.persistedMessages}
+              agentConfig={props.agentConfig}
               onNewInputBlock={props.onNewInputBlock}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
-              setSessionId={props.setSessionId}
+              onSessionExpired={props.onSessionExpired}
             />
           </Match>
           <Match when={!props.stream}>
           <ConversationContainer
               context={props.context}
-              isConnecting={props.isConnecting}
-              initialAgentReply={props.initialAgentReply}
+              initialAgentReply={{...props.initialAgentReply, agentConfig: props.agentConfig}}
               onNewInputBlock={props.onNewInputBlock}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
-              setSessionId={props.setSessionId}
             />
           </Match>
         </Switch>
       </div>
-      <Show when={props.initialAgentReply.agentConfig.settings.general.isBrandingEnabled}>
+      <Show when={props.agentConfig.settings.general.isBrandingEnabled}>
         <LiteBadge botContainer={botContainer} />
       </Show>
       <Show when={props.isDebugMode}>

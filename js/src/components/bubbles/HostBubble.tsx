@@ -11,6 +11,7 @@ type Props = {
   typingEmulation: TypingEmulation;
   onTransitionEnd: (offsetTop?: number) => void;
   filterResponse?: (response: string) => string;
+  isPersisted?: boolean;
 };
 
 export const HostBubble = (props: Props) => {
@@ -21,9 +22,14 @@ export const HostBubble = (props: Props) => {
   return (
     <TextBubble
       content={props.message.content}
-      typingEmulation={props.typingEmulation}
-      onTransitionEnd={onTransitionEnd}
+      typingEmulation={props.isPersisted ? {
+        enabled: false,
+        speed: 300,
+        maxDelay: 1.5,
+      } : props.typingEmulation}
+      onTransitionEnd={props.isPersisted ? () => {} : onTransitionEnd}
       filterResponse={props.filterResponse}
+      isPersisted={props.isPersisted}
     />
   );
 };

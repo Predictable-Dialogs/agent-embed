@@ -3,10 +3,15 @@ import { UIMessage } from '@ai-sdk/ui-utils';
 // Type augmentation for UIMessage to include input property
 export type EnhancedUIMessage = UIMessage & {
   input?: any;
+  isPersisted?: boolean;
 };
 
 // Helper function to transform an old message shape to the new one
-export const transformMessage = (msg: any, roleOverride?: 'assistant' | 'user', input?: any) => {
+export const transformMessage = (
+  msg: any, 
+  roleOverride?: 'assistant' | 'user', 
+  input?: any
+) => {
   const role = roleOverride || msg.role;
   let content = '';
 
@@ -24,10 +29,10 @@ export const transformMessage = (msg: any, roleOverride?: 'assistant' | 'user', 
     createdAt: msg.createdAt || new Date().toISOString(),
     role,
     content,
-    parts: msg.parts || []
+    parts: msg.parts || [],
   };
 
-  if (role === 'assistant' && input) {
+  if (role === 'assistant') {
     return { ...transformedMessage, input };
   }
 

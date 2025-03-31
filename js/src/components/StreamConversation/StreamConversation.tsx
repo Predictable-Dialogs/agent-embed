@@ -59,7 +59,7 @@ export const StreamConversation = (props: Props) => {
     props.initialAgentReply.input ? 1 : 0
   );
   const [displayIndex, setdisplayIndex] = createSignal('#HIDE');
-  let longRequest: NodeJS.Timeout;
+  let longRequest: ReturnType<typeof setTimeout> | undefined;
 
 
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
@@ -95,17 +95,6 @@ export const StreamConversation = (props: Props) => {
           agentName: props.context.agentName,
         };
       },
-      onResponse: (response) => {
-      },
-      onFinish: (message, options) => {
-        const currentMessages = messages();
-        const lastMessage = currentMessages?.[currentMessages.length - 1];
-        if(lastMessage?.id) {
-          setdisplayIndex(lastMessage.id);
-        }
-        
-        autoScrollToBottom();
-      },
       onError: (error) => {
         clearTimeout(longRequest);
         setIsSending(false);
@@ -122,6 +111,20 @@ export const StreamConversation = (props: Props) => {
   createEffect(() => {
     localStorage.setItem(getStorageKey('chatMessages'), JSON.stringify(messages()));
   });
+
+  createEffect(() => {
+    if (status() === 'ready') {
+      const currentMessages = messages();
+      if (currentMessages.length !== 1) {
+        //The first message is not streamed so set this
+        const lastMessage = currentMessages[currentMessages.length - 1];
+        if (lastMessage && lastMessage.role === 'assistant') {
+          setdisplayIndex(lastMessage.id);
+          autoScrollToBottom();
+        }  
+      }
+    }  
+  })
 
   const streamingHandlers = createMemo(() => {
     if (!handleInputChange || !handleSubmit) return undefined;

@@ -26,7 +26,7 @@ export type BotProps = {
   onNewLogs?: (logs: OutgoingLog[]) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
-  persist?: boolean;
+  persistSession?: boolean;
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
@@ -139,7 +139,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     const storedCustomCss = getCustomCss();
     const storedMessages = getPersistedMessages();
 
-    if (props.stream && props.persist && storedMessages.length > 0 && storedSessionId && storedAgentConfig) {
+    if (props.stream && props.persistSession && storedMessages.length > 0 && storedSessionId && storedAgentConfig) {
       // If persisted data exists, use it and mark as initialized
       if (storedMessages) setPersistedMessages(storedMessages);
       if (storedSessionId) setSessionId(storedSessionId);

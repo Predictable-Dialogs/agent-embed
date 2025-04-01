@@ -1,6 +1,6 @@
 {
   "name": "@agent-embed/js",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "Javascript library to display agent embeds on your website",
   "type": "module",
   "main": "dist/index.js",

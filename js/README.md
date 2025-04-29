@@ -1,6 +1,9 @@
 # Agent embed JS library
 
-Frontend library to embed Agent embeds.
+Add an [OpenAI Chatbot](https://predictabledialogs.com) to your website using this library.
+
+## Pre-requisite
+Create an agent on [https://predictabledialogs.com](https://predictabledialogs.com)
 
 ## Installation
 
@@ -12,21 +15,7 @@ To install, run:
 npm install agent-embed
 ```
 
-### Directly in your HTML
-
-```html
-
-<script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.1/dist/web.js'
-
-  Agent.initBubble({
-    agentName: 'options-agent',
-  })
-</script>
-<agent-bubble></agent-bubble>
-```
-
-## Standard
+## Standard Embed
 
  Here is a code example:
 
@@ -35,7 +24,7 @@ npm install agent-embed
   import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.1/dist/web.js'
 
   Agent.initStandard({
-    agentName: 'my-agent',
+    agentName: 'my-agent', // this agent is created on predictable dialogs.
   })
 </script>
 
@@ -54,7 +43,6 @@ Here is an example:
 
   Agent.initPopup({
     agentName: 'my-agent',
-    apiHost: 'http://localhost:3001',
     autoShowDelay: 3000,
   })
 </script>

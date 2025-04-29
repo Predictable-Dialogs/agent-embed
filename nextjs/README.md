@@ -1,3 +1,8 @@
+Add an [OpenAI Chatbot For NextJs](https://predictabledialogs.com) using this library.
+
+## Pre-requisite
+Create an agent on [https://predictabledialogs.com](https://predictabledialogs.com)
+
 ## Install
 
 ```bash

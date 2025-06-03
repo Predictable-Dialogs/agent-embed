@@ -19,13 +19,13 @@ Scroll to the bottom of this file before the closing </body> tag.
 Insert a <script> tag and write your custom JavaScript inside or link to an external JavaScript file.
 ```html
 <script type="module">
-  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.1/dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
 
   Agent.initBubble({
-    agentName: 'options-agent',
+    agentName: "your assistant name",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
   })
 </script>
-<agent-bubble></agent-bubble>
 ```
 
 Save the changes.

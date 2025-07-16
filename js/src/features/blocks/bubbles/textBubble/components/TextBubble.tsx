@@ -33,6 +33,21 @@ export const TextBubble = (props: Props) => {
   createEffect(async () => {
     const newText = applyFilterText(props.content, props.filterResponse);    
     setFilteredText(newText);
+    
+    // If content arrives and we're still typing, end the typing animation
+    if (props.content?.trim() && isTyping()) {
+      const typingDuration =
+        props.typingEmulation?.enabled === false
+          ? 0
+          : computeTypingDuration(
+              props.content,
+              props.typingEmulation ?? defaultTypingEmulation
+            )
+      
+      // Clear any existing timeout and set a new one
+      if (typingTimeout) clearTimeout(typingTimeout)
+      typingTimeout = setTimeout(onTypingEnd, typingDuration)
+    }
   });
   
   const onTypingEnd = () => {
@@ -52,7 +67,11 @@ export const TextBubble = (props: Props) => {
             props.content,
             props.typingEmulation ?? defaultTypingEmulation
           )
-    typingTimeout = setTimeout(onTypingEnd, typingDuration)
+    
+    // If content is empty or only whitespace, keep typing animation until content arrives
+    if (props.content?.trim()) {
+      typingTimeout = setTimeout(onTypingEnd, typingDuration)
+    }
     
     const newText = applyFilterText(props.content, props.filterResponse);    
     setFilteredText(newText);
@@ -91,7 +110,9 @@ export const TextBubble = (props: Props) => {
               props.isPersisted ? '' : ' text-fade-in'
             )}
             style={{
-              height: isTyping() ? (isMobile() ? '16px' : '20px') : '100%',
+              'min-height': isMobile() ? '16px' : '20px',
+              height: isTyping() ? (isMobile() ? '16px' : '20px') : 'auto',
+              transition: 'height 350ms ease-out',
             }}
           >
             <PlateText content={filteredText()} />

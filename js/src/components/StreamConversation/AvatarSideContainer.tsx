@@ -8,9 +8,12 @@ export const AvatarSideContainer = (props: Props) => {
   let avatarContainer: HTMLDivElement | undefined;
   const [top, setTop] = createSignal<number>(0);
 
-  const resizeObserver = new ResizeObserver((entries) =>
-    setTop(entries[0].target.clientHeight - (isMobile() ? 24 : 40))
-  );
+  const resizeObserver = new ResizeObserver((entries) => {
+    const newTop = entries[0].target.clientHeight - (isMobile() ? 24 : 40);
+    // Debounce position updates to reduce flicker
+    // the setTimeout reduces the avatar flicker
+    setTimeout(() => setTop(newTop), 10);
+  });
 
   onMount(() => {
     if (avatarContainer) {

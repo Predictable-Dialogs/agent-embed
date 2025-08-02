@@ -3,7 +3,7 @@ import { executeRedirect } from '@/features/blocks/logic/redirect';
 import { executeSetVariable } from '@/features/blocks/logic/setVariable/executeSetVariable';
 import { executePixel } from '@/features/blocks/integrations/pixel/executePixel';
 import { ClientSideActionContext } from '@/types';
-import type { ChatReply, ReplyLog } from '@/schemas';
+import type { ChatReply } from '@/schemas';
 import { injectStartProps } from './injectStartProps';
 
 type Props = {
@@ -16,7 +16,7 @@ export const executeClientSideAction = async ({
   clientSideAction,
   context,
 }: Props): Promise<
-  { blockedPopupUrl: string } | { replyToSend: string | undefined; logs?: ReplyLog[] } | void
+  { blockedPopupUrl: string } | { replyToSend: string | undefined; } | void
 > => {
   if ('googleAnalytics' in clientSideAction) {
     return executeGoogleAnalyticsBlock(clientSideAction.googleAnalytics);

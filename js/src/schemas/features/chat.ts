@@ -5,7 +5,6 @@ import {
   pixelOptionsSchema,
   redirectOptionsSchema,
 } from './blocks'
-import { logSchema } from './result'
 import { listVariableValue, agentSchema } from './agent'
 import {
   textBubbleContentSchema,
@@ -106,10 +105,6 @@ const startParamsSchema = z.object({
     .describe(
       "If set to `true`, it will start a Preview session with the unpublished bot and it won't be saved in the Results tab. You need to be authenticated for this to work."
     ),
-  resultId: z
-    .string()
-    .optional()
-    .describe("Provide it if you'd like to overwrite an existing result."),
   startGroupId: z
     .string()
     .optional()
@@ -123,13 +118,6 @@ const startParamsSchema = z.object({
   isStreamEnabled: z.boolean().optional(),
 })
 
-const replyLogSchema = logSchema
-  .pick({
-    status: true,
-    description: true,
-  })
-  .merge(z.object({ details: z.unknown().optional() }))
-
 export const sendMessageInputSchema = z.object({
   message: z
     .string()
@@ -141,7 +129,6 @@ export const sendMessageInputSchema = z.object({
     .describe(
       'Session ID that you get from the initial chat request to a bot. If not provided, it will create a new session.'
     ),
-  clientLogs: z.array(replyLogSchema).optional().describe('Logs while executing client side actions'),
   startParams: startParamsSchema.optional(),
   agentName: z.string().optional().describe('The agent name.'),
 });
@@ -218,9 +205,7 @@ export const chatReplySchema = z.object({
   agentConfig: agentSchema
     .pick({ id: true, theme: true, settings: true })
     .optional(),
-  resultId: z.string().optional(),
   dynamicTheme: dynamicThemeSchema.optional(),
-  logs: z.array(replyLogSchema).optional(),
 })
 
 export type ChatReply = z.infer<typeof chatReplySchema>
@@ -230,7 +215,6 @@ export type ScriptToExecute = z.infer<typeof scriptToExecuteSchema>
 export type StartParams = z.infer<typeof startParamsSchema>
 export type RuntimeOptions = z.infer<typeof runtimeOptionsSchema>
 export type StartAgent = z.infer<typeof startAgentSchema>
-export type ReplyLog = z.infer<typeof replyLogSchema>
 export type StartPropsToInject = z.infer<typeof startPropsToInjectSchema>
 
 // export type Message = {

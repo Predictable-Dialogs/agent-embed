@@ -15,7 +15,6 @@ export const defaultBotProps: BotProps = {
   prefilledVariables: undefined,
   apiHost: undefined,
   apiStreamHost: undefined,
-  resultId: undefined,
   filterResponse: undefined,
   stream: true,
   persistSession: false,

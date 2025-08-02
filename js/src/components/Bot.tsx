@@ -14,7 +14,6 @@ export type BotProps = {
   agentName: string | any;
   initialPrompt?: string;
   isPreview?: boolean;
-  resultId?: string;
   startGroupId?: string;
   prefilledVariables?: Record<string, unknown>;
   apiHost?: string;
@@ -84,7 +83,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
       initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,
       isPreview: props.isPreview ?? false,
-      resultId: undefined,
       startGroupId: props.startGroupId,
       prefilledVariables: {
         ...prefilledVariables,
@@ -115,7 +113,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
         id: data.input.id,
         groupId: data.input.groupId,
       });
-    if (data.logs) props.onNewLogs?.(data.logs);
   };
 
   const handleSessionExpired = () => {

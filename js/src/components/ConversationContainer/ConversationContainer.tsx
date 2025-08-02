@@ -108,7 +108,6 @@ export const ConversationContainer = (props: Props) => {
 
   const sendMessage = async (
     message: string | undefined,
-    clientLogs?: SendMessageInput['clientLogs']
   ) => {
     setHasError(false);
 
@@ -121,7 +120,6 @@ export const ConversationContainer = (props: Props) => {
       sessionId: props.context.sessionId,
       agentName: props.context.agentName,
       message,
-      clientLogs,
     });
     clearTimeout(longRequest);
     setIsSending(false);
@@ -191,7 +189,7 @@ export const ConversationContainer = (props: Props) => {
           },
         });
         if (response && 'replyToSend' in response) {
-          sendMessage(response.replyToSend, response.logs);
+          sendMessage(response.replyToSend);
           return;
         }
         if (response && 'blockedPopupUrl' in response) setBlockedPopupUrl(response.blockedPopupUrl);

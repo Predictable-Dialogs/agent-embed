@@ -60,7 +60,6 @@ export const FileUploadForm = (props: Props) => {
         {
           file,
           path: `${file.name}`,
-          // path: `public/results/${props.context.resultId}/${props.block.id}/${file.name}`,
         },
       ],
     })
@@ -84,7 +83,6 @@ export const FileUploadForm = (props: Props) => {
       files: files.map((file) => ({
         file: file,
         path: `${file.name}`,
-        // path: `public/results/${props.context.resultId}/${props.block.id}/${file.name}`,
       })),
       onUploadProgress: setUploadProgressPercent,
     })

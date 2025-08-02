@@ -17,7 +17,6 @@ export type BotProps = {
   prefilledVariables?: Record<string, unknown>;
   apiHost?: string;
   apiStreamHost?: string;
-  onNewInputBlock?: (ids: { id: string; groupId: string }) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onInit?: () => void;
   onEnd?: () => void;
@@ -105,12 +104,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (data.messages) setInitialMessages(data.messages);
     setCustomCss(data.agentConfig.theme.customCss ?? '');
     if (data.agentConfig) setAgentConfig(data.agentConfig);
-
-    if (data.input?.id && props.onNewInputBlock)
-      props.onNewInputBlock({
-        id: data.input.id,
-        groupId: data.input.groupId,
-      });
   };
 
   const handleSessionExpired = () => {
@@ -205,7 +198,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
               agentConfig: agentConfigValue,
               agentName: props.agentName,
             }}
-            onNewInputBlock={props.onNewInputBlock}
             onNewLogs={props.onNewLogs}
             onAnswer={props.onAnswer}
             onEnd={props.onEnd}
@@ -226,7 +218,6 @@ type BotContentProps = {
   agentConfig: any;
   context: BotContext;
   class?: string;
-  onNewInputBlock?: (block: { id: string; groupId: string }) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;
@@ -294,7 +285,6 @@ const BotContent = (props: BotContentProps) => {
               initialAgentReply={props.initialAgentReply}
               persistedMessages={props.persistedMessages}
               agentConfig={props.agentConfig}
-              onNewInputBlock={props.onNewInputBlock}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}
@@ -306,7 +296,6 @@ const BotContent = (props: BotContentProps) => {
           <ConversationContainer
               context={props.context}
               initialAgentReply={{...props.initialAgentReply, agentConfig: props.agentConfig}}
-              onNewInputBlock={props.onNewInputBlock}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
               onNewLogs={props.onNewLogs}

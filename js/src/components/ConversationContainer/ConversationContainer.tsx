@@ -37,7 +37,6 @@ const parseDynamicTheme = (
 type Props = {
   initialAgentReply: InitialChatReply;
   context: BotContext;
-  onNewInputBlock?: (ids: { id: string; groupId: string }) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;

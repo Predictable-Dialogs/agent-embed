@@ -5,7 +5,6 @@ import type { BotProps } from './components/Bot'
 export const defaultBotProps: BotProps = {
   agentName: undefined,
   initialPrompt: 'Hi',
-  onNewInputBlock: undefined,
   onAnswer: undefined,
   onEnd: undefined,
   onInit: undefined,

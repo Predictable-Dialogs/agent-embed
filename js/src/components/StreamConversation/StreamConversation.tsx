@@ -38,7 +38,6 @@ type Props = {
   persistedMessages: any[];
   agentConfig: any;
   context: BotContext;
-  onNewInputBlock?: (ids: { id: string; groupId: string }) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: OutgoingLog[]) => void;

@@ -14,7 +14,6 @@ export type BotProps = {
   agentName: string | any;
   initialPrompt?: string;
   isPreview?: boolean;
-  startGroupId?: string;
   prefilledVariables?: Record<string, unknown>;
   apiHost?: string;
   apiStreamHost?: string;
@@ -83,7 +82,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
       initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,
       isPreview: props.isPreview ?? false,
-      startGroupId: props.startGroupId,
       prefilledVariables: {
         ...prefilledVariables,
         ...props.prefilledVariables,

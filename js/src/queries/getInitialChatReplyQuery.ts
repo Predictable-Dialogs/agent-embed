@@ -10,7 +10,6 @@ export async function getInitialChatReplyQuery({
   isPreview,
   apiHost,
   prefilledVariables,
-  startGroupId,
 }: StartParams & {
   apiHost?: string;
   agentName: string;
@@ -27,7 +26,6 @@ export async function getInitialChatReplyQuery({
             agentName,
             isPreview,
             prefilledVariables,
-            startGroupId,
             isStreamEnabled: true,
           },
       agentName,

@@ -40,7 +40,6 @@ type Props = {
   context: BotContext;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
-  onNewLogs?: (logs: OutgoingLog[]) => void;
   filterResponse?: (response: string) => string;
   onSessionExpired?: () => void;
 };

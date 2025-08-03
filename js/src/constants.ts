@@ -8,7 +8,6 @@ export const defaultBotProps: BotProps = {
   onAnswer: undefined,
   onEnd: undefined,
   onInit: undefined,
-  onNewLogs: undefined,
   isPreview: undefined,
   prefilledVariables: undefined,
   apiHost: undefined,

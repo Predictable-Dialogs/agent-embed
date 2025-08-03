@@ -39,7 +39,6 @@ type Props = {
   context: BotContext;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
-  onNewLogs?: (logs: OutgoingLog[]) => void;
   filterResponse?: (response: string) => string;
 };
 
@@ -124,13 +123,6 @@ export const ConversationContainer = (props: Props) => {
     setIsSending(false);
     if (error) {
       setHasError(true);
-      props.onNewLogs?.([
-        {
-          description: 'Failed to send the reply',
-          details: error,
-          status: 'error',
-        },
-      ]);
     }
     if (!data) return;
 

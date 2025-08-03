@@ -20,7 +20,6 @@ export type BotProps = {
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onInit?: () => void;
   onEnd?: () => void;
-  onNewLogs?: (logs: OutgoingLog[]) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
@@ -198,7 +197,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
               agentConfig: agentConfigValue,
               agentName: props.agentName,
             }}
-            onNewLogs={props.onNewLogs}
             onAnswer={props.onAnswer}
             onEnd={props.onEnd}
             filterResponse={props.filterResponse}
@@ -220,7 +218,6 @@ type BotContentProps = {
   class?: string;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
-  onNewLogs?: (logs: OutgoingLog[]) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   isDebugMode?: boolean;
@@ -287,7 +284,6 @@ const BotContent = (props: BotContentProps) => {
               agentConfig={props.agentConfig}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
-              onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
               onSessionExpired={props.onSessionExpired}
             />
@@ -298,7 +294,6 @@ const BotContent = (props: BotContentProps) => {
               initialAgentReply={{...props.initialAgentReply, agentConfig: props.agentConfig}}
               onAnswer={props.onAnswer}
               onEnd={props.onEnd}
-              onNewLogs={props.onNewLogs}
               filterResponse={props.filterResponse}
             />
           </Match>

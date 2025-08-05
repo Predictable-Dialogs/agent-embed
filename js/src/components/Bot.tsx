@@ -23,6 +23,7 @@ export type BotProps = {
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
+  input?: any;
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
@@ -99,7 +100,9 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
     if (data.sessionId) setSessionId(data.sessionId);
     if (data.clientSideActions) setClientSideActions(data.clientSideActions);
-    if (data.input) setInitialInput(data.input);
+    // Use props input if provided, otherwise use API input
+    const inputToUse = props.input || data.input;
+    if (inputToUse) setInitialInput(inputToUse);
     if (data.messages) setInitialMessages(data.messages);
     setCustomCss(data.agentConfig.theme.customCss ?? '');
     if (data.agentConfig) setAgentConfig(data.agentConfig);

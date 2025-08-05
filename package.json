@@ -4,6 +4,7 @@
   "scripts": {
     "clean": "rm -rf js/dist && rm -rf react/dist && rm -rf nextjs/dist",
     "build": "npm run clean && cd js && npm run build && cd ../react && npm run build && cd ../nextjs && npm run build",
+    "publish": "cd js && npm publish && cd ../react && npm publish && cd ../nextjs && npm publish",
     "test": "echo 'Add test scripts here'"
   },
   "dependencies": {

@@ -1,11 +1,11 @@
-import { ChatReply, SendMessageInput, Theme } from '@/schemas';
-import { createEffect, createSignal, For, onMount, Show, onCleanup } from 'solid-js';
+import { ChatReply, Theme } from '@/schemas';
+import { createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { sendMessageQuery } from '@/queries/sendMessageQuery';
 import { ChatChunk } from './ChatChunk';
-import { BotContext, ChatChunk as ChatChunkType, InitialChatReply, OutgoingLog } from '@/types';
+import { BotContext, ChatChunk as ChatChunkType, InitialChatReply } from '@/types';
 import { isNotDefined } from '@/lib/utils';
 import { executeClientSideAction } from '@/utils/executeClientSideActions';
-import { LoadingChunk, ConnectingChunk } from './LoadingChunk';
+import { LoadingChunk } from './LoadingChunk';
 import { PopupBlockedToast } from './PopupBlockedToast';
 import { useInitialActions } from '@/hooks/useInitialActions';
 import { transformMessage } from '@/utils/transformMessages';

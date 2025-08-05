@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import type { BubbleProps } from '@agent-embed/js'
-import 'agent-embed/dist/web'
+import '@agent-embed/js/web'
 
 type Props = BubbleProps
 

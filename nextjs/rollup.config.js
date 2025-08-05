@@ -7,22 +7,24 @@ import { typescriptPaths } from 'rollup-plugin-typescript-paths'
 import alias from '@rollup/plugin-alias'
 
 const extensions = ['.ts', '.tsx']
-
+const isExternal = (id) =>
+  id === 'react' ||
+  id === 'react/jsx-runtime' ||
+  id === 'next' ||
+  id.startsWith('next/') 
+  
 const indexConfig = {
   input: './src/index.ts',
-  output: {
-    dir: './dist',
-    format: 'es',
-  },
-  external: ['next/dynamic', 'react', 'react/jsx-runtime'],
+  output: { dir: './dist', format: 'esm', sourcemap: true },
+  external: isExternal,
   plugins: [
     alias({
       entries: [
-        { find: 'agent-embed/dist/web', replacement: '../../js/dist/web' },
+        // { find: 'agent-embed/dist/web', replacement: '../../js/dist/web' },
       ],
     }),
     resolve({ extensions }),
-    commonjs(), // Add this line
+    commonjs(),
     babel({
       babelHelpers: 'bundled',
       exclude: 'node_modules/**',

@@ -67,10 +67,12 @@ export const StreamConversation = (props: Props) => {
     setTheme(parseDynamicTheme(props.agentConfig.theme, dynamicTheme()));
   });
 
-  const initialMessages = props.persistedMessages.length > 0
-    ? props.persistedMessages.map(msg => ({ ...msg, isPersisted: true }))      
-    : props.initialAgentReply.messages.map((msg: any) =>
-      ({ ...transformMessage({ ...msg }, 'assistant', props.initialAgentReply.input), isPersisted: false })
+  const initialMessages = createMemo(() => 
+    props.persistedMessages.length > 0
+      ? props.persistedMessages.map(msg => ({ ...msg, isPersisted: true }))      
+      : props.initialAgentReply.messages.map((msg: any) =>
+        ({ ...transformMessage({ ...msg }, 'assistant', props.initialAgentReply.input), isPersisted: false })
+      )
   );
 
   const {
@@ -84,7 +86,7 @@ export const StreamConversation = (props: Props) => {
   } = useChat({
       api: `${isNotEmpty(props.context.apiStreamHost) ? props.context.apiStreamHost : getApiStreamEndPoint()}`,
       streamProtocol: 'data',
-      initialMessages,  
+      initialMessages: initialMessages(),  
       experimental_prepareRequestBody({ messages }) {
         return {
           message: messages[messages.length - 1].content,
@@ -101,6 +103,7 @@ export const StreamConversation = (props: Props) => {
         }
       }
   });
+
   
   const getStorageKey = (key: string) => {
     return props.context.agentName ? `${props.context.agentName}_${key}` : key;
@@ -207,9 +210,9 @@ export const StreamConversation = (props: Props) => {
     >
       <For each={messages()}>
         {(message) => {        
-          const inputValue = message.role === 'assistant' ? 
-            (initialMessages[0]?.input || props.initialAgentReply.input) : 
-            undefined;
+          const inputValue = createMemo(() => message.role === 'assistant' ? 
+            props.initialAgentReply.input : 
+            undefined);
           
           if (message.role === 'assistant') {
             clearTimeout(longRequest);
@@ -219,7 +222,7 @@ export const StreamConversation = (props: Props) => {
           return (
             <ChatChunk
               displayIndex={displayIndex()}
-              input={inputValue}
+              input={inputValue()}
               onDisplayAssistantMessage={onDisplayAssistantMessage}
               message={message}
               theme={theme()}

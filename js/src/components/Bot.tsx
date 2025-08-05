@@ -1,11 +1,9 @@
 import { LiteBadge } from './LiteBadge';
-import { createEffect, createSignal, onMount, Show, onCleanup, Switch, Match } from 'solid-js';
-import { isNotDefined } from '@/lib/utils';
+import { createEffect, createSignal, onMount, Show, onCleanup } from 'solid-js';
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
-import { ConversationContainer } from './ConversationContainer';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext, OutgoingLog } from '@/types';
+import { BotContext } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import immutableCss from '../assets/immutable.css';
@@ -170,6 +168,13 @@ export const Bot = (props: BotProps & { class?: string }) => {
     }
   });
 
+  createEffect(() => {
+    if (props.input) {
+      console.log(`the props.input is set to:`, props.input);
+      setInitialInput(props.input);
+    }
+  });
+
   onCleanup(() => {
     setIsInitialized(false);
   });
@@ -278,29 +283,16 @@ const BotContent = (props: BotContentProps) => {
       }
     >
       <div class="flex w-full h-full justify-center">
-        <Switch>
-          <Match when={props.stream}>
-            <StreamConversation
-              context={props.context}
-              initialAgentReply={props.initialAgentReply}
-              persistedMessages={props.persistedMessages}
-              agentConfig={props.agentConfig}
-              onAnswer={props.onAnswer}
-              onEnd={props.onEnd}
-              filterResponse={props.filterResponse}
-              onSessionExpired={props.onSessionExpired}
-            />
-          </Match>
-          <Match when={!props.stream}>
-          <ConversationContainer
-              context={props.context}
-              initialAgentReply={{...props.initialAgentReply, agentConfig: props.agentConfig}}
-              onAnswer={props.onAnswer}
-              onEnd={props.onEnd}
-              filterResponse={props.filterResponse}
-            />
-          </Match>
-        </Switch>
+        <StreamConversation
+          context={props.context}
+          initialAgentReply={props.initialAgentReply}
+          persistedMessages={props.persistedMessages}
+          agentConfig={props.agentConfig}
+          onAnswer={props.onAnswer}
+          onEnd={props.onEnd}
+          filterResponse={props.filterResponse}
+          onSessionExpired={props.onSessionExpired}
+        />
       </div>
       <Show when={props.agentConfig.settings.general.isBrandingEnabled}>
         <LiteBadge botContainer={botContainer} />

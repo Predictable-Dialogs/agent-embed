@@ -15,6 +15,7 @@ export const defaultBotProps: BotProps = {
   filterResponse: undefined,
   stream: true,
   persistSession: false,
+  input: undefined
 }
 
 export const defaultPopupProps: PopupProps = {

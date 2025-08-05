@@ -1,0 +1,4 @@
+
+constants.ts -> defines the props
+components/Bot.tsx -> Is the parent solidjs component which is used, the props are passed to this component. This SolidJS component Bot initializes the chatbot UI using StreamConversation. It fetches agent config and initial messages via getInitialChatReplyQuery, restores session state from localStorage, injects theme CSS and fonts, and handles errors with ErrorMessage. The BotContent subcomponent applies responsive styling, sets CSS variables, and conditionally shows branding (LiteBadge).
+components/StreamConversation/StreamConversation.tsx -> StreamConversation streams replies via useChat from ai-sdk ver 4, renders a scrollable thread, and auto-scrolls on updates. It builds initial messages from persisted history or the initial agent reply, persists new messages to localStorage (namespaced by agentName). Each message renders a ChatChunk; LoadingChunk, ErrorChunk, and PopupBlockedToast show conditionally.

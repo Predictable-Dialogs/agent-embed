@@ -83,8 +83,7 @@ The embed widgets communicate with backend APIs through:
 - Streaming responses via useChat from @ai-sdk/solid
 
 ## Testing
-
-No test framework is currently configured in the codebase. Tests would need to be set up if implementing.
+Vitest with @solidjs/testing-library and jsdom
 
 ## Browser Compatibility
 

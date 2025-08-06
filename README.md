@@ -4,7 +4,7 @@ Add an [OpenAI Chatbot](https://predictabledialogs.com) to your website using th
 Create an agent on [https://predictabledialogs.com](https://predictabledialogs.com)
 
 
-The [agent-embed](https://github.com/Predictable-Dialogs/agent-embed) repository provides components which can be embedded on a website and communicates with the predictable dialogs backend which in turn talks to the openAI LLM models. It currently provides components for chat. The chat components it provides are Bubbles, Standard, Popup and Button. 
+The [agent-embed](https://github.com/Predictable-Dialogs/agent-embed) repository provides components which can be embedded on a website and communicates with the predictable dialogs backend which in turn talks to the openAI LLM models. It currently provides components for chat. The chat components it provides are Bubbles, Standard, Popup. 
 
 
 ## Introduction

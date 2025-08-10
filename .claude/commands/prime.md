@@ -1,7 +1,3 @@
 # Context Window Prime
 RUN: 
-  git ls-files
-
-READ:
-  test.md
- 
+  git ls-files 

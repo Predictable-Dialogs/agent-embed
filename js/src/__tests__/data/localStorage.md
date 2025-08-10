@@ -1,0 +1,10 @@
+# Sample localstorage values for for test:
+
+Key: Chatbot-183a0_agentConfig 
+Value: {"theme":{"chat":{"inputs":{"color":"#5a5a5a","backgroundColor":"#FFFFFF","placeholderColor":"#4b5a2a"},"buttons":{"color":"#FFFFFF","backgroundColor":"#4b5a2a"},"roundness":"large","hostAvatar":{"url":"https://pd-images-public.s3.ap-south-1.amazonaws.com/guest-profile.png","isEnabled":true},"guestAvatar":{"url":"https://pd-images-public.s3.ap-south-1.amazonaws.com/guest-profile.png","isEnabled":false},"hostBubbles":{"color":"#e8e2d6","backgroundColor":"#2b3e13"},"guestBubbles":{"color":"#FFFFFF","backgroundColor":"#4b5a2a"}},"general":{"font":"Avenir","background":{"type":"Color","content":"#ffffff"}}},"settings":{"general":{"isBrandingEnabled":true,"isInputPrefillEnabled":true,"isHideQueryParamsEnabled":true,"isNewResultOnRefreshEnabled":true},"metadata":{"description":"Build agents and embed them directly in your applications without a line of code."},"typingEmulation":{"speed":300,"enabled":true,"maxDelay":1.5}}}
+
+Key: Chatbot-183a0_chatMessages
+Value: [{"id":"2577da3d-5f35-449f-80e8-b7c00cd65a1f","createdAt":"2025-07-29T05:25:40.753Z","role":"assistant","content":"You can change this **welcome message** or remove it completely.\n\nLogin to <a href=\"https://predictabledialogs.com\" style=\"text-decoration: underline;\">Predictable Dialogs</a> then click on your agent and go to \"settings\" and update or remove this message.","parts":[],"input":{"type":"text input","options":{"labels":{"placeholder":"Type your answer...","button":"Send"},"isLong":false}},"isPersisted":false},{"id":"bmq4ypGus1dCrVPg","role":"user","content":"hi","createdAt":"2025-07-29T05:25:54.145Z","parts":[{"type":"text","text":"hi"}]},{"id":"msg-eunPpJV3lXbDi1gWMqjGd6fj","createdAt":"2025-07-29T05:25:55.116Z","role":"assistant","content":"Hello! How can I assist you today?","parts":[{"type":"text","text":"Hello! How can I assist you today?"}],"revisionId":"wqeFEAoTLoJbBPgA"}]
+
+Key: Chatbot-183a0_sessionId
+Value: "sess_1b30a00f1c61d0cb"

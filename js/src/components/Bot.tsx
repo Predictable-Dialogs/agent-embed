@@ -94,7 +94,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   onMount(() => {
     setIsDebugMode(storage.getDebugMode());
     
-    if (props.stream && props.persistSession && storage.hasCompleteSession()) {
+    if (props.persistSession && storage.hasCompleteSession()) {
       // If persisted data exists, use it and mark as initialized
       const storedSessionId = storage.getSessionId();
       const storedAgentConfig = storage.getAgentConfig();
@@ -170,7 +170,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
                 agentName: props.agentName,
               }}
               filterResponse={props.filterResponse}
-              stream={props.stream}
               isDebugMode={isDebugMode()}
               onSessionExpired={handleSessionExpired}
             />
@@ -188,7 +187,6 @@ type BotContentProps = {
   context: BotContext;
   class?: string;
   filterResponse?: (response: string) => string;
-  stream?: boolean;
   isDebugMode?: boolean;
   onSessionExpired?: () => void;
 };

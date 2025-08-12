@@ -39,6 +39,46 @@ export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
   };
 
   /**
+   * Safe localStorage getItem with error handling
+   */
+  const safeGetItem = (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to access localStorage for key:', key, error);
+      }
+      return null;
+    }
+  };
+
+  /**
+   * Safe localStorage setItem with error handling
+   */
+  const safeSetItem = (key: string, value: string): void => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to store localStorage value for key:', key, error);
+      }
+    }
+  };
+
+  /**
+   * Safe localStorage removeItem with error handling
+   */
+  const safeRemoveItem = (key: string): void => {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to remove localStorage value for key:', key, error);
+      }
+    }
+  };
+
+  /**
    * Safe JSON parsing with error handling
    */
   const safeParse = <T>(value: string | null, defaultValue: T): T => {
@@ -69,62 +109,62 @@ export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
 
   // Storage operations
   const getSessionId = (): string | null => {
-    const sessionId = localStorage.getItem(getStorageKey('sessionId'));
+    const sessionId = safeGetItem(getStorageKey('sessionId'));
     return safeParse(sessionId, null);
   };
 
   const setSessionId = (sessionId: string): void => {
-    localStorage.setItem(getStorageKey('sessionId'), safeStringify(sessionId));
+    safeSetItem(getStorageKey('sessionId'), safeStringify(sessionId));
   };
 
   const getAgentConfig = (): any | null => {
-    const agentConfig = localStorage.getItem(getStorageKey('agentConfig'));
+    const agentConfig = safeGetItem(getStorageKey('agentConfig'));
     return safeParse(agentConfig, null);
   };
 
   const setAgentConfig = (config: any): void => {
-    localStorage.setItem(getStorageKey('agentConfig'), safeStringify(config));
+    safeSetItem(getStorageKey('agentConfig'), safeStringify(config));
   };
 
   const getCustomCss = (): string | null => {
-    const customCss = localStorage.getItem(getStorageKey('customCss'));
+    const customCss = safeGetItem(getStorageKey('customCss'));
     return safeParse(customCss, null);
   };
 
   const setCustomCss = (css: string): void => {
-    localStorage.setItem(getStorageKey('customCss'), safeStringify(css));
+    safeSetItem(getStorageKey('customCss'), safeStringify(css));
   };
 
   const getChatMessages = (): any[] => {
-    const messages = localStorage.getItem(getStorageKey('chatMessages'));
+    const messages = safeGetItem(getStorageKey('chatMessages'));
     return safeParse(messages, []);
   };
 
   const setChatMessages = (messages: any[]): void => {
-    localStorage.setItem(getStorageKey('chatMessages'), safeStringify(messages));
+    safeSetItem(getStorageKey('chatMessages'), safeStringify(messages));
   };
 
   const getInput = (): any | null => {
-    const input = localStorage.getItem(getStorageKey('input'));
+    const input = safeGetItem(getStorageKey('input'));
     return safeParse(input, null);
   };
 
   const setInput = (input: any): void => {
-    localStorage.setItem(getStorageKey('input'), safeStringify(input));
+    safeSetItem(getStorageKey('input'), safeStringify(input));
   };
 
   const getDebugMode = (): boolean => {
-    const debugFlag = localStorage.getItem('debugMode');
+    const debugFlag = safeGetItem('debugMode');
     return debugFlag === 'true';
   };
 
   // Session management
   const clearSession = (): void => {
-    localStorage.removeItem(getStorageKey('sessionId'));
-    localStorage.removeItem(getStorageKey('agentConfig'));
-    localStorage.removeItem(getStorageKey('chatMessages'));
-    localStorage.removeItem(getStorageKey('customCss'));
-    localStorage.removeItem(getStorageKey('input'));
+    safeRemoveItem(getStorageKey('sessionId'));
+    safeRemoveItem(getStorageKey('agentConfig'));
+    safeRemoveItem(getStorageKey('chatMessages'));
+    safeRemoveItem(getStorageKey('customCss'));
+    safeRemoveItem(getStorageKey('input'));
   };
 
   const hasCompleteSession = (): boolean => {

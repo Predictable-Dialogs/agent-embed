@@ -72,6 +72,11 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
     // Store API data - merging with props will be handled by mergedConfig memo
     setApiData(data);
+    
+    // Store input data for future session restoration
+    if (data.input) {
+      storage.setInput(data.input);
+    }
   };
 
   const handleSessionExpired = () => {
@@ -95,6 +100,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       const storedAgentConfig = storage.getAgentConfig();
       const storedCustomCss = storage.getCustomCss();
       const storedMessages = storage.getChatMessages();
+      const storedInput = storage.getInput();
       
       if (storedMessages) setPersistedMessages(storedMessages);
       const restoredData = {
@@ -103,7 +109,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
         theme: { customCss: storedCustomCss || '' },
         messages: [],
         clientSideActions: [],
-        input: null,
+        input: storedInput,
       };
       setApiData(restoredData);
       setIsInitialized(true);
@@ -125,6 +131,9 @@ export const Bot = (props: BotProps & { class?: string }) => {
     }
     if (config.agentConfig) {
       storage.setAgentConfig(config.agentConfig);
+    }
+    if (config.input) {
+      storage.setInput(config.input);
     }
   });
 

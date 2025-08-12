@@ -15,6 +15,8 @@ export interface UseAgentStorageReturn {
   setCustomCss: (css: string) => void;
   getChatMessages: () => any[];
   setChatMessages: (messages: any[]) => void;
+  getInput: () => any | null;
+  setInput: (input: any) => void;
   getDebugMode: () => boolean;
   
   // Session management  
@@ -102,6 +104,15 @@ export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
     localStorage.setItem(getStorageKey('chatMessages'), safeStringify(messages));
   };
 
+  const getInput = (): any | null => {
+    const input = localStorage.getItem(getStorageKey('input'));
+    return safeParse(input, null);
+  };
+
+  const setInput = (input: any): void => {
+    localStorage.setItem(getStorageKey('input'), safeStringify(input));
+  };
+
   const getDebugMode = (): boolean => {
     const debugFlag = localStorage.getItem('debugMode');
     return debugFlag === 'true';
@@ -113,6 +124,7 @@ export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
     localStorage.removeItem(getStorageKey('agentConfig'));
     localStorage.removeItem(getStorageKey('chatMessages'));
     localStorage.removeItem(getStorageKey('customCss'));
+    localStorage.removeItem(getStorageKey('input'));
   };
 
   const hasCompleteSession = (): boolean => {
@@ -132,6 +144,8 @@ export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
     setCustomCss,
     getChatMessages,
     setChatMessages,
+    getInput,
+    setInput,
     getDebugMode,
     
     // Session management

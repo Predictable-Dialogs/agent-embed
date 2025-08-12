@@ -6,6 +6,7 @@ import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { useChat } from '@ai-sdk/solid';
 import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
+import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { isNotEmpty } from '@/lib/utils';
 
 const parseDynamicTheme = (
@@ -97,12 +98,10 @@ export const StreamConversation = (props: Props) => {
   });
 
   
-  const getStorageKey = (key: string) => {
-    return props.context.agentName ? `${props.context.agentName}_${key}` : key;
-  };
+  const storage = useAgentStorage(props.context.agentName);
   
   createEffect(() => {
-    localStorage.setItem(getStorageKey('chatMessages'), JSON.stringify(messages()));
+    storage.setChatMessages(messages());
   });
 
   createEffect(() => {

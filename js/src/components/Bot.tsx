@@ -7,6 +7,7 @@ import { BotContext } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
+import { useAgentStorage } from '@/hooks/useAgentStorage';
 import immutableCss from '../assets/immutable.css';
 
 export type BotProps = {
@@ -36,34 +37,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     return mergePropsWithApiData({ input }, apiData())
   });
 
-  const getStorageKey = (key: string) => {
-    return props.agentName ? `${props.agentName}_${key}` : key;
-  };
-
-  const getSessionId = () => {
-    const sessionId = localStorage.getItem(getStorageKey('sessionId'));
-    return sessionId ? JSON.parse(sessionId) : null;
-  };
-
-  const getAgentConfig = () => {
-    const agentConfig = localStorage.getItem(getStorageKey('agentConfig'));
-    return agentConfig ? JSON.parse(agentConfig) : null;
-  };
-
-  const getCustomCss = () => {
-    const customCss = localStorage.getItem(getStorageKey('customCss'));
-    return customCss ? JSON.parse(customCss) : null;
-  };
-
-  const getPersistedMessages = () => {
-    const messages = localStorage.getItem(getStorageKey('chatMessages'));
-    return messages ? JSON.parse(messages) : [];
-  };
-
-  const checkDebugMode = () => {
-    const debugFlag = localStorage.getItem('debugMode');
-    return debugFlag === 'true';
-  };
+  const storage = useAgentStorage(props.agentName);
 
   const initializeBot = async () => {
     const urlParams = new URLSearchParams(location.search);
@@ -102,9 +76,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   const handleSessionExpired = () => {
     // Clear local storage
-    localStorage.removeItem(getStorageKey('sessionId'));
-    localStorage.removeItem(getStorageKey('agentConfig'));
-    localStorage.removeItem(getStorageKey('chatMessages'));
+    storage.clearSession();
     setPersistedMessages([]);
     // Delay to show expiration message, then reinitialize
     setTimeout(() => {
@@ -115,14 +87,15 @@ export const Bot = (props: BotProps & { class?: string }) => {
   };
 
   onMount(() => {
-    setIsDebugMode(checkDebugMode());
-    const storedSessionId = getSessionId();
-    const storedAgentConfig = getAgentConfig();
-    const storedCustomCss = getCustomCss();
-    const storedMessages = getPersistedMessages();
-
-    if (props.stream && props.persistSession && storedMessages.length > 0 && storedSessionId && storedAgentConfig) {
+    setIsDebugMode(storage.getDebugMode());
+    
+    if (props.stream && props.persistSession && storage.hasCompleteSession()) {
       // If persisted data exists, use it and mark as initialized
+      const storedSessionId = storage.getSessionId();
+      const storedAgentConfig = storage.getAgentConfig();
+      const storedCustomCss = storage.getCustomCss();
+      const storedMessages = storage.getChatMessages();
+      
       if (storedMessages) setPersistedMessages(storedMessages);
       const restoredData = {
         sessionId: storedSessionId,
@@ -145,22 +118,13 @@ export const Bot = (props: BotProps & { class?: string }) => {
   createEffect(() => {
     const config = mergedConfig();
     if (config.customCss) {
-      localStorage.setItem(
-        getStorageKey('customCss'),
-        JSON.stringify(config.customCss)
-      );
+      storage.setCustomCss(config.customCss);
     }
     if (config.sessionId) {
-      localStorage.setItem(
-        getStorageKey('sessionId'),
-        JSON.stringify(config.sessionId)
-      );  
+      storage.setSessionId(config.sessionId);
     }
     if (config.agentConfig) {
-      localStorage.setItem(
-        getStorageKey('agentConfig'),
-        JSON.stringify(config.agentConfig)
-      );  
+      storage.setAgentConfig(config.agentConfig);
     }
   });
 

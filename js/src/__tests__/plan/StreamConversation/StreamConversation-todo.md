@@ -1,0 +1,3 @@
+        - To do tests for “Dynamic theme merging”
+        - To do tests for File attachments support
+        - Not adding tests for displayIndex since we will move to ChatGPT UI

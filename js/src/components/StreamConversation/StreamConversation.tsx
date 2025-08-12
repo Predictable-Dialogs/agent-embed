@@ -1,9 +1,8 @@
 import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show } from 'solid-js';
 import { ChatChunk } from './ChatChunk';
-import { BotContext, InitialChatReply, OutgoingLog } from '@/types';
+import { BotContext, InitialChatReply } from '@/types';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
-import { PopupBlockedToast } from './PopupBlockedToast';
 import { useChat } from '@ai-sdk/solid';
 import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
@@ -38,8 +37,6 @@ type Props = {
   persistedMessages: any[];
   agentConfig: any;
   context: BotContext;
-  onAnswer?: (answer: { message: string; blockId: string }) => void;
-  onEnd?: () => void;
   filterResponse?: (response: string) => string;
   onSessionExpired?: () => void;
 };
@@ -51,11 +48,6 @@ export const StreamConversation = (props: Props) => {
   );
   const [theme, setTheme] = createSignal(props.agentConfig.theme);
   const [isSending, setIsSending] = createSignal(false);
-  const [blockedPopupUrl, setBlockedPopupUrl] = createSignal<string>();
-  const [hasError, setHasError] = createSignal(false);
-  const [activeInputId, setActiveInputId] = createSignal<number>(
-    props.initialAgentReply.input ? 1 : 0
-  );
   const [displayIndex, setdisplayIndex] = createSignal('#HIDE');
   let longRequest: ReturnType<typeof setTimeout> | undefined;
 
@@ -202,7 +194,11 @@ export const StreamConversation = (props: Props) => {
       autoScrollToBottom(bubbleOffsetTop);
     }
   };
-    
+  
+  createEffect(() => {
+    console.log(`initialAgentReply.input is set to:`, props.initialAgentReply.input);
+  });
+
   return (
     <div
       ref={chatContainer}
@@ -210,10 +206,6 @@ export const StreamConversation = (props: Props) => {
     >
       <For each={messages()}>
         {(message) => {        
-          const inputValue = createMemo(() => message.role === 'assistant' ? 
-            props.initialAgentReply.input : 
-            undefined);
-          
           if (message.role === 'assistant') {
             clearTimeout(longRequest);
             setIsSending(false);
@@ -222,7 +214,7 @@ export const StreamConversation = (props: Props) => {
           return (
             <ChatChunk
               displayIndex={displayIndex()}
-              input={inputValue()}
+              input={message.role === 'assistant' ? props.initialAgentReply.input : undefined}
               onDisplayAssistantMessage={onDisplayAssistantMessage}
               message={message}
               theme={theme()}
@@ -230,7 +222,6 @@ export const StreamConversation = (props: Props) => {
               streamingMessageId={undefined}
               context={props.context}
               hideAvatar={false}
-              hasError={hasError()}
               streamingHandlers={streamingHandlers()}
               onScrollToBottom={autoScrollToBottom}
               filterResponse={props.filterResponse}
@@ -246,17 +237,6 @@ export const StreamConversation = (props: Props) => {
 
       <Show when={error()}>
         <ErrorChunk message={error()?.message} theme={theme()} />
-      </Show>
-
-      <Show when={blockedPopupUrl()} keyed>
-        {(blockedPopupUrl) => (
-          <div class="flex justify-end">
-            <PopupBlockedToast
-              url={blockedPopupUrl}
-              onLinkClick={() => setBlockedPopupUrl(undefined)}
-            />
-          </div>
-        )}
       </Show>
       <BottomSpacer />
     </div>

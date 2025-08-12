@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is agent-embed, a monorepo for embedding AI chatbots on websites. It provides multiple embed formats (Bubble, Standard, Popup, Topic Buttons) that integrate with the Predictable Dialogs backend or custom backends. The project is built with SolidJS and distributed as embeddable JavaScript widgets.
+This is agent-embed, a monorepo for embedding AI chatbots on websites. It provides multiple embed formats (Bubble, Standard, Popup) that integrate with the Predictable Dialogs backend or custom backends. The project is built with SolidJS and distributed as embeddable JavaScript widgets. This repo is the source code for the widgets. A widget REQUIRES the agent name to start chatting with the agent.
 
 ## Architecture
 

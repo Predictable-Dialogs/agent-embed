@@ -1,7 +1,7 @@
 import { BotContext, ChatChunk as ChatChunkType } from '@/types';
 import { isMobile } from '@/utils/isMobileSignal';
 import type { ChatReply, Settings, Theme } from '@/schemas';
-import { onMount, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { HostBubble } from '../bubbles/HostBubble';
 import { AvatarSideContainer } from './AvatarSideContainer';
 import { Match, Switch } from 'solid-js';
@@ -16,7 +16,6 @@ type Props =  {
   displayIndex: string;
   onDisplayAssistantMessage: (bubbleOffsetTop?: number) => void;
   context: BotContext;
-  hasError: boolean;
   hideAvatar: boolean;
   streamingMessageId: ChatChunkType['streamingMessageId'];
   onScrollToBottom: (top?: number) => void;
@@ -85,7 +84,6 @@ export const ChatChunk = (props: Props) => {
           guestAvatar={props.theme.chat.guestAvatar}
           context={props.context}
           isInputPrefillEnabled={props.settings.general.isInputPrefillEnabled ?? true}
-          hasError={props.hasError}
           streamingHandlers={props.streamingHandlers}
         />
       )} 

@@ -1,0 +1,2 @@
+- We should have test using a non existent agent name, if there is a non existent agent name the API call would return - POST https://app.predictabledialogs.com/web/incoming 404 (Not Found) and the UI would display - "The agent you're looking for doesn't exist."
+- We can have a test which establishes a real session with the backend and then mocks the initial reply to send to the AI in the backend, this would test that the useChat works well with the backend. (this test can also be planned by the backend endpoint)

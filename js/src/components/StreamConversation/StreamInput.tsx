@@ -2,10 +2,8 @@ import type {
   ChatReply, TextInputBlock,
   Theme
 } from '../../schemas';
-import { BotContext, InputSubmitContent } from '@/types';
+import { BotContext } from '@/types';
 import { TextInput } from '@/features/blocks/inputs/textInput';
-import { createSignal, createEffect, Switch, Match } from 'solid-js';
-import { isNotDefined } from '@/lib/utils';
 import { isMobile } from '@/utils/isMobileSignal';
 
 type Props = {
@@ -15,7 +13,6 @@ type Props = {
   guestAvatar?: Theme['chat']['guestAvatar'];
   context: BotContext;
   isInputPrefillEnabled: boolean;
-  hasError: boolean;
   streamingHandlers?: {
     onInput?: (e: Event) => void;
     onSubmit: (e: Event) => void;

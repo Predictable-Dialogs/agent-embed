@@ -9,9 +9,9 @@ import {
   createMockInitialChatReply,
   createMockAgentConfig,
   mockGetInitialChatReplyQuery
-} from '../test-utils';
+} from '../../test-utils';
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
-import realisticTestData from '../data/getInitialChatReplyQuery.json';
+import realisticTestData from '../../data/getInitialChatReplyQuery.json';
 
 // Mock dependencies
 vi.mock('@/queries/getInitialChatReplyQuery');

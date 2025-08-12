@@ -1,0 +1,1 @@
+Please write the specific functional features this SolidJs component has. While writing the functional features be specific to the code within THIS SolidJS component only. Before writing the functional features, look at the imports, props, signals and functions in the code and think deeply how they could impact the behavious of the component. 

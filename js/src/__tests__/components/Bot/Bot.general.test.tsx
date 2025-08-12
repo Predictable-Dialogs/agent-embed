@@ -5,7 +5,7 @@ import {
   createMockAgentConfig,
   createMockInitialChatReply,
   cleanupDOM,
-} from '../test-utils';
+} from '../../test-utils';
 
 // Mock external dependencies
 vi.mock('@/queries/getInitialChatReplyQuery', () => ({

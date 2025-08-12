@@ -1,11 +1,12 @@
 import { LiteBadge } from './LiteBadge';
-import { createEffect, createSignal, onMount, Show, onCleanup } from 'solid-js';
+import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from 'solid-js';
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
 import { BotContext } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
+import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
 import immutableCss from '../assets/immutable.css';
 
 export type BotProps = {
@@ -15,9 +16,7 @@ export type BotProps = {
   prefilledVariables?: Record<string, unknown>;
   apiHost?: string;
   apiStreamHost?: string;
-  onAnswer?: (answer: { message: string; blockId: string }) => void;
   onInit?: () => void;
-  onEnd?: () => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
@@ -25,16 +24,17 @@ export type BotProps = {
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
-  const [sessionId, setSessionId] = createSignal<string | undefined>();
-  const [agentConfig, setAgentConfig] = createSignal<any | undefined>();
-  const [clientSideActions, setClientSideActions] = createSignal<any | []>([]);
-  const [initialInput, setInitialInput] = createSignal<any | null>(null);
-  const [initialMessages, setInitialMessages] = createSignal<any | []>([]);
-  const [customCss, setCustomCss] = createSignal('');
+  const [apiData, setApiData] = createSignal<any | null>(null);
   const [isInitialized, setIsInitialized] = createSignal(false);
   const [error, setError] = createSignal<Error | undefined>();
   const [isDebugMode, setIsDebugMode] = createSignal(false);
   const [persistedMessages, setPersistedMessages] = createSignal<any[]>([]);
+  // Centralized config merging - props take precedence over API data
+
+  const mergedConfig = createMemo(() => {
+    const input = props.input;
+    return mergePropsWithApiData({ input }, apiData())
+  });
 
   const getStorageKey = (key: string) => {
     return props.agentName ? `${props.agentName}_${key}` : key;
@@ -74,7 +74,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     });
 
     const { data, error } = await getInitialChatReplyQuery({
-      sessionId: sessionId(),
+      sessionId: undefined, // Start with no sessionId for new initialization
       agentName: props.agentName,
       initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,
@@ -96,19 +96,14 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
     if (!data) return setError(new Error("Couldn't initiate the chat."));
 
-    if (data.sessionId) setSessionId(data.sessionId);
-    if (data.clientSideActions) setClientSideActions(data.clientSideActions);
-    // Use props input if provided, otherwise use API input
-    const inputToUse = props.input || data.input;
-    if (inputToUse) setInitialInput(inputToUse);
-    if (data.messages) setInitialMessages(data.messages);
-    setCustomCss(data.agentConfig.theme.customCss ?? '');
-    if (data.agentConfig) setAgentConfig(data.agentConfig);
+    // Store API data - merging with props will be handled by mergedConfig memo
+    setApiData(data);
   };
 
   const handleSessionExpired = () => {
     // Clear local storage
     localStorage.removeItem(getStorageKey('sessionId'));
+    localStorage.removeItem(getStorageKey('agentConfig'));
     localStorage.removeItem(getStorageKey('chatMessages'));
     setPersistedMessages([]);
     // Delay to show expiration message, then reinitialize
@@ -119,7 +114,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     }, 1500); // Display "expired" message for 1.5 seconds
   };
 
-  // maybe we should store the data.input as well?
   onMount(() => {
     setIsDebugMode(checkDebugMode());
     const storedSessionId = getSessionId();
@@ -130,9 +124,15 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (props.stream && props.persistSession && storedMessages.length > 0 && storedSessionId && storedAgentConfig) {
       // If persisted data exists, use it and mark as initialized
       if (storedMessages) setPersistedMessages(storedMessages);
-      if (storedSessionId) setSessionId(storedSessionId);
-      if (storedAgentConfig) setAgentConfig(storedAgentConfig);
-      if(storedCustomCss) setCustomCss(storedCustomCss || '');
+      const restoredData = {
+        sessionId: storedSessionId,
+        agentConfig: storedAgentConfig,
+        theme: { customCss: storedCustomCss || '' },
+        messages: [],
+        clientSideActions: [],
+        input: null,
+      };
+      setApiData(restoredData);
       setIsInitialized(true);
     } else {
       initializeBot().then(() => {
@@ -141,37 +141,26 @@ export const Bot = (props: BotProps & { class?: string }) => {
     }
   });
 
+  // Store merged config values in localStorage
   createEffect(() => {
-    if (customCss()) {
+    const config = mergedConfig();
+    if (config.customCss) {
       localStorage.setItem(
         getStorageKey('customCss'),
-        JSON.stringify(customCss())
+        JSON.stringify(config.customCss)
       );
     }
-  });
-
-  createEffect(() => {
-    if (sessionId()) {
+    if (config.sessionId) {
       localStorage.setItem(
         getStorageKey('sessionId'),
-        JSON.stringify(sessionId())
+        JSON.stringify(config.sessionId)
       );  
     }
-  });
-
-  createEffect(() => {
-    if (agentConfig()) {
+    if (config.agentConfig) {
       localStorage.setItem(
         getStorageKey('agentConfig'),
-        JSON.stringify(agentConfig())
+        JSON.stringify(config.agentConfig)
       );  
-    }
-  });
-
-  createEffect(() => {
-    if (props.input) {
-      console.log(`the props.input is set to:`, props.input);
-      setInitialInput(props.input);
     }
   });
 
@@ -181,38 +170,39 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   return (
     <>
-      <style>{customCss()}</style>
+      <style>{mergedConfig().customCss}</style>
       <style>{immutableCss}</style>
       <Show when={error()} keyed>
         {(error) => <ErrorMessage error={error} />}
       </Show>
-      <Show when={agentConfig()} keyed>
-        {(agentConfigValue) => (
-          <BotContent
-            class={props.class}
-            initialAgentReply={{
-              messages: initialMessages(),
-              clientSideActions: clientSideActions(),
-              input: initialInput(),
-            }}
-            persistedMessages={persistedMessages()}
-            agentConfig={agentConfigValue}
-            context={{
-              apiHost: props.apiHost,
-              apiStreamHost: props.apiStreamHost,
-              isPreview: props.isPreview ?? false,
-              sessionId: sessionId(),
-              agentConfig: agentConfigValue,
-              agentName: props.agentName,
-            }}
-            onAnswer={props.onAnswer}
-            onEnd={props.onEnd}
-            filterResponse={props.filterResponse}
-            stream={props.stream}
-            isDebugMode={isDebugMode()}
-            onSessionExpired={handleSessionExpired}
-          />
-        )}
+      <Show when={mergedConfig().agentConfig} keyed>
+        {(agentConfigValue) => {
+          const config = mergedConfig();
+          return (
+            <BotContent
+              class={props.class}
+              initialAgentReply={{
+                messages: config.messages,
+                clientSideActions: config.clientSideActions,
+                input: mergedConfig().input,
+              }}
+              persistedMessages={persistedMessages()}
+              agentConfig={agentConfigValue}
+              context={{
+                apiHost: props.apiHost,
+                apiStreamHost: props.apiStreamHost,
+                isPreview: props.isPreview ?? false,
+                sessionId: config.sessionId,
+                agentConfig: agentConfigValue,
+                agentName: props.agentName,
+              }}
+              filterResponse={props.filterResponse}
+              stream={props.stream}
+              isDebugMode={isDebugMode()}
+              onSessionExpired={handleSessionExpired}
+            />
+          );
+        }}
       </Show>
     </>
   );
@@ -224,8 +214,6 @@ type BotContentProps = {
   agentConfig: any;
   context: BotContext;
   class?: string;
-  onAnswer?: (answer: { message: string; blockId: string }) => void;
-  onEnd?: () => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   isDebugMode?: boolean;
@@ -288,8 +276,6 @@ const BotContent = (props: BotContentProps) => {
           initialAgentReply={props.initialAgentReply}
           persistedMessages={props.persistedMessages}
           agentConfig={props.agentConfig}
-          onAnswer={props.onAnswer}
-          onEnd={props.onEnd}
           filterResponse={props.filterResponse}
           onSessionExpired={props.onSessionExpired}
         />

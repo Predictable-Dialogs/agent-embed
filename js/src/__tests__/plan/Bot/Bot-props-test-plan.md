@@ -37,11 +37,11 @@ This plan covers props integration testing and merging logic for the Bot compone
 ### 2. Component Integration & Props Passing Tests
 
 **2.1 Complete Props Passing to BotContent** - Rejected
-- **Setup:** Render Bot with complete props set (onAnswer, onEnd, filterResponse, stream, etc.)
+- **Setup:** Render Bot with complete props set (filterResponse, stream, etc.)
 - **Execute:** Wait for initialization
 - **Assert:** 
   - BotContent receives correct `context` object with all API values
-  - Callback props (onAnswer, onEnd, filterResponse) passed correctly
+  - Callback props (filterResponse) passed correctly
   - Boolean props (stream, isDebugMode) passed correctly
 - **Critical:** Must fail if any prop passing is broken
 

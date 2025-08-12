@@ -42,7 +42,8 @@ export const mergePropsWithApiData = (
   apiData: ApiData | null
 ): MergedConfig => {
   // Props take precedence over API data
-  const input = props.input ?? apiData?.input ?? null;
+  const input = props.input || apiData?.input;
+
   const customCss = apiData?.agentConfig?.theme?.customCss ?? '';
   const messages = apiData?.messages ?? [];
   const clientSideActions = apiData?.clientSideActions ?? [];

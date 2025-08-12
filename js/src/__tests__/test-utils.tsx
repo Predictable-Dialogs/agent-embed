@@ -1,6 +1,7 @@
 import { render } from '@solidjs/testing-library';
 import { Component, JSX } from 'solid-js';
 import { vi } from 'vitest';
+import { BackgroundType } from '@/schemas/features/agent/theme/enums';
 
 // Test utilities for component testing
 export function renderComponent<T extends Component<any>>(
@@ -19,6 +20,7 @@ export const mockSetCssVariablesValue = vi.fn();
 // Factory functions for test data
 export function createMockAgentConfig(overrides = {}) {
   return {
+    id: 'test-agent-id',
     theme: {
         chat: {
             "inputs": {
@@ -30,7 +32,7 @@ export function createMockAgentConfig(overrides = {}) {
                 "color": "#FFFFFF",
                 "backgroundColor": "#517920"
             },
-            "roundness": "none",
+            "roundness": "none" as const,
             "hostAvatar": {
                 "url": "https://pd-images-public.s3.ap-south-1.amazonaws.com/guest-profile.png",
                 "isEnabled": true
@@ -51,7 +53,7 @@ export function createMockAgentConfig(overrides = {}) {
         general: {
             "font": "Amita",
             "background": {
-                "type": "Color",
+                "type": BackgroundType.COLOR,
                 "content": "#b6a0a0"
             }
         }
@@ -77,9 +79,14 @@ export function createMockAgentConfig(overrides = {}) {
 }
 
 export function createMockInitialChatReply(overrides = {}) {
+  const fullAgentConfig = createMockAgentConfig();
   return {
     sessionId: 'test-session-id',
-    agentConfig: createMockAgentConfig(),
+    agentConfig: {
+      id: fullAgentConfig.id,
+      theme: fullAgentConfig.theme,
+      settings: fullAgentConfig.settings,
+    },
     messages: [
         {
             "type": "text",
@@ -112,11 +119,18 @@ export function createMockInitialChatReply(overrides = {}) {
 }
 
 export function createMockBotContext(overrides = {}) {
+  const fullAgentConfig = createMockAgentConfig();
   return {
     agentName: 'test-agent',
     apiHost: 'https://api.test.com',
     apiStreamHost: 'https://stream.test.com',
     isPreview: false,
+    sessionId: 'test-session',
+    agentConfig: {
+      id: fullAgentConfig.id,
+      theme: fullAgentConfig.theme,
+      settings: fullAgentConfig.settings,
+    },
     prefilledVariables: {},
     ...overrides,
   };
@@ -164,20 +178,54 @@ export function cleanupDOM() {
 
 // Mock useChat hook implementation
 export function createMockUseChat(overrides = {}) {
-  return {
-    messages: [],
+  let messagesData: any[] = [];
+  let errorData: any = null;
+  let statusData: any = 'idle';
+  let dataValue: any = null;
+  
+  const mock = {
+    messages: vi.fn(() => messagesData),
     input: '',
     handleInputChange: vi.fn(),
     handleSubmit: vi.fn(),
     isLoading: false,
-    error: null,
+    error: vi.fn(() => errorData),
     reload: vi.fn(),
     stop: vi.fn(),
     append: vi.fn(),
     setMessages: vi.fn(),
     setInput: vi.fn(),
+    status: vi.fn(() => statusData),
+    data: vi.fn(() => dataValue),
     ...overrides,
-  };
+  } as any;
+  
+  // Allow tests to set the underlying data
+  Object.defineProperty(mock, 'messages', {
+    get() { return vi.fn(() => messagesData); },
+    set(value: any) { messagesData = value; },
+    configurable: true
+  });
+  
+  Object.defineProperty(mock, 'error', {
+    get() { return vi.fn(() => errorData); },
+    set(value: any) { errorData = value; },
+    configurable: true
+  });
+  
+  Object.defineProperty(mock, 'status', {
+    get() { return vi.fn(() => statusData); },
+    set(value: any) { statusData = value; },
+    configurable: true
+  });
+  
+  Object.defineProperty(mock, 'data', {
+    get() { return vi.fn(() => dataValue); },
+    set(value: any) { dataValue = value; },
+    configurable: true
+  });
+  
+  return mock;
 }
 
 // Helper for testing async effects

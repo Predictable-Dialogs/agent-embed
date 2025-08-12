@@ -250,14 +250,58 @@ Based on the component documentation and source code analysis, here's a comprehe
    - **Verify**: `chatContainer` ref is properly assigned
    - **Assert**: Ref can be used for scroll operations
 
+## Mock Implementation Specifications
+
+**SolidJS Signal Compatibility**:
+The AI SDK returns SolidJS signals/accessors that must be called as functions. Critical requirements:
+
+- `messages`, `error`, `status`, `data` must be mocked as **functions** that return values
+- Use getter/setter pattern to allow test reassignment: `mockUseChat.messages = newArray`
+- Example implementation:
+  ```typescript
+  const mockUseChat = {
+    messages: vi.fn(() => messagesData),
+    error: vi.fn(() => errorData),
+    // ... with Object.defineProperty for reassignment
+  }
+  ```
+
+**Function Call Behavior**:
+- Component calls `messages()`, `error()` as functions - ensure mocks support this
+- Tests should be able to reassign: `mockUseChat.messages = [...]` (updates underlying data)
+- Mock functions should return the current data state when called
+
+## Type Safety & Schema Compliance
+
+**Required Mock Properties**:
+- `InitialChatReply`: Must include `sessionId` (string) and `agentConfig` (object with id, theme, settings)
+- `BotContext`: Must include `agentConfig`, `sessionId`, `agentName`, plus optional API hosts
+- `AgentConfig`: Only requires subset `{id: string, theme: object, settings: object}` (not full agent schema)
+
+**Enum and Union Type Requirements**:
+- `BackgroundType`: Use `BackgroundType.COLOR` (not string `"Color"`)
+- `roundness`: Use `"none" | "medium" | "large"` with `as const` assertion
+- Ensure all enum imports are included in test-utils
+
+**TypeScript Compatibility**:
+- Use `as any` typing for dynamic mock objects that need reassignment
+- Ensure mock factories return types compatible with component expectations
+- All test data must pass TypeScript compilation
+
 ## Test Implementation Strategy
 
 **Mocking Approach**:
-- Mock `useChat` from `@ai-sdk/solid` with realistic return values
+- Mock `useChat` from `@ai-sdk/solid` as SolidJS signals (functions returning values)
 - Mock `getApiStreamEndPoint` to return predictable URLs
 - Mock `transformMessage` utility to return enhanced messages
 - Use real localStorage operations with cleanup
 - Mock `setTimeout`/`clearTimeout` for timer testing
+
+**Build Integration Requirements**:
+- **Mandatory**: Run `npm run build` after test implementation to verify TypeScript compilation
+- **Mandatory**: Run `npm test` to verify runtime behavior
+- Both must pass for implementation to be considered complete
+- Test files must not introduce TypeScript errors that break the build process
 
 **Assertion Strategy**:
 - Test actual DOM changes and component state

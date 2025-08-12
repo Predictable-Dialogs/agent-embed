@@ -12,7 +12,8 @@
   * Passes these as `initialMessages` to `useChat`.
 
 * **Chat API wiring (Vercel AI SDK)**
-
+  The AI SDK returns SolidJS signals/accessors (functions), not plain values. The component calls messages(), error(), etc. as
+  functions.
   * Uses `useChat` with:
 
     * `api` chosen from `context.apiStreamHost` or `getApiStreamEndPoint()`.

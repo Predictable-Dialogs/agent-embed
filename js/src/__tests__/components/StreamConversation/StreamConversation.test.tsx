@@ -52,11 +52,11 @@ describe('StreamConversation - Working Tests', () => {
     
     // Setup default mocks
     mockUseChat = createMockUseChat({
-      status: vi.fn(() => 'idle'),
-      messages: vi.fn(() => []),
+      status: 'idle',
+      messages: [],
       setMessages: vi.fn(),
-      data: vi.fn(() => null),
-      error: vi.fn(() => null),
+      data: null,
+      error: null,
       handleInputChange: vi.fn(),
       handleSubmit: vi.fn(),
     });
@@ -107,7 +107,7 @@ describe('StreamConversation - Working Tests', () => {
         isPersisted: true
       }));
 
-      mockUseChat.messages = vi.fn(() => expectedMessagesWithPersisted);
+      mockUseChat.messages = expectedMessagesWithPersisted;
 
       const props = createTestProps({
         persistedMessages,
@@ -145,7 +145,7 @@ describe('StreamConversation - Working Tests', () => {
       };
 
       mockTransformMessage.mockReturnValue(transformedMessage);
-      mockUseChat.messages = vi.fn(() => [transformedMessage]);
+      mockUseChat.messages = [transformedMessage];
 
       const props = createTestProps({
         initialAgentReply: {
@@ -176,7 +176,7 @@ describe('StreamConversation - Working Tests', () => {
     });
 
     it('should handle empty state with no messages', () => {
-      mockUseChat.messages = vi.fn(() => []);
+      mockUseChat.messages = [];
 
       const props = createTestProps({
         persistedMessages: [],
@@ -294,7 +294,7 @@ describe('StreamConversation - Working Tests', () => {
         { id: '1', role: 'assistant', content: 'Hello' }
       ];
 
-      mockUseChat.messages = vi.fn(() => messages);
+      mockUseChat.messages = messages;
 
       const props = createTestProps({
         context: {
@@ -316,7 +316,7 @@ describe('StreamConversation - Working Tests', () => {
         { id: '1', role: 'assistant', content: 'Hello' }
       ];
 
-      mockUseChat.messages = vi.fn(() => messages);
+      mockUseChat.messages = messages;
 
       const props = createTestProps({
         context: {
@@ -337,7 +337,7 @@ describe('StreamConversation - Working Tests', () => {
   describe('4. Error and Toast UI', () => {
     it('should display ErrorChunk when error is present', () => {
       const errorMessage = 'Network connection failed';
-      mockUseChat.error = vi.fn(() => ({ message: errorMessage }));
+      mockUseChat.error = { message: errorMessage };
 
       const props = createTestProps();
 
@@ -347,7 +347,7 @@ describe('StreamConversation - Working Tests', () => {
     });
 
     it('should not display ErrorChunk when no error', () => {
-      mockUseChat.error = vi.fn(() => null);
+      mockUseChat.error = null;
 
       const props = createTestProps();
 
@@ -365,7 +365,7 @@ describe('StreamConversation - Working Tests', () => {
         { id: '3', role: 'assistant', content: 'How can I help?' }
       ];
 
-      mockUseChat.messages = vi.fn(() => messages);
+      mockUseChat.messages = messages;
 
       const props = createTestProps();
 
@@ -382,7 +382,7 @@ describe('StreamConversation - Working Tests', () => {
         { id: '3', role: 'assistant', content: 'How can I help?' }
       ];
 
-      mockUseChat.messages = vi.fn(() => messages);
+      mockUseChat.messages = messages;
 
       const props = createTestProps();
 
@@ -404,7 +404,7 @@ describe('StreamConversation - Working Tests', () => {
         { id: '2', role: 'user', content: 'Hi', isPersisted: false }
       ];
 
-      mockUseChat.messages = vi.fn(() => messages);
+      mockUseChat.messages = messages;
 
       const props = createTestProps();
 

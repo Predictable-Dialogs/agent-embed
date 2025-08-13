@@ -15,9 +15,9 @@
   visibility: visible !important;
   display: flex !important;
   /* Position below input container with proper spacing */
-  bottom: 10px !important;
-  right: 16px !important;
-  left: auto !important;
+  bottom: 16px !important;
+  right: auto !important;
+  left: 16px !important;
   top: auto !important;
   transition: background-color 0.2s ease-in-out !important;
 }

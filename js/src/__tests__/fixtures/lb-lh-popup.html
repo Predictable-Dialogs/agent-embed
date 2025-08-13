@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Agent Example</title>
+  </head>
+  <body>
+    <!-- Adding a button to trigger the chat agent popup -->
+
+<script type="module">
+  import Agent from '../../../dist/web.js'
+  Agent.initPopup({
+    agentName: "Chatbot-67689",
+    apiHost: "http://localhost:8001/web/incoming",
+    apiStreamHost: "http://localhost:8001/web/stream",
+    autoShowDelay: 3000,
+    // persistSession: true,
+  });
+</script>
+<agent-standard style="width: 100%; height: 600px; "></agent-standard>
+
+  </body>
+</html>

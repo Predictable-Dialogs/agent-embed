@@ -1,6 +1,7 @@
 import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show } from 'solid-js';
 import { ChatChunk } from './ChatChunk';
+import { FixedBottomInput } from './FixedBottomInput';
 import { BotContext, InitialChatReply } from '@/types';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { useChat } from '@ai-sdk/solid';
@@ -50,6 +51,7 @@ export const StreamConversation = (props: Props) => {
   const [theme, setTheme] = createSignal(props.agentConfig.theme);
   const [isSending, setIsSending] = createSignal(false);
   const [displayIndex, setdisplayIndex] = createSignal('#HIDE');
+  const [isFixedInputDisabled, setIsFixedInputDisabled] = createSignal(false);
   let longRequest: ReturnType<typeof setTimeout> | undefined;
 
 
@@ -126,6 +128,7 @@ export const StreamConversation = (props: Props) => {
       onSubmit: (e: Event) => {
         e.preventDefault();
         setdisplayIndex('#HIDE');
+        setIsFixedInputDisabled(true);
         longRequest = setTimeout(() => {
           setIsSending(true);
         }, 2000);
@@ -194,51 +197,61 @@ export const StreamConversation = (props: Props) => {
     }
   };
   
-  createEffect(() => {
-    console.log(`initialAgentReply.input is set to:`, props.initialAgentReply.input);
-  });
-
   return (
-    <div
-      ref={chatContainer}
-      class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2"
-    >
-      <For each={messages()}>
-        {(message) => {        
-          if (message.role === 'assistant') {
-            clearTimeout(longRequest);
-            setIsSending(false);
-          }
-
-          return (
-            <ChatChunk
-              displayIndex={displayIndex()}
-              input={message.role === 'assistant' ? props.initialAgentReply.input : undefined}
-              onDisplayAssistantMessage={onDisplayAssistantMessage}
-              message={message}
-              theme={theme()}
-              settings={props.agentConfig.settings}
-              streamingMessageId={undefined}
-              context={props.context}
-              hideAvatar={false}
-              streamingHandlers={streamingHandlers()}
-              onScrollToBottom={autoScrollToBottom}
-              filterResponse={props.filterResponse}
-              isPersisted={(message as EnhancedUIMessage).isPersisted ?? false}
-            />
-          );
+    <>
+      <div
+        ref={chatContainer}
+        class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2"
+        style={{
+          'padding-bottom': props.initialAgentReply.input?.options?.type === 'fixed-bottom' ? '200px' : undefined
         }}
-      </For>
+      >
+        <For each={messages()}>
+          {(message) => {        
+            if (message.role === 'assistant') {
+              clearTimeout(longRequest);
+              setIsSending(false);
+              setIsFixedInputDisabled(false);
+            }
 
-      <Show when={isSending()}>
-        <LoadingChunk theme={theme()} />
-      </Show>
+            return (
+              <ChatChunk
+                displayIndex={displayIndex()}
+                input={message.role === 'assistant' ? props.initialAgentReply.input : undefined}
+                onDisplayAssistantMessage={onDisplayAssistantMessage}
+                message={message}
+                theme={theme()}
+                settings={props.agentConfig.settings}
+                streamingMessageId={undefined}
+                context={props.context}
+                hideAvatar={false}
+                streamingHandlers={streamingHandlers()}
+                onScrollToBottom={autoScrollToBottom}
+                filterResponse={props.filterResponse}
+                isPersisted={(message as EnhancedUIMessage).isPersisted ?? false}
+              />
+            );
+          }}
+        </For>
 
-      <Show when={error()}>
-        <ErrorChunk message={error()?.message} theme={theme()} />
+        <Show when={isSending()}>
+          <LoadingChunk theme={theme()} />
+        </Show>
+
+        <Show when={error()}>
+          <ErrorChunk message={error()?.message} theme={theme()} />
+        </Show>
+        <BottomSpacer />
+      </div>
+
+      <Show when={props.initialAgentReply.input?.options?.type === 'fixed-bottom'}>
+        <FixedBottomInput
+          block={props.initialAgentReply.input}
+          isDisabled={isFixedInputDisabled()}
+          streamingHandlers={streamingHandlers()}
+        />
       </Show>
-      <BottomSpacer />
-    </div>
+    </>
   );
 };
 

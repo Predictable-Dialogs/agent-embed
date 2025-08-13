@@ -93,7 +93,11 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   onMount(() => {
     setIsDebugMode(storage.getDebugMode());
-    
+    if (!props.agentName) {
+      //On the first mount, the agentName is not set, so we return early
+      console.info(`Initializing pd agent`);
+      return;
+    }
     if (props.persistSession && storage.hasCompleteSession()) {
       // If persisted data exists, use it and mark as initialized
       const storedSessionId = storage.getSessionId();

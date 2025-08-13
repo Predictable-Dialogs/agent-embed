@@ -399,3 +399,8 @@ select option {
 .chat-container.ready {
   opacity: 1;
 }
+
+.agent-fixed-input {
+  color: var(--agent-input-color);
+  background-color: var(--agent-input-bg-color);
+}

@@ -2,7 +2,7 @@
   position: absolute !important;
   padding: 4px 8px !important;
   background-color: white !important;
-  z-index: 50 !important;
+  z-index: 52 !important;
   border-radius: 4px !important;
   color: rgb(17 24 39) !important;
   gap: 8px !important;
@@ -14,10 +14,11 @@
   opacity: 1 !important;
   visibility: visible !important;
   display: flex !important;
-  top: auto !important;
-  right: auto !important;
+  /* Position below input container with proper spacing */
+  bottom: 10px !important;
+  right: 16px !important;
   left: auto !important;
-  bottom: 20px !important;
+  top: auto !important;
   transition: background-color 0.2s ease-in-out !important;
 }
 

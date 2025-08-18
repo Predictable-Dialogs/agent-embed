@@ -98,7 +98,9 @@ vi.mock('@/components/StreamConversation', () => ({
           left: '0',
           right: '0', 
           'z-index': '51',
-          padding: '1rem',
+          'padding-left': '1rem',
+          'padding-right': '1rem',
+          'padding-top': '1rem',
           'padding-bottom': 'max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))',
           'background-color': 'var(--agent-embed-container-bg-color, #ffffff)',
         };

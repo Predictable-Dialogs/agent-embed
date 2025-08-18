@@ -56,7 +56,10 @@ export const FixedBottomInput = (props: Props) => {
         left: '0',
         right: '0',
         'z-index': '51', //viewport overlay level
-        padding: '1rem',
+        'padding-left': '0.75rem',
+        'padding-right': '0.75rem',
+        'padding-top': '1rem',
+        // padding-bottom comes from baseStyles for LiteBadge spacing
       }
     }
   })

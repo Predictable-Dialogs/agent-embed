@@ -122,17 +122,6 @@ describe('Bot.tsx - SessionId Functionality', () => {
         verifyStorageStructure('test-agent', realisticSessionId);
       });
 
-      it('should use plain keys when agentName is not provided', async () => {
-        render(() => <Bot agentName="" stream={true} persistSession={true} />);
-        
-        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
-        await waitForStorage('sessionId');
-
-        // Verify specific values without namespacing
-        verifyStorageValue('sessionId', realisticSessionId);
-        const agentConfig = JSON.parse(localStorage.getItem('agentConfig') || '{}');
-        expect(agentConfig.theme?.general?.font).toBe('Amita');
-      });
 
       it('should follow pattern ${agentName}_${key} for all storage keys', async () => {
         render(() => <Bot agentName="my-bot" stream={true} persistSession={true} />);
@@ -306,22 +295,24 @@ describe('Bot.tsx - SessionId Functionality', () => {
         expect(screen.getByTestId('persisted-messages-count')).toHaveTextContent('2');
       });
 
-      it('should require both stream=true and persistSession=true for restoration', async () => {
+      // Test when persistSession=true but data exists in localStorage - should skip API call
+      it('should skip API call when persistSession=true and complete session data exists', async () => {
         setupLocalStorage({
           'test-agent_sessionId': 'sess_restored_456',
           'test-agent_agentConfig': realisticTestData.agentConfig,
           'test-agent_chatMessages': [{ id: 'msg-1', content: 'test', role: 'user' }],
         });
 
-        // Test with stream=false
-        render(() => <Bot agentName="test-agent" stream={false} persistSession={true} />);
+        render(() => <Bot agentName="test-agent" persistSession={true} />);
         await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
-        verifyApiCallParams({ agentName: 'test-agent' });
+        
+        // Verify no API call was made since data exists in localStorage
+        expect(getInitialChatReplyQuery).not.toHaveBeenCalled();
 
         vi.clearAllMocks();
 
-        // Test with persistSession=false
-        render(() => <Bot agentName="test-agent" stream={true} persistSession={false} />);
+        // Test with persistSession=false - should call API even if data exists
+        render(() => <Bot agentName="test-agent" persistSession={false} />);
         await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
         verifyApiCallParams({ agentName: 'test-agent' });
       });

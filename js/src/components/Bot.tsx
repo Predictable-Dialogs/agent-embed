@@ -3,7 +3,7 @@ import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext } from '@/types';
+import { BotContext, WidgetContext } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
@@ -22,6 +22,7 @@ export type BotProps = {
   stream?: boolean;
   persistSession?: boolean;
   input?: any;
+  widgetContext?: WidgetContext;
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
@@ -176,6 +177,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               filterResponse={props.filterResponse}
               isDebugMode={isDebugMode()}
               onSessionExpired={handleSessionExpired}
+              widgetContext={props.widgetContext}
             />
           );
         }}
@@ -193,6 +195,7 @@ type BotContentProps = {
   filterResponse?: (response: string) => string;
   isDebugMode?: boolean;
   onSessionExpired?: () => void;
+  widgetContext?: WidgetContext;
 };
 
 const BotContent = (props: BotContentProps) => {
@@ -253,6 +256,7 @@ const BotContent = (props: BotContentProps) => {
           agentConfig={props.agentConfig}
           filterResponse={props.filterResponse}
           onSessionExpired={props.onSessionExpired}
+          widgetContext={props.widgetContext}
         />
       </div>
       <Show when={props.agentConfig.settings.general.isBrandingEnabled}>

@@ -148,6 +148,7 @@ export const Popup = (props: PopupProps) => {
                 {...botProps}
                 initialPrompt={initialPrompt()}
                 prefilledVariables={prefilledVariables()}
+                widgetContext="popup"
               />
             </div>
           </div>

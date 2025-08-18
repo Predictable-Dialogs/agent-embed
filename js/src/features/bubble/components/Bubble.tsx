@@ -174,6 +174,7 @@ export const Bubble = (props: BubbleProps) => {
             initialPrompt={initialPrompt()}
             prefilledVariables={prefilledVariables()}
             class="rounded-lg"
+            widgetContext="bubble"
           />
         </Show>
       </div>

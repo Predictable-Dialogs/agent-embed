@@ -1,10 +1,10 @@
 import { Textarea, ShortTextInput } from '@/components'
 import { SendButton } from '@/components/SendButton'
 import { CommandData } from '@/features/commands'
-import { InputSubmitContent } from '@/types'
+import { InputSubmitContent, WidgetContext } from '@/types'
 import { isMobile } from '@/utils/isMobileSignal'
 import type { TextInputBlock } from '@/schemas'
-import { createSignal, createEffect, onCleanup, onMount } from 'solid-js'
+import { createSignal, createEffect, onCleanup, onMount, createMemo } from 'solid-js'
 
 type Props = {
   block: TextInputBlock
@@ -15,12 +15,59 @@ type Props = {
     onSubmit?: (e: Event) => void
   }
   isDisabled?: boolean
+  widgetContext?: WidgetContext
 }
 
 export const FixedBottomInput = (props: Props) => {
   const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '')
   const [shouldFocus, setShouldFocus] = createSignal(false)
   let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined
+
+  // Determine positioning based on widget context
+  const isStandardWidget = createMemo(() => props.widgetContext === 'standard')
+  
+  // Conditional styles based on widget type
+  const containerStyles = createMemo(() => {
+    const baseStyles = {
+      'background-color': 'var(--agent-embed-container-bg-color, #ffffff)',
+      'padding-bottom': `max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))`
+    }
+
+    if (isStandardWidget()) {
+      // Standard widget: use absolute positioning with container boundaries
+      return {
+        ...baseStyles,
+        position: 'absolute' as 'absolute',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        'z-index': '10', //appropriate for container context
+        'padding-left': '0.75rem', // Match px-3 (12px) from chat container
+        'padding-right': '0.75rem',
+        'padding-top': '1rem', // Keep original top padding
+        // padding-bottom comes from baseStyles for LiteBadge spacing
+      }
+    } else {
+      // Bubble/Popup widgets: use fixed positioning for viewport overlays  
+      return {
+        ...baseStyles,
+        position: 'fixed' as 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        'z-index': '51', //viewport overlay level
+        padding: '1rem',
+      }
+    }
+  })
+
+  const containerClasses = createMemo(() => {
+    if (isStandardWidget()) {
+      return 'agent-fixed-input'
+    } else {
+      return 'fixed bottom-0 left-0 right-0 agent-fixed-input'
+    }
+  })
 
   const handleInput = (e: Event) => {
     const target = e.currentTarget as HTMLInputElement | HTMLTextAreaElement;
@@ -89,13 +136,8 @@ export const FixedBottomInput = (props: Props) => {
 
   return (
     <div
-      class="fixed bottom-0 left-0 right-0 agent-fixed-input"
-      style={{
-        'z-index': '51',
-        'background-color': 'var(--agent-embed-container-bg-color, #ffffff)',
-        'padding': '1rem',
-        'padding-bottom': `max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))`
-      }}
+      class={containerClasses()}
+      style={containerStyles()}
     >
       <div
         class="flex items-end justify-between agent-input w-full max-w-4xl mx-auto"

@@ -38,24 +38,98 @@ vi.mock('@/components/LiteBadge', () => ({
   LiteBadge: () => <div data-testid="lite-badge">Badge</div>,
 }));
 
+// Mock useAgentStorage hook
+vi.mock('@/hooks/useAgentStorage', () => ({
+  useAgentStorage: vi.fn(() => ({
+    getDebugMode: vi.fn(() => false),
+    hasCompleteSession: vi.fn(() => false),
+    getSessionId: vi.fn(),
+    getAgentConfig: vi.fn(),
+    getCustomCss: vi.fn(),
+    getChatMessages: vi.fn(),
+    getInput: vi.fn(),
+    setCustomCss: vi.fn(),
+    setSessionId: vi.fn(),
+    setAgentConfig: vi.fn(),
+    setInput: vi.fn(),
+    clearSession: vi.fn(),
+  })),
+}));
+
+// Mock mergePropsWithApiData utility
+vi.mock('@/utils/mergePropsWithApiData', () => ({
+  mergePropsWithApiData: vi.fn((props, apiData) => ({
+    ...apiData,
+    ...props,
+    customCss: '',
+    messages: apiData?.messages || [],
+    clientSideActions: apiData?.clientSideActions || [],
+    input: apiData?.input || props.input, // Ensure input is preserved from apiData
+  })),
+}));
+
 // Mock StreamConversation to render FixedBottomInput when needed
 vi.mock('@/components/StreamConversation', () => ({
   StreamConversation: (props: any) => {
-    const hasFixedBottomInput = props.initialAgentReply.input?.options?.type === 'fixed-bottom';
+    const hasFixedBottomInput = props.initialAgentReply?.input?.options?.type === 'fixed-bottom';
+    const isStandardWidget = props.widgetContext === 'standard';
+    
+    // Replicate the conditional positioning logic from our fix
+    const getInputStyles = (): Record<string, string> => {
+      if (isStandardWidget) {
+        // Standard widget: absolute positioning with container boundaries
+        return {
+          position: 'absolute',
+          bottom: '0',
+          left: '0', 
+          right: '0',
+          'z-index': '10',
+          'padding-left': '0.75rem',
+          'padding-right': '0.75rem',
+          'padding-top': '1rem',
+          'padding-bottom': 'max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))',
+          'background-color': 'var(--agent-embed-container-bg-color, #ffffff)',
+        };
+      } else {
+        // Bubble/Popup: fixed positioning for viewport overlays
+        return {
+          position: 'fixed',
+          bottom: '0',
+          left: '0',
+          right: '0', 
+          'z-index': '51',
+          padding: '1rem',
+          'padding-bottom': 'max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))',
+          'background-color': 'var(--agent-embed-container-bg-color, #ffffff)',
+        };
+      }
+    };
+
+    const getInputClasses = () => {
+      if (isStandardWidget) {
+        return 'agent-fixed-input';
+      } else {
+        return 'fixed bottom-0 left-0 right-0 agent-fixed-input';
+      }
+    };
     
     return (
       <div data-testid="stream-conversation">
-        <div class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2">
+        <div 
+          class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2"
+          style={{
+            'padding-bottom': hasFixedBottomInput ? '200px' : undefined,
+            position: isStandardWidget ? 'relative' : undefined,
+            'padding-left': '0.75rem', // px-3 equivalent
+            'padding-right': '0.75rem', // px-3 equivalent
+          }}
+        >
           <div data-testid="chat-messages">Mock chat messages</div>
         </div>
         {hasFixedBottomInput && (
           <div
-            class="fixed bottom-0 left-0 right-0 agent-fixed-input"
-            style={{
-              'z-index': '51',
-              'background-color': 'var(--agent-embed-container-bg-color, #ffffff)',
-              'padding': '1rem',
-            }}
+            class={getInputClasses()}
+            style={getInputStyles()}
           >
             <div
               class="flex items-end justify-between agent-input w-full max-w-4xl mx-auto"
@@ -75,7 +149,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
   let mockContainer: HTMLElement;
   let mockUseChat: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Create a mock container element that simulates different Standard widget sizes
     mockContainer = document.createElement('agent-standard');
     document.body.appendChild(mockContainer);
@@ -86,9 +160,9 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
       status: 'ready',
     });
     
-    vi.mocked(import('@ai-sdk/solid')).useChat = vi.fn(() => mockUseChat);
+    (vi.mocked(import('@ai-sdk/solid')) as any).useChat = vi.fn(() => mockUseChat);
     
-    // Mock the initial chat reply query
+    // Mock the initial chat reply query - this returns the complete Bot initialization data
     const mockInitialReply = createMockInitialChatReply({
       input: {
         type: "text input",
@@ -102,8 +176,8 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
       }
     });
     
-    vi.mocked(import('@/queries/getInitialChatReplyQuery')).getInitialChatReplyQuery = vi.fn()
-      .mockResolvedValue(mockInitialReply);
+    const getInitialChatReplyQuery = vi.mocked((await import('@/queries/getInitialChatReplyQuery')).getInitialChatReplyQuery);
+    getInitialChatReplyQuery.mockResolvedValue({ data: mockInitialReply, error: undefined });
   });
 
   afterEach(() => {
@@ -122,13 +196,16 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
       
       const context = createMockBotContext();
       
-      render(() => (
+      const result = render(() => (
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
+      // Wait longer for async initialization
+      await new Promise(resolve => setTimeout(resolve, 500));
       await waitForEffects();
 
       // Wait for FixedBottomInput to be rendered
@@ -166,6 +243,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
@@ -200,6 +278,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
@@ -226,6 +305,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
@@ -249,6 +329,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
@@ -280,6 +361,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
@@ -308,6 +390,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 
@@ -337,6 +420,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
         <Bot 
           agentName={context.agentName}
           apiHost={context.apiHost}
+          widgetContext="standard"
         />
       ), { container: mockContainer });
 

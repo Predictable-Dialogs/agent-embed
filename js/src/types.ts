@@ -37,3 +37,6 @@ export type ChatChunk = Pick<
 > & {
   streamingMessageId?: string
 }
+
+// Widget Context Detection: used for conditional positioning in FixedBottomInput
+export type WidgetContext = 'standard' | 'bubble' | 'popup'

@@ -39,7 +39,7 @@ export const Standard = (props: BotProps, { element }: { element: HTMLElement })
         {hostElementCss}
       </style>
       <Show when={isBotDisplayed()}>
-        <Bot {...props} />
+        <Bot {...props} widgetContext="standard" />
       </Show>
     </>
   );

@@ -2,7 +2,7 @@ import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show } from 'solid-js';
 import { ChatChunk } from './ChatChunk';
 import { FixedBottomInput } from './FixedBottomInput';
-import { BotContext, InitialChatReply } from '@/types';
+import { BotContext, InitialChatReply, WidgetContext } from '@/types';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { useChat } from '@ai-sdk/solid';
 import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
@@ -41,6 +41,7 @@ type Props = {
   context: BotContext;
   filterResponse?: (response: string) => string;
   onSessionExpired?: () => void;
+  widgetContext?: WidgetContext;
 };
 
 export const StreamConversation = (props: Props) => {
@@ -203,7 +204,8 @@ export const StreamConversation = (props: Props) => {
         ref={chatContainer}
         class="flex flex-col overflow-y-scroll w-full min-h-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2"
         style={{
-          'padding-bottom': props.initialAgentReply.input?.options?.type === 'fixed-bottom' ? '200px' : undefined
+          'padding-bottom': props.initialAgentReply.input?.options?.type === 'fixed-bottom' ? '200px' : undefined,
+          'position': props.widgetContext === 'standard' ? 'relative' : undefined
         }}
       >
         <For each={messages()}>
@@ -242,15 +244,15 @@ export const StreamConversation = (props: Props) => {
           <ErrorChunk message={error()?.message} theme={theme()} />
         </Show>
         <BottomSpacer />
+      </div>
         <Show when={props.initialAgentReply.input?.options?.type === 'fixed-bottom'}>
           <FixedBottomInput
             block={props.initialAgentReply.input}
             isDisabled={isFixedInputDisabled()}
             streamingHandlers={streamingHandlers()}
+            widgetContext={props.widgetContext}
           />
         </Show>
-      </div>
-
     </>
   );
 };

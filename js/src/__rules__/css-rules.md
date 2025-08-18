@@ -16,3 +16,14 @@
 * **Inconsistent/underused Tailwind** (magic numbers, ad-hoc z-indexes, ignoring tokens).
 * **Magic numbers** for layers/spacing instead of semantic tokens (`z-[51]` without a token).
 * **Redundant utilities** (e.g., `my-2 ml-2 mr-2` instead of `my-2 mx-2`; `left-0 right-0 bottom-0` instead of `inset-x-0 bottom-0`).
+* **Background conflicts** (multiple elements setting backgrounds without clear hierarchy).
+
+## REFACTOR SAFETY CHECKS
+* **Semantic class preservation**: When converting inline styles to classes, verify existing semantic classes (like `agent-input`, `agent-button`) aren't being duplicated or conflicted.
+* **Background hierarchy**: Only one element in a component tree should own the primary background - avoid setting backgrounds on both container and child unless intentionally layered.
+* **API override points**: Identify which CSS variables can be overridden by APIs/themes and ensure refactoring doesn't create conflicts with those override points.
+
+## BEFORE REFACTORING
+* **Audit existing classes**: Search for semantic classes (`agent-*`) that already handle styling concerns.
+* **Map CSS variable usage**: Understand which variables are API-configurable vs internal.
+* **Test with overrides**: Verify the refactor works when theme variables are dynamically changed.

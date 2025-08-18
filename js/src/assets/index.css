@@ -31,6 +31,13 @@
 
   --agent-border-radius: 6px;
 
+  /* Layer tokens for semantic z-index values */
+  --layer-container: 10;
+  --layer-overlay: 51;
+  
+  /* Safe area spacing token */
+  --space-safe-bottom: max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem));
+
   /* Phone input */
   --PhoneInputCountryFlag-borderColor: transparent;
   --PhoneInput-color--focus: transparent;

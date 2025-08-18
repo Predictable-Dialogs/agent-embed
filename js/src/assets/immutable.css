@@ -17,7 +17,7 @@
   /* Position below input container with proper spacing */
   bottom: 16px !important;
   right: auto !important;
-  left: 16px !important;
+  left: max(16px, calc(50% - 448px + 16px)) !important;
   top: auto !important;
   transition: background-color 0.2s ease-in-out !important;
 }

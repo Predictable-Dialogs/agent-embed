@@ -16,11 +16,22 @@ The codebase is organized as a monorepo with three main packages:
 
 ### Key Components Structure
 
+The Standard widget acts as a custom element that fills its container, while Bubble/Popup are overlay widgets that position themselves independently of any container element.
+
+  Standard widget (Standard.tsx:14):
+  - Takes an { element } parameter representing the host DOM element
+  - Uses :host CSS selector (Standard.tsx:6-11) to style the custom element container
+  - Relies on the <agent-standard> HTML element's inline styles to control dimensions
+
+  Bubble/Popup widgets:
+  - Don't receive a host element parameter
+  - Use fixed positioning with absolute coordinates (Bubble.tsx:165, Popup.tsx:131)
+  - Control their own positioning and sizing through internal CSS classes and theme props
+
 - **js/src/features/** - Main embed types:
   - `bubble/` - Chat bubble that appears in corner of page
   - `standard/` - Full-width chat interface
   - `popup/` - Modal popup chat
-  - `button/` - Topic buttons for predefined conversations
 
 - **js/src/features/blocks/** - Chat building blocks:
   - `bubbles/` - Message display components (text, image, video, audio, embed)

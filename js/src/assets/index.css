@@ -127,6 +127,11 @@ textarea {
   opacity: 1 !important;
 }
 
+ /* - Purpose: Root-level theming container
+  - Scope: Applied to the outermost Bot component container
+  - Responsibility: Sets global theme variables (background, font-family, color)
+  - Usage: Bot.tsx:244 - Applied to the main Bot wrapper div */
+  
 .agent-embed-container {
   background-image: var(--agent-embed-container-bg-image);
   background-color: var(--agent-embed-container-bg-color);
@@ -238,6 +243,10 @@ textarea {
   fill: var(--agent-button-color);
 }
 
+  /* - Purpose: Layout constraint for chat content
+  - Scope: Applied to the chat conversation area
+  - Responsibility: Sets max-width: 800px to constrain chat width for readability
+  - Usage: StreamConversation.tsx:204 - Applied to the scrollable chat messages container */
 .agent-chat-view {
   max-width: 800px;
 }
@@ -392,6 +401,10 @@ select option {
   transition: none !important;
 }
 
+  /* - Purpose: Animation/visibility control
+  - Scope: Applied to the same element as .agent-chat-view
+  - Responsibility: Handles fade-in animation (opacity: 0 → opacity: 1 when .ready class added)
+  - Usage: StreamConversation.tsx:204 - Both classes applied together for layout + animation */
 .chat-container {
   opacity: 0;
   transition: opacity 0.4s ease;

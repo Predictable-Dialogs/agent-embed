@@ -242,15 +242,15 @@ export const StreamConversation = (props: Props) => {
           <ErrorChunk message={error()?.message} theme={theme()} />
         </Show>
         <BottomSpacer />
+        <Show when={props.initialAgentReply.input?.options?.type === 'fixed-bottom'}>
+          <FixedBottomInput
+            block={props.initialAgentReply.input}
+            isDisabled={isFixedInputDisabled()}
+            streamingHandlers={streamingHandlers()}
+          />
+        </Show>
       </div>
 
-      <Show when={props.initialAgentReply.input?.options?.type === 'fixed-bottom'}>
-        <FixedBottomInput
-          block={props.initialAgentReply.input}
-          isDisabled={isFixedInputDisabled()}
-          streamingHandlers={streamingHandlers()}
-        />
-      </Show>
     </>
   );
 };

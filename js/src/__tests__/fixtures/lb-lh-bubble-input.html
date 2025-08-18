@@ -14,8 +14,25 @@
     agentName: "Chatbot-67689",
     apiHost: "http://localhost:8001/web/incoming",
     apiStreamHost: "http://localhost:8001/web/stream",
-    autoShowDelay: 3000,
     persistSession: false,
+    previewMessage: {
+      message: "Need help? Tap here to chat with us!",
+      avatarUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/user.svg",
+      autoShowDelay: 3000,
+    },
+    theme: {
+      placement: 'right',
+      button: {
+        size: 'medium',
+        backgroundColor: "#28a745",
+        iconColor: "#FFFFFF"
+      },
+      previewMessage: {
+        backgroundColor: '#28a745',
+        textColor: '#FFFFFF'
+      }
+    },
+
     input: {
       "type": "text input",
       "options": {

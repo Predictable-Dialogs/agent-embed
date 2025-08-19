@@ -8,6 +8,12 @@
 - Never plan excessive mocks or simulations unless absolutely necessary.
 - For network calls or certain dependencies - plan for a realistic mock response for the API call, but still ensure the component processes it correctly.
 
+## Assertions
+  - Assertions in tests need to be meaningful. 
+  - Do not write trivial assertions that always pass.
+  - The tests must fail if the feature is broken.
+  - No false positive tests – tests that pass with broken functionality are forbidden. 
+  
 ## TEST DATA 
 When needed plan to use the below real data for a realistic mock response of the API call, but still ensure the component processes it correctly.
    - The real response from `getInitialChatReplyQuery` is available in  `../js/src/__tests__/data/getInitialChatReplyQuery.json`

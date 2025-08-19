@@ -37,6 +37,10 @@
   
   /* Safe area spacing token */
   --space-safe-bottom: max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem));
+  
+  /* Content max-width constraints */
+  --agent-content-max-width: 800px;
+  --agent-input-max-width: 800px;
 
   /* Phone input */
   --PhoneInputCountryFlag-borderColor: transparent;
@@ -252,10 +256,18 @@ textarea {
 
   /* - Purpose: Layout constraint for chat content
   - Scope: Applied to the chat conversation area
-  - Responsibility: Sets max-width: 800px to constrain chat width for readability
+  - Responsibility: Sets max-width to constrain chat width for readability
   - Usage: StreamConversation.tsx:204 - Applied to the scrollable chat messages container */
 .agent-chat-view {
-  max-width: 800px;
+  max-width: var(--agent-content-max-width);
+}
+
+  /* - Purpose: Layout constraint for input components
+  - Scope: Applied to input container elements
+  - Responsibility: Constrains input width for optimal UX (independently configurable from chat content)
+  - Usage: FixedBottomInput.tsx - Applied to the input container */
+.agent-input-container {
+  max-width: var(--agent-input-max-width);
 }
 
 .ping span {

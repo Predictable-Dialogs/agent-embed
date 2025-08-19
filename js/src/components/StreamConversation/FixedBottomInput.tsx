@@ -104,7 +104,7 @@ export const FixedBottomInput = (props: Props) => {
       }}
     >
       <div
-        class="flex items-end justify-between agent-input w-full max-w-4xl mx-auto relative fixed-input-overlay"
+        class="flex items-end justify-between agent-input agent-input-container w-full mx-auto relative fixed-input-overlay"
         data-testid="fixed-input"
         onKeyDown={submitWhenEnter}
       >

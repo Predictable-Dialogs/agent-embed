@@ -1,4 +1,4 @@
-import { Textarea, ShortTextInput } from '@/components'
+import { AutoResizingTextarea } from '@/components/inputs/AutoResizingTextarea'
 import { SendButton } from '@/components/SendButton'
 import { CommandData } from '@/features/commands'
 import { InputSubmitContent, WidgetContext } from '@/types'
@@ -21,13 +21,13 @@ type Props = {
 export const FixedBottomInput = (props: Props) => {
   const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '')
   const [shouldFocus, setShouldFocus] = createSignal(false)
-  let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined
+  let inputRef: HTMLTextAreaElement | undefined
 
   // Determine positioning based on widget context
   const isStandardWidget = createMemo(() => props.widgetContext === 'standard')
 
   const handleInput = (e: Event) => {
-    const target = e.currentTarget as HTMLInputElement | HTMLTextAreaElement;
+    const target = e.currentTarget as HTMLTextAreaElement;
     setInputValue(target.value);
     
     if (props.streamingHandlers?.onInput) {
@@ -49,13 +49,7 @@ export const FixedBottomInput = (props: Props) => {
       setInputValue('')
       // Set flag to focus when input is re-enabled
       setShouldFocus(true)
-    } else if (props.onSubmit) {
-      props.onSubmit({ value: inputValue() })
-      // Clear input after submission
-      setInputValue('')
-      // Set flag to focus when input is re-enabled
-      setShouldFocus(true)
-    }
+    } 
   }
 
   const submitWhenEnter = (e: KeyboardEvent) => {
@@ -106,30 +100,17 @@ export const FixedBottomInput = (props: Props) => {
       <div
         class="flex items-end justify-between agent-input agent-input-container w-full mx-auto relative fixed-input-overlay"
         data-testid="fixed-input"
-        onKeyDown={submitWhenEnter}
       >
-        {props.block?.options?.isLong ? (
-          <Textarea
-            ref={inputRef as HTMLTextAreaElement}
-            onInput={(e) => handleInput(e)}
-            onKeyDown={submitIfCtrlEnter}
-            value={inputValue()}
-            placeholder={
-              props.block?.options?.labels?.placeholder ?? 'Type your answer...'
-            }
-            disabled={props.isDisabled}
-          />
-        ) : (
-          <ShortTextInput
-            ref={inputRef as HTMLInputElement}
-            onInput={(e) => handleInput(e)}
-            value={inputValue()}
-            placeholder={
-              props.block?.options?.labels?.placeholder ?? 'Type your answer...'
-            }
-            disabled={props.isDisabled}
-          />
-        )}
+        <AutoResizingTextarea
+          ref={inputRef as HTMLTextAreaElement}
+          onInput={(e) => handleInput(e)}
+          onKeyDown={props.block?.options?.isLong ? submitIfCtrlEnter : submitWhenEnter}
+          value={inputValue()}
+          placeholder={
+            props.block?.options?.labels?.placeholder ?? 'Type your answer...'
+          }
+          disabled={props.isDisabled}
+        />
         <SendButton
           type="button"
           isDisabled={inputValue() === '' || props.isDisabled}

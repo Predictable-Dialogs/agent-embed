@@ -41,6 +41,9 @@
   /* Content max-width constraints */
   --agent-content-max-width: 800px;
   --agent-input-max-width: 800px;
+  
+  /* Input auto-resize configuration */
+  --input-max-lines: 11;
 
   /* Phone input */
   --PhoneInputCountryFlag-borderColor: transparent;
@@ -414,6 +417,32 @@ textarea {
 select option {
   color: var(--agent-input-color);
   background-color: var(--agent-input-bg-color);
+}
+
+/* Custom scrollbar styling for auto-resizing textarea */
+[data-testid="auto-resizing-textarea"]::-webkit-scrollbar {
+  width: 8px;
+}
+
+[data-testid="auto-resizing-textarea"]::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: var(--agent-border-radius);
+}
+
+[data-testid="auto-resizing-textarea"]::-webkit-scrollbar-thumb {
+  background: rgba(var(--agent-button-bg-color-rgb), calc(var(--selectable-base-alpha) + 0.15));
+  border-radius: var(--agent-border-radius);
+}
+
+[data-testid="auto-resizing-textarea"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--agent-button-bg-color-rgb), calc(var(--selectable-base-alpha) + 0.25));
+  border-radius: var(--agent-border-radius);
+}
+
+/* Firefox scrollbar styling */
+[data-testid="auto-resizing-textarea"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--agent-button-bg-color-rgb), calc(var(--selectable-base-alpha) + 0.15)) transparent;
 }
 
 .no-transition {

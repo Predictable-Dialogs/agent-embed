@@ -35,10 +35,20 @@
 5.2 **Map CSS variable usage:** Distinguish API-configurable variables from internal ones.  
 5.3 **Test with overrides:** Verify the refactor under dynamic theme variable changes.
 
-## 6) Positioning & Pseudo-Elements
+## 6) Color & Theming
 
-6.1 **Pseudo-elements anchor:** Always position `::before`/`::after` relative to the element whose **boundaries matter** for your visual design. Ensure that element establishes the containing block (e.g., apply `relative`), then position the pseudo-element (`absolute/fixed`) with semantic tokens.
-6.2 **Positioning context checklist (analyze first):**
+6.1 **Never use hardcoded colors:** Always use CSS variables for colors, especially `rgba()` values.  
+6.2 **Theme-aware styling:** Use existing color tokens (`--agent-button-bg-color-rgb`, `--agent-input-color`, etc.) with semantic alpha values (`--selectable-base-alpha + 0.15`).  
+6.3 **Consistent opacity patterns:** Follow existing alpha patterns in the codebase (e.g., `calc(var(--selectable-base-alpha) + 0.15)` for subtle elements, `+ 0.25` for hover states).  
+6.4 **Anti-pattern:** Never use hardcoded colors - they won't adapt to theme changes or user customizations.
+
+## 7) Positioning & Pseudo-Elements
+
+7.1 **Pseudo-elements anchor:** Always position `::before`/`::after` relative to the element whose **boundaries matter** for your visual design. Ensure that element establishes the containing block (e.g., apply `relative`), then position the pseudo-element (`absolute/fixed`) with semantic tokens.
+7.2 **Positioning context checklist (analyze first):**
 • What element is the positioning **relative to**?
 • What **padding/margins** exist between the reference and the target?
 • Is there a **closer/better reference** element nearer to the target that reduces offsets and complexity?
+
+
+The CSS variables are in the file: `agent-embed/js/src/assets/index.css`

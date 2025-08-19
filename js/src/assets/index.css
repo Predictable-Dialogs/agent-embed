@@ -424,3 +424,30 @@ select option {
   color: var(--agent-input-color);
   background-color: var(--agent-input-bg-color);
 }
+
+/* Fixed input overlay - masks content above and below the input */
+.fixed-input-overlay::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(to bottom, transparent, var(--agent-embed-container-bg-color));
+  z-index: 5;
+  pointer-events: none;
+}
+
+.fixed-input-overlay::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background-color: var(--agent-embed-container-bg-color);
+  z-index: 5;
+  pointer-events: none;
+}
+
+

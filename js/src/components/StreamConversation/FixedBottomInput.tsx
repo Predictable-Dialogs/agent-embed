@@ -93,23 +93,18 @@ export const FixedBottomInput = (props: Props) => {
 
   return (
     <div
+      class="pb-[var(--space-safe-bottom)] px-3 pt-4 bottom-0 inset-x-0"
       classList={{
-        'pb-[var(--space-safe-bottom)]': true,
-        'px-3': true,
-        'pt-4': true,
         // Standard widget: absolute positioning within container
         'absolute': isStandardWidget(),
         'z-[var(--layer-container)]': isStandardWidget(),
         // Bubble/Popup widgets: fixed positioning for viewport overlay
         'fixed': !isStandardWidget(),
         'z-[var(--layer-overlay)]': !isStandardWidget(),
-        // Common positioning
-        'bottom-0': true,
-        'inset-x-0': true,
       }}
     >
       <div
-        class="flex items-end justify-between agent-input w-full max-w-4xl mx-auto"
+        class="flex items-end justify-between agent-input w-full max-w-4xl mx-auto relative fixed-input-overlay"
         data-testid="fixed-input"
         onKeyDown={submitWhenEnter}
       >

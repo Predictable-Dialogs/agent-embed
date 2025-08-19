@@ -28,10 +28,10 @@ The Standard widget acts as a custom element that fills its container, while Bub
   - Use fixed positioning with absolute coordinates (Bubble.tsx:165, Popup.tsx:131)
   - Control their own positioning and sizing through internal CSS classes and theme props
 
-- **js/src/features/** - Main embed types:
-  - `bubble/` - Chat bubble that appears in corner of page
-  - `standard/` - Full-width chat interface
-  - `popup/` - Modal popup chat
+- Main embed types:
+  - Chat bubble that appears in corner of page - `agent-embed/js/src/features/bubble/components/Bubble.tsx`
+  - Full-width chat interface - `agent-embed/js/src/features/standard/components/Standard.tsx`
+  - Modal popup chat - `agent-embed/js/src/features/popup/components/Popup.tsx`
 
 - **js/src/features/blocks/** - Chat building blocks:
   - `bubbles/` - Message display components (text, image, video, audio, embed)

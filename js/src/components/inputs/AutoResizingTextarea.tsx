@@ -106,7 +106,9 @@ export const AutoResizingTextarea = (props: AutoResizingTextareaProps) => {
     keyboardHandlers.onKeyDown(e)
     // Then call any additional onKeyDown handler if provided
     if (local.onKeyDown) {
-      local.onKeyDown(e)
+      // Handle SolidJS event handler union type
+      const handler = local.onKeyDown as (e: KeyboardEvent) => void
+      handler(e)
     }
   }
 

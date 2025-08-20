@@ -20,6 +20,7 @@ the same line in which we have the LiteBadge, the LiteBadge is positioned with a
 ## Button UI Testing
 Use playwright mcp server to review the size and positioning of the button to make it aesthetically good.
 
+
 ## Button Behaviour
 On clicking the button 
    - The localstorage should be cleared of the old session data.

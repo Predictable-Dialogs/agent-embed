@@ -13,7 +13,7 @@ export const defaultBotProps: BotProps = {
   apiStreamHost: undefined,
   filterResponse: undefined,
   stream: true,
-  persistSession: false,
+  persistSession: true,
   input: {
     type: "text input",
     options: {

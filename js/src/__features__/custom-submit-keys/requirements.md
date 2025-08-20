@@ -101,6 +101,8 @@ Here are some example shapes we should support - notice the `shortcuts` property
 }
 ```
 
+# Type
+Update / Create types here `agent-embed/js/src/schemas/features/blocks/inputs/text.ts`
 
 # Presets and fallbacks
 You have two built-in presets:
@@ -117,7 +119,7 @@ custom is an opt-in mode that requires a keymap. If the user selects custom but 
 * Match `Enter` via `evt.key === "Enter"`.
 * Respect `imeSafe`: ignore shortcuts while composing (use `compositionstart/ end`).
 
-Here is an example function to match, feel free to use this or a variation of it, the goal is
+Here is some example code to match, feel free to make it cleaner and readable, the goal is
 - Exact matching (no surprises) - If the user configured Shift+Enter, then Mod+Shift+Enter should not trigger. The function rejects “extra” modifiers.
 
 Enter-scoped shortcuts only - It returns false if Enter isn’t part of the combo. That keeps the widget from hijacking random shortcuts like Ctrl+B.
@@ -126,29 +128,66 @@ Enter-scoped shortcuts only - It returns false if Enter isn’t part of the comb
 
 Separation of concerns - The matching logic lives in one small, testable function; our onKeyDown stays clean.
 
+
+
 ```ts
+
+type KeyToken = "Enter" | "Shift" | "Alt" | "Mod";
+
 function matchCombo(evt: KeyboardEvent, combo: KeyToken[]) {
-  const needShift = combo.includes("Shift");
-  const needAlt   = combo.includes("Alt");
-  const needMod   = combo.includes("Mod");
-  const needEnter = combo.includes("Enter");
-
-  if (needShift !== evt.shiftKey) return false;
-  if (needAlt   !== evt.altKey)   return false;
-  if (needMod   && !(evt.metaKey || evt.ctrlKey)) return false;
-  if (needEnter && evt.key !== "Enter") return false;
-
-  // If Enter is not in combo, we don't handle it (keeps scope tight to Enter-based combos)
-  if (!needEnter) return false;
-
-  // block if extra modifiers are pressed that weren't requested
-  const extraMod =
-    (!needShift && evt.shiftKey) ||
-    (!needAlt   && evt.altKey)   ||
-    (!needMod   && (evt.metaKey || evt.ctrlKey));
-  if (extraMod) return false;
-
+  if (!combo.includes("Enter") || evt.key !== "Enter") return false;
+  const pressed = new Set<KeyToken>([
+    evt.shiftKey && "Shift",
+    evt.altKey && "Alt",
+    (evt.metaKey || evt.ctrlKey) && "Mod",
+  ].filter(Boolean) as KeyToken[]);
+  const expected = new Set(combo.filter(k => k !== "Enter"));
+  if (pressed.size !== expected.size) return false;
+  for (const k of pressed) if (!expected.has(k)) return false;
   return true;
+}
+
+// Example combos (could come from props.shortcuts.keymap)
+const submitCombos: KeyToken[][]  = [["Enter"]];          // "enterToSend"
+const newlineCombos: KeyToken[][] = [["Shift","Enter"]];  // "enterToSend"
+
+let composing = false;
+
+function onKeyDown(e: KeyboardEvent) {
+  if (composing || (e as any).isComposing) return; // IME-safe guard
+
+  // 1) Try submit first
+  if (submitCombos.some(c => matchCombo(e, c))) {
+    e.preventDefault();
+    sendMessage();
+    return;
+  }
+
+  // 2) Then try newline
+  if (newlineCombos.some(c => matchCombo(e, c))) {
+    e.preventDefault();
+    insertNewlineAtCaret();
+    return;
+  }
+
+  // Otherwise: fall through to normal typing
+}
+
+function onCompositionStart() { composing = true; }
+function onCompositionEnd()   { composing = false; }
+
+function isAltGraph(e: KeyboardEvent) {
+  return typeof e.getModifierState === "function" && e.getModifierState("AltGraph");
+}
+
+function isEnter(e: KeyboardEvent) {
+  return e.key === "Enter" || e.code === "NumpadEnter";
+}
+
+// “Mod” = Cmd or Ctrl, excluding AltGr combos so we don’t mis-detect on some layouts
+function isMod(e: KeyboardEvent) {
+  if (isAltGraph(e)) return false;           // AltGr often reports as Ctrl+Alt
+  return e.metaKey || e.ctrlKey;             // broad support even without getModifierState
 }
 ```
 

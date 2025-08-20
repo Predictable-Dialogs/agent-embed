@@ -13,7 +13,7 @@
   - Do not write trivial assertions that always pass.
   - The tests must fail if the feature is broken.
   - No false positive tests – tests that pass with broken functionality are forbidden. 
-  
+
 ## TEST DATA 
 When needed plan to use the below real data for a realistic mock response of the API call, but still ensure the component processes it correctly.
    - The real response from `getInitialChatReplyQuery` is available in  `../js/src/__tests__/data/getInitialChatReplyQuery.json`
@@ -21,3 +21,6 @@ When needed plan to use the below real data for a realistic mock response of the
 
 ## Tests location
 The tests should be created within the directory `../js/src/__tests__/` following the existing conventions.
+
+## RUNNING TESTS
+- After modifying or creating tests, always run `npm run build` to check for type errors and correct the type errors.

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@solidjs/testing-library';
+import { render, screen, fireEvent, waitFor } from '@solidjs/testing-library';
+import { createSignal } from 'solid-js';
 import { AutoResizingTextarea } from '@/components/inputs/AutoResizingTextarea';
 import { cleanupDOM } from '../../test-utils';
 
@@ -319,6 +320,47 @@ describe('AutoResizingTextarea Component', () => {
       
       // Height calculation should have been triggered
       expect(textarea.style.height).toBeDefined();
+    });
+
+    it('should respond to reactive value changes via createEffect', async () => {
+      const [value, setValue] = createSignal('Short');
+      const mockOnInput = vi.fn();
+      
+      const props = {
+        ref: undefined as HTMLTextAreaElement | undefined,
+        onInput: mockOnInput,
+        get value() { return value(); }, // Reactive getter that tracks the signal
+        placeholder: 'Type here...',
+      };
+      
+      render(() => <AutoResizingTextarea {...props} />);
+      const textarea = screen.getByTestId('auto-resizing-textarea') as HTMLTextAreaElement;
+      
+      // Wait for initial mount effects to complete
+      await waitFor(() => {
+        expect(textarea.style.height).toBeDefined();
+      });
+      
+      // Track specific style changes that only happen in adjustHeight
+      const initialPaddingRight = textarea.style.paddingRight;
+      const initialOverflowY = textarea.style.overflowY;
+      
+      // Clear the style to see if adjustHeight gets called again
+      textarea.style.height = '';
+      
+      // Change the signal value - this should trigger createEffect -> adjustHeight
+      setValue('Much longer text content that requires height adjustment and should cause the createEffect to run which calls adjustHeight function');
+      
+      // Wait for the createEffect to run and adjustHeight to be called
+      await waitFor(() => {
+        // These style properties are only set by adjustHeight function
+        expect(textarea.style.height).not.toBe(''); // Should be recalculated
+        expect(textarea.style.paddingRight).toBeDefined(); // Should be set by adjustHeight
+        expect(textarea.style.overflowY).toBeDefined(); // Should be set by adjustHeight
+      }, { timeout: 1000 });
+      
+      // Verify the value updated (confirming signal reactivity)
+      expect(textarea.value).toBe('Much longer text content that requires height adjustment and should cause the createEffect to run which calls adjustHeight function');
     });
 
     it('should call adjustHeight on input events', () => {

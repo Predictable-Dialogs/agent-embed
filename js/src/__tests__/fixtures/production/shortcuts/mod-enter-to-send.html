@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shortcuts - Backward Compatibility</title>
+    <title>Production Mod+Enter to Send Test</title>
   </head>
   <body>
-    <h1>Backward Compatibility Test</h1>
-    <p>Using isLong=true (should behave like modEnterToSend)</p>
+    <h1>Production Mod+Enter to Send Test</h1>
+    <p>Cmd/Ctrl+Enter = Send, Enter = Newline</p>
+    <p>This tests mod+enter-to-send shortcuts against production backend.</p>
 
 <script type="module">
-  import Agent from '../../../dist/web.js'
+  import Agent from '../../../../../dist/web.js'
   Agent.initStandard({
-    agentName: "Chatbot-67689",
-    apiHost: "http://localhost:8001/web/incoming",
-    apiStreamHost: "http://localhost:8001/web/stream",
+    agentName: "Assistant OpenAI-18fc0",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
     autoShowDelay: 3000,
     persistSession: false,
     input: {
@@ -22,10 +23,13 @@
       "options": {
         "type": "fixed-bottom",
         "labels": {
-          "placeholder": "isLong=true: Cmd/Ctrl+Enter=Send, Enter=Newline",
+          "placeholder": "Cmd/Ctrl+Enter=Send, Enter=Newline",
           "button": "Send"
         },
-        "isLong": true
+        "isLong": false,
+        "shortcuts": {
+          "preset": "mod-enter-to-send"
+        }
       }
      }
   });

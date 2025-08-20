@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shortcuts - Enter to Send</title>
+    <title>Production Enter to Send Test</title>
   </head>
   <body>
-    <h1>Enter to Send Test</h1>
+    <h1>Production Enter to Send Test</h1>
     <p>Enter = Send, Shift+Enter = Newline</p>
+    <p>This tests enter-to-send shortcuts against production backend.</p>
 
 <script type="module">
-  import Agent from '../../../dist/web.js'
+  import Agent from '../../../../../dist/web.js'
   Agent.initStandard({
-    agentName: "Chatbot-67689",
-    apiHost: "http://localhost:8001/web/incoming",
-    apiStreamHost: "http://localhost:8001/web/stream",
+    agentName: "Assistant OpenAI-18fc0",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
     autoShowDelay: 3000,
     persistSession: false,
     input: {
@@ -22,13 +23,12 @@
       "options": {
         "type": "fixed-bottom",
         "labels": {
-          "placeholder": "Type here... Enter=Send, Shift+Enter=Newline",
+          "placeholder": "Enter=Send, Shift+Enter=Newline",
           "button": "Send"
         },
         "isLong": false,
         "shortcuts": {
-          "preset": "enterToSend",
-          "imeSafe": true
+          "preset": "enter-to-send"
         }
       }
      }

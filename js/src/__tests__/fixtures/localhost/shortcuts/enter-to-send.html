@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shortcuts - Enter to Send</title>
+  </head>
+  <body>
+    <h1>Enter to Send Test</h1>
+    <p>Enter = Send, Shift+Enter = Newline</p>
+
+<script type="module">
+  import Agent from '../../../../../dist/web.js'
+  Agent.initStandard({
+    agentName: "Chatbot-67689",
+    apiHost: "http://localhost:8001/web/incoming",
+    apiStreamHost: "http://localhost:8001/web/stream",
+    autoShowDelay: 3000,
+    persistSession: false,
+    input: {
+      "type": "text input",
+      "options": {
+        "type": "fixed-bottom",
+        "labels": {
+          "placeholder": "Type here... Enter=Send, Shift+Enter=Newline",
+          "button": "Send"
+        },
+        "isLong": false,
+        "shortcuts": {
+          "preset": "enterToSend",
+          "imeSafe": true
+        }
+      }
+     }
+  });
+</script>
+<agent-standard style="
+  width: 100%; 
+  height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+"></agent-standard>
+
+  </body>
+</html>

@@ -3,17 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Agent Example</title>
+    <title>Production Bubble with Input Test</title>
   </head>
   <body>
-    <!-- Adding a button to trigger the chat agent popup -->
+    <h1>Production Bubble with Custom Input Test</h1>
+    <p>This tests the bubble widget with custom input configuration against production backend.</p>
 
 <script type="module">
-  import Agent from '../../../dist/web.js'
+  import Agent from '../../../../../dist/web.js'
   Agent.initBubble({
-    agentName: "Chatbot-67689",
-    apiHost: "http://localhost:8001/web/incoming",
-    apiStreamHost: "http://localhost:8001/web/stream",
+    agentName: "Chatbot-ed5e7",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
     persistSession: false,
     previewMessage: {
       message: "Need help? Tap here to chat with us!",
@@ -32,14 +33,13 @@
         textColor: '#FFFFFF'
       }
     },
-
     input: {
       "type": "text input",
       "options": {
         "type": "fixed-bottom",
         "labels": {
-          "placeholder": "Whats on your mind",
-          "button": "Enter"
+          "placeholder": "What's on your mind?",
+          "button": "Send"
         },
         "isLong": false
       }

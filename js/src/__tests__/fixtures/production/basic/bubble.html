@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Production Bubble Test</title>
+  </head>
+  <body>
+    <h1>Production Bubble Widget Test</h1>
+    <p>This tests the bubble widget against production backend with local build.</p>
+
+<script type="module">
+  import Agent from '../../../../../dist/web.js'
+  Agent.initBubble({
+    agentName: "Chatbot-ed5e7",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
+    persistSession: false,
+    previewMessage: {
+      message: "Need help? Tap here to chat with us!",
+      avatarUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/user.svg",
+      autoShowDelay: 3000,
+    },
+    theme: {
+      placement: 'right',
+      button: {
+        size: 'medium',
+        backgroundColor: "#28a745",
+        iconColor: "#FFFFFF"
+      },
+      previewMessage: {
+        backgroundColor: '#28a745',
+        textColor: '#FFFFFF'
+      }
+    },
+  });
+</script>
+  </body>
+</html>

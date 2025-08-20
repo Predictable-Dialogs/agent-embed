@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Production Backward Compatibility Test</title>
+  </head>
+  <body>
+    <h1>Production Backward Compatibility Test</h1>
+    <p>This tests backward compatibility features against production backend.</p>
+
+<script type="module">
+  import Agent from '../../../../../dist/web.js'
+  Agent.initStandard({
+    agentName: "Chatbot-ed5e7",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
+    autoShowDelay: 3000,
+    persistSession: false,
+    input: {
+      "type": "text input",
+      "options": {
+        "type": "fixed-bottom",
+        "labels": {
+          "placeholder": "Test backward compatibility features...",
+          "button": "Send"
+        },
+        "isLong": false,
+        // Legacy shortcut format for backward compatibility
+        "shortcuts": {
+          "preset": "default"
+        }
+      }
+     }
+  });
+</script>
+<agent-standard style="
+  width: 100%; 
+  height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+"></agent-standard>
+
+  </body>
+</html>

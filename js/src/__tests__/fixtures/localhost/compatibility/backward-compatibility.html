@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shortcuts - Mod+Enter to Send</title>
+    <title>Shortcuts - Backward Compatibility</title>
   </head>
   <body>
-    <h1>Mod+Enter to Send Test</h1>
-    <p>Cmd/Ctrl+Enter = Send, Enter = Newline</p>
+    <h1>Backward Compatibility Test</h1>
+    <p>Using isLong=true (should behave like modEnterToSend)</p>
 
 <script type="module">
-  import Agent from '../../../dist/web.js'
+  import Agent from '../../../../../dist/web.js'
   Agent.initStandard({
     agentName: "Chatbot-67689",
     apiHost: "http://localhost:8001/web/incoming",
@@ -22,14 +22,10 @@
       "options": {
         "type": "fixed-bottom",
         "labels": {
-          "placeholder": "Type here... Cmd/Ctrl+Enter=Send, Enter=Newline",
+          "placeholder": "isLong=true: Cmd/Ctrl+Enter=Send, Enter=Newline",
           "button": "Send"
         },
-        "isLong": false,
-        "shortcuts": {
-          "preset": "modEnterToSend",
-          "imeSafe": true
-        }
+        "isLong": true
       }
      }
   });

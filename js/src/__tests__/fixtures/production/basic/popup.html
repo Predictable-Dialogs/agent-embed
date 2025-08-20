@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Production Popup Test</title>
+  </head>
+  <body>
+    <h1>Production Popup Widget Test</h1>
+    <p>This tests the popup widget against production backend with local build.</p>
+    <button onclick="Agent.open()">Open Chat Popup</button>
+
+<script type="module">
+  import Agent from '../../../../../dist/web.js'
+  Agent.initPopup({
+    agentName: "Chatbot-ed5e7",
+    apiHost: "https://app.predictabledialogs.com/web/incoming",
+    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
+    persistSession: false,
+    autoShowDelay: 5000,
+  });
+  
+  // Make Agent globally accessible for button click
+  window.Agent = Agent;
+</script>
+
+  </body>
+</html>

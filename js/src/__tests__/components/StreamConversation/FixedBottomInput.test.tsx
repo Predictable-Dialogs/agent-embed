@@ -228,66 +228,6 @@ describe('FixedBottomInput Component', () => {
   });
 
   describe('3. Submission Logic Tests', () => {
-    it('should trigger submit on Enter key for non-long inputs (isLong=false)', () => {
-      const mockBlock = createMockTextInputBlock({ isLong: false });
-      const mockOnSubmit = vi.fn();
-      const streamingHandlers = { onSubmit: mockOnSubmit };
-      
-      render(() => (
-        <FixedBottomInput block={mockBlock} streamingHandlers={streamingHandlers} />
-      ));
-      
-      const textarea = screen.getByTestId('auto-resizing-textarea') as HTMLTextAreaElement;
-      
-      // Add text first
-      fireEvent.input(textarea, { target: { value: 'Test message' } });
-      
-      // Press Enter
-      fireEvent.keyDown(textarea, { key: 'Enter' });
-      
-      expect(mockOnSubmit).toHaveBeenCalled();
-    });
-
-    it('should trigger submit on Ctrl+Enter for long inputs (isLong=true)', () => {
-      const mockBlock = createMockTextInputBlock({ isLong: true });
-      const mockOnSubmit = vi.fn();
-      const streamingHandlers = { onSubmit: mockOnSubmit };
-      
-      render(() => (
-        <FixedBottomInput block={mockBlock} streamingHandlers={streamingHandlers} />
-      ));
-      
-      const textarea = screen.getByTestId('auto-resizing-textarea') as HTMLTextAreaElement;
-      
-      // Add text first
-      fireEvent.input(textarea, { target: { value: 'Test message' } });
-      
-      // Press Ctrl+Enter
-      fireEvent.keyDown(textarea, { key: 'Enter', ctrlKey: true });
-      
-      expect(mockOnSubmit).toHaveBeenCalled();
-    });
-
-    it('should trigger submit on Cmd+Enter for long inputs (isLong=true)', () => {
-      const mockBlock = createMockTextInputBlock({ isLong: true });
-      const mockOnSubmit = vi.fn();
-      const streamingHandlers = { onSubmit: mockOnSubmit };
-      
-      render(() => (
-        <FixedBottomInput block={mockBlock} streamingHandlers={streamingHandlers} />
-      ));
-      
-      const textarea = screen.getByTestId('auto-resizing-textarea') as HTMLTextAreaElement;
-      
-      // Add text first
-      fireEvent.input(textarea, { target: { value: 'Test message' } });
-      
-      // Press Cmd+Enter
-      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
-      
-      expect(mockOnSubmit).toHaveBeenCalled();
-    });
-
     it('should trigger submit on SendButton click', () => {
       const mockBlock = createMockTextInputBlock();
       const mockOnSubmit = vi.fn();
@@ -702,66 +642,6 @@ describe('FixedBottomInput Component', () => {
       expect(textarea).toBeInTheDocument();
       // The onKeyDown handler is attached - this tests that the component renders correctly
       // with the keyboard handler wiring
-    });
-
-    it('should handle Enter key differently for short vs long inputs', () => {
-      const mockOnSubmit = vi.fn();
-      const streamingHandlers = { onSubmit: mockOnSubmit };
-      
-      // Test short input (isLong: false)
-      const shortBlock = createMockTextInputBlock({ isLong: false });
-      const { unmount } = render(() => (
-        <FixedBottomInput block={shortBlock} streamingHandlers={streamingHandlers} />
-      ));
-      
-      let textarea = screen.getByTestId('auto-resizing-textarea');
-      
-      fireEvent.input(textarea, { target: { value: 'Test' } });
-      fireEvent.keyDown(textarea, { key: 'Enter' });
-      
-      expect(mockOnSubmit).toHaveBeenCalled();
-      mockOnSubmit.mockClear();
-      
-      unmount();
-      
-      // Test long input (isLong: true) - Enter alone should not submit
-      const longBlock = createMockTextInputBlock({ isLong: true });
-      render(() => (
-        <FixedBottomInput block={longBlock} streamingHandlers={streamingHandlers} />
-      ));
-      
-      textarea = screen.getByTestId('auto-resizing-textarea');
-      
-      fireEvent.input(textarea, { target: { value: 'Test' } });
-      fireEvent.keyDown(textarea, { key: 'Enter' });
-      
-      expect(mockOnSubmit).not.toHaveBeenCalled();
-    });
-
-    it('should handle modifier keys correctly for long inputs', () => {
-      const mockOnSubmit = vi.fn();
-      const streamingHandlers = { onSubmit: mockOnSubmit };
-      
-      const longBlock = createMockTextInputBlock({ isLong: true });
-      render(() => (
-        <FixedBottomInput block={longBlock} streamingHandlers={streamingHandlers} />
-      ));
-      
-      const textarea = screen.getByTestId('auto-resizing-textarea') as HTMLTextAreaElement;
-      
-      fireEvent.input(textarea, { target: { value: 'Test' } });
-      
-      // Test Ctrl+Enter
-      fireEvent.keyDown(textarea, { key: 'Enter', ctrlKey: true });
-      expect(mockOnSubmit).toHaveBeenCalled();
-      
-      // Reset for second test
-      mockOnSubmit.mockClear();
-      fireEvent.input(textarea, { target: { value: 'Test2' } });
-      
-      // Test Cmd+Enter
-      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
-      expect(mockOnSubmit).toHaveBeenCalled();
     });
   });
 

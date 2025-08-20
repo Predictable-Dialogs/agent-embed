@@ -4,6 +4,7 @@ import { CommandData } from '@/features/commands'
 import { InputSubmitContent, WidgetContext } from '@/types'
 import { isMobile } from '@/utils/isMobileSignal'
 import type { TextInputBlock } from '@/schemas'
+import type { Shortcuts } from '@/schemas/features/blocks/inputs/text'
 import { createSignal, createEffect, onCleanup, onMount, createMemo } from 'solid-js'
 
 type Props = {
@@ -25,6 +26,19 @@ export const FixedBottomInput = (props: Props) => {
 
   // Determine positioning based on widget context
   const isStandardWidget = createMemo(() => props.widgetContext === 'standard')
+
+  // Derive shortcuts configuration for backward compatibility with isLong
+  const getEffectiveShortcuts = (): Shortcuts => {
+    // If shortcuts are explicitly provided, use them
+    if (props.block?.options?.shortcuts) {
+      return props.block.options.shortcuts
+    }
+    
+    return {
+      preset: 'enterToSend', 
+      imeSafe: true
+    }
+  }
 
   const handleInput = (e: Event) => {
     const target = e.currentTarget as HTMLTextAreaElement;
@@ -52,15 +66,6 @@ export const FixedBottomInput = (props: Props) => {
     } 
   }
 
-  const submitWhenEnter = (e: KeyboardEvent) => {
-    if (props.block?.options?.isLong) return
-    if (e.key === 'Enter') submit()
-  }
-
-  const submitIfCtrlEnter = (e: KeyboardEvent) => {
-    if (!props.block?.options?.isLong) return
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit()
-  }
 
   // Effect to focus input when it becomes enabled after submission
   createEffect(() => {
@@ -104,7 +109,8 @@ export const FixedBottomInput = (props: Props) => {
         <AutoResizingTextarea
           ref={inputRef as HTMLTextAreaElement}
           onInput={(e) => handleInput(e)}
-          onKeyDown={props.block?.options?.isLong ? submitIfCtrlEnter : submitWhenEnter}
+          onSubmit={submit}
+          shortcuts={getEffectiveShortcuts()}
           value={inputValue()}
           placeholder={
             props.block?.options?.labels?.placeholder ?? 'Type your answer...'

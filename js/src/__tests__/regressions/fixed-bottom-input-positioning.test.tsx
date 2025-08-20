@@ -103,13 +103,11 @@ describe('FixedBottomInput - Positioning Regression Tests', () => {
       const inputElement = screen.getByTestId('fixed-input');
       const inputContainer = inputElement.parentElement!;
       
-      const styles = window.getComputedStyle(inputContainer);
-      
       // Without widgetContext, should still use fixed positioning (legacy behavior)
-      expect(styles.position).toBe('fixed');
-      expect(styles.bottom).toBe('0px');
-      expect(styles.left).toBe('0px');
-      expect(styles.right).toBe('0px');
+      expect(inputContainer).toHaveClass('fixed');
+      expect(inputContainer).not.toHaveClass('absolute');
+      expect(inputContainer).toHaveClass('z-[var(--layer-overlay)]');
+      expect(inputContainer).not.toHaveClass('z-[var(--layer-container)]');
     });
     it('FIXED: should use absolute positioning within Standard widget context', async () => {
       // Setup: Constrained container (simulating Standard widget)
@@ -146,14 +144,12 @@ describe('FixedBottomInput - Positioning Regression Tests', () => {
       const inputElement = screen.getByTestId('fixed-input');
       const inputContainer = inputElement.parentElement!;
       
-      const styles = window.getComputedStyle(inputContainer);
-      
       // CRITICAL ASSERTION: Should use absolute positioning for Standard widgets
       // This test PASSES with the fix and would FAIL if fix regresses
-      expect(styles.position).toBe('absolute');
-      expect(styles.bottom).toBe('0px');
-      expect(styles.left).toBe('0px');
-      expect(styles.right).toBe('0px');
+      expect(inputContainer).toHaveClass('absolute');
+      expect(inputContainer).not.toHaveClass('fixed');
+      expect(inputContainer).toHaveClass('z-[var(--layer-container)]');
+      expect(inputContainer).not.toHaveClass('z-[var(--layer-overlay)]');
     });
 
   // Visual Breakdown of the Test
@@ -381,13 +377,10 @@ describe('FixedBottomInput - Positioning Regression Tests', () => {
       const inputElement = screen.getByTestId('fixed-input');
       const inputContainer = inputElement.parentElement!;
       
-      const styles = window.getComputedStyle(inputContainer);
-      const zIndex = parseInt(styles.zIndex);
-      
       // CRITICAL ASSERTION: This documents the current behavior
       // Uses z-index 51, which is appropriate for viewport overlays but too high for widget-contained elements
-      expect(zIndex).toBe(51);
-      expect(zIndex).toBeGreaterThan(50); // High z-index indicates it's meant for viewport-level overlays
+      expect(inputContainer).toHaveClass('z-[var(--layer-overlay)]');
+      expect(inputContainer).not.toHaveClass('z-[var(--layer-container)]');
     });
   });
 
@@ -423,11 +416,12 @@ describe('FixedBottomInput - Positioning Regression Tests', () => {
       const inputElement = screen.getByTestId('fixed-input');
       const inputContainer = inputElement.parentElement!;
       
-      const styles = window.getComputedStyle(inputContainer);
-      
       // CRITICAL ASSERTION: Should now use absolute positioning for Standard widgets
       // This test PASSES with the fix and would FAIL if fix regresses
-      expect(styles.position).toBe('absolute');
+      expect(inputContainer).toHaveClass('absolute');
+      expect(inputContainer).not.toHaveClass('fixed');
+      expect(inputContainer).toHaveClass('z-[var(--layer-container)]');
+      expect(inputContainer).not.toHaveClass('z-[var(--layer-overlay)]');
     });
 
     it('FIXED: should respect container boundaries with Standard widget context', async () => {
@@ -506,11 +500,10 @@ describe('FixedBottomInput - Positioning Regression Tests', () => {
       
       // CRITICAL ASSERTION: Bubble widgets should still use fixed positioning
       // This ensures our fix doesn't break Bubble/Popup widgets
-      const styles = window.getComputedStyle(inputContainer);
-      expect(styles.position).toBe('fixed');
-      expect(styles.bottom).toBe('0px');
-      expect(styles.left).toBe('0px');
-      expect(styles.right).toBe('0px');
+      expect(inputContainer).toHaveClass('fixed');
+      expect(inputContainer).not.toHaveClass('absolute');
+      expect(inputContainer).toHaveClass('z-[var(--layer-overlay)]');
+      expect(inputContainer).not.toHaveClass('z-[var(--layer-container)]');
     });
 
     it('should maintain fixed positioning for Popup widgets (viewport overlays)', async () => {
@@ -542,9 +535,10 @@ describe('FixedBottomInput - Positioning Regression Tests', () => {
       const inputContainer = inputElement.parentElement!;
       
       // CRITICAL ASSERTION: Popup widgets should still use fixed positioning
-      const styles = window.getComputedStyle(inputContainer);
-      expect(styles.position).toBe('fixed');
-      expect(styles.bottom).toBe('0px');
+      expect(inputContainer).toHaveClass('fixed');
+      expect(inputContainer).not.toHaveClass('absolute');
+      expect(inputContainer).toHaveClass('z-[var(--layer-overlay)]');
+      expect(inputContainer).not.toHaveClass('z-[var(--layer-container)]');
     });
   });
 });

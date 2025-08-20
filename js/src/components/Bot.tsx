@@ -1,4 +1,5 @@
 import { LiteBadge } from './LiteBadge';
+import { ClearButton } from './ClearButton';
 import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from 'solid-js';
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
@@ -31,6 +32,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [error, setError] = createSignal<Error | undefined>();
   const [isDebugMode, setIsDebugMode] = createSignal(false);
   const [persistedMessages, setPersistedMessages] = createSignal<any[]>([]);
+  const [isClearButtonOnCooldown, setIsClearButtonOnCooldown] = createSignal(false);
   // Centralized config merging - props take precedence over API data
 
   const mergedConfig = createMemo(() => {
@@ -39,6 +41,24 @@ export const Bot = (props: BotProps & { class?: string }) => {
   });
 
   const storage = useAgentStorage(props.agentName);
+  let cooldownTimeoutId: NodeJS.Timeout | undefined;
+
+  const handleClearSession = async () => {
+    // Start cooldown immediately
+    setIsClearButtonOnCooldown(true);
+    
+    // Clear localStorage session data
+    storage.clearSession();
+    setPersistedMessages([]);
+    // Reinitialize the bot
+    await initializeBot();
+    setIsInitialized(true);
+    
+    // Set 5-second cooldown timer
+    cooldownTimeoutId = setTimeout(() => {
+      setIsClearButtonOnCooldown(false);
+    }, 5000);
+  };
 
   const initializeBot = async () => {
     const urlParams = new URLSearchParams(location.search);
@@ -144,6 +164,10 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   onCleanup(() => {
     setIsInitialized(false);
+    // Cleanup cooldown timeout
+    if (cooldownTimeoutId) {
+      clearTimeout(cooldownTimeoutId);
+    }
   });
 
   return (
@@ -178,6 +202,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
               isDebugMode={isDebugMode()}
               onSessionExpired={handleSessionExpired}
               widgetContext={props.widgetContext}
+              handleClearSession={handleClearSession}
+              isClearButtonOnCooldown={isClearButtonOnCooldown()}
             />
           );
         }}
@@ -196,6 +222,8 @@ type BotContentProps = {
   isDebugMode?: boolean;
   onSessionExpired?: () => void;
   widgetContext?: WidgetContext;
+  handleClearSession: () => Promise<void>;
+  isClearButtonOnCooldown: boolean;
 };
 
 const BotContent = (props: BotContentProps) => {
@@ -262,6 +290,7 @@ const BotContent = (props: BotContentProps) => {
       <Show when={props.agentConfig.settings.general.isBrandingEnabled}>
         <LiteBadge botContainer={botContainer} />
       </Show>
+      <ClearButton onClick={props.handleClearSession} isOnCooldown={props.isClearButtonOnCooldown} />
       <Show when={props.isDebugMode}>
         <div class="absolute bottom-0 w-full text-center text-gray-500" style="font-size: 0.5rem;">
           {process.env.VERSION}

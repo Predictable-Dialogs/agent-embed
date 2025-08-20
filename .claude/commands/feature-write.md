@@ -25,3 +25,16 @@ Before writing the code, engage in extended thinking so the implementation follo
 - We will run existing tests to ensure we have not broken existing functionality.
 - We should execute `npm run build` to ensure it works.
 - DO NOT create/modify/edit/delete any tests.
+
+
+# Testing: 
+- Use the Playwright MCP server for testing. You need to build the code before testing using `npm run build`.
+- The python http server is already running.
+- The fixtures are in `agent-embed/js/src/__tests__/fixtures`, feel free to use and modify for testing.
+- E.g of opening a fixter is: `http://localhost:8000/pd/agent-embed/js/src/__tests__/fixtures/lb-lh-std-input.html`
+
+
+# Writing Unit tests
+- Write unit tests AFTER testing with playwright only.
+- Follow the rules in `agent-embed/js/src/__rules__/test-rules.md` for writing the tests.
+

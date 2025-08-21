@@ -119,7 +119,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       console.info(`Initializing pd agent`);
       return;
     }
-    if (storage.hasCompleteSession()) {
+    if (props.persistSession && storage.hasCompleteSession()) {
       // If persisted data exists, use it and mark as initialized
       const storedSessionId = storage.getSessionId();
       const storedAgentConfig = storage.getAgentConfig();

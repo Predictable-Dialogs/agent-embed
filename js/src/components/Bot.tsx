@@ -9,6 +9,7 @@ import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
+import { AvatarProps, AvatarConfig } from '@/constants';
 import immutableCss from '../assets/immutable.css';
 
 export type BotProps = {
@@ -23,6 +24,8 @@ export type BotProps = {
   stream?: boolean;
   persistSession?: boolean;
   input?: any;
+  avatar?: AvatarProps;
+  customCss?: string;
   widgetContext?: WidgetContext;
 };
 
@@ -33,13 +36,12 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [isDebugMode, setIsDebugMode] = createSignal(false);
   const [persistedMessages, setPersistedMessages] = createSignal<any[]>([]);
   const [isClearButtonOnCooldown, setIsClearButtonOnCooldown] = createSignal(false);
-  // Centralized config merging - props take precedence over API data
 
-  const mergedConfig = createMemo(() => {
-    const input = props.input;
-    return mergePropsWithApiData({ input }, apiData())
-  });
-
+  const input = createMemo(() => props.input ?? apiData()?.input);
+  const customCss = createMemo(() => props.customCss ?? apiData()?.agentConfig?.theme?.customCss ?? '');
+  const mergedHostAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.hostAvatar ?? apiData()?.agentConfig?.theme?.chat?.hostAvatar);
+  const mergedGuestAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.guestAvatar ?? apiData()?.agentConfig?.theme?.chat?.guestAvatar);
+  
   const storage = useAgentStorage(props.agentName);
   let cooldownTimeoutId: NodeJS.Timeout | undefined;
 
@@ -91,7 +93,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
     if (!data) return setError(new Error("Couldn't initiate the chat."));
 
-    // Store API data - merging with props will be handled by mergedConfig memo
+    // Store API data
     setApiData(data);
     
     // Store input data for future session restoration
@@ -147,18 +149,33 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   // Store merged config values in localStorage
   createEffect(() => {
-    const config = mergedConfig();
-    if (config.customCss) {
-      storage.setCustomCss(config.customCss);
+    if (customCss()) {
+      storage.setCustomCss(customCss());
     }
-    if (config.sessionId) {
-      storage.setSessionId(config.sessionId);
+    if (apiData()?.sessionId) {
+      storage.setSessionId(apiData().sessionId);
     }
-    if (config.agentConfig) {
-      storage.setAgentConfig(config.agentConfig);
+    let storedAgentConfig = apiData()?.agentConfig;
+    const host = mergedHostAvatar();
+    const guest = mergedGuestAvatar();
+    if (host || guest) {
+      storedAgentConfig = {
+        ...storedAgentConfig,
+        theme: {
+          ...storedAgentConfig?.theme,
+          chat: {
+            ...storedAgentConfig?.theme?.chat,
+            ...(host ? { hostAvatar: host } : {}),
+            ...(guest ? { guestAvatar: guest } : {}),
+          }
+        }
+      };
     }
-    if (config.input) {
-      storage.setInput(config.input);
+    if (storedAgentConfig) {
+      storage.setAgentConfig(storedAgentConfig);
+    }
+    if (input()) {
+      storage.setInput(input());
     }
   });
 
@@ -172,30 +189,30 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   return (
     <>
-      <style>{mergedConfig().customCss}</style>
+      <style>{customCss()}</style>
       <style>{immutableCss}</style>
       <Show when={error()} keyed>
         {(error) => <ErrorMessage error={error} />}
       </Show>
-      <Show when={mergedConfig().agentConfig} keyed>
+      <Show when={apiData()?.agentConfig} keyed>
         {(agentConfigValue) => {
-          const config = mergedConfig();
+          const config = apiData();
           return (
             <BotContent
               class={props.class}
               initialAgentReply={{
                 messages: config.messages,
-                clientSideActions: config.clientSideActions,
-                input: mergedConfig().input,
               }}
               persistedMessages={persistedMessages()}
               agentConfig={agentConfigValue}
+              hostAvatar={mergedHostAvatar()}
+              guestAvatar={mergedGuestAvatar()}
+              input={input()}
               context={{
                 apiHost: props.apiHost,
                 apiStreamHost: props.apiStreamHost,
                 isPreview: props.isPreview ?? false,
                 sessionId: config.sessionId,
-                agentConfig: agentConfigValue,
                 agentName: props.agentName,
               }}
               filterResponse={props.filterResponse}
@@ -216,6 +233,9 @@ type BotContentProps = {
   initialAgentReply: any;
   persistedMessages: any[];
   agentConfig: any;
+  hostAvatar?: AvatarConfig;
+  guestAvatar?: AvatarConfig;
+  input?: any;
   context: BotContext;
   class?: string;
   filterResponse?: (response: string) => string;
@@ -276,12 +296,20 @@ const BotContent = (props: BotContentProps) => {
         props.class
       }
     >
-      <div class="flex w-full h-full justify-center">
+      <div 
+        class="flex w-full justify-center overflow-hidden"
+        style={{
+          'height': props.input?.options?.type === 'fixed-bottom' ? 'calc(100% - 100px)' : 'calc(100% - 44px)'
+        }}
+      >
         <StreamConversation
           context={props.context}
           initialAgentReply={props.initialAgentReply}
           persistedMessages={props.persistedMessages}
+          hostAvatar={props.hostAvatar}
+          guestAvatar={props.guestAvatar}
           agentConfig={props.agentConfig}
+          input={props.input}
           filterResponse={props.filterResponse}
           onSessionExpired={props.onSessionExpired}
           widgetContext={props.widgetContext}

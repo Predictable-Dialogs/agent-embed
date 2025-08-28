@@ -6,7 +6,7 @@ export type InputSubmitContent = {
 }
 
 export type BotContext = {
-  agentConfig: InitialChatReply['agentConfig']
+  agentConfig?: InitialChatReply['agentConfig']
   isPreview: boolean
   apiHost?: string
   apiStreamHost?: string

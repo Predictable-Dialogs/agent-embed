@@ -12,6 +12,7 @@ import {
   mockGetInitialChatReplyQuery
 } from '../../test-utils';
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
+import { AvatarProps } from '@/constants';
 import realisticTestData from '../../data/getInitialChatReplyQuery.json';
 
 // Mock dependencies
@@ -21,8 +22,12 @@ vi.mock('@/components/StreamConversation', () => ({
     <div data-testid="stream-conversation">
       <div data-testid="session-id">{props.context.sessionId}</div>
       <div data-testid="persisted-messages-count">{props.persistedMessages.length}</div>
-      <div data-testid="initial-input-type">{props.initialAgentReply.input?.type || 'null'}</div>
-      <div data-testid="initial-input-placeholder">{props.initialAgentReply.input?.options?.labels?.placeholder || 'null'}</div>
+      <div data-testid="initial-input-type">{props.input?.type || 'null'}</div>
+      <div data-testid="initial-input-placeholder">{props.input?.options?.labels?.placeholder || 'null'}</div>
+      <div data-testid="host-avatar-url">{props.hostAvatar?.url || 'null'}</div>
+      <div data-testid="host-avatar-enabled">{String(props.hostAvatar?.isEnabled) || 'null'}</div>
+      <div data-testid="guest-avatar-url">{props.guestAvatar?.url || 'null'}</div>
+      <div data-testid="guest-avatar-enabled">{String(props.guestAvatar?.isEnabled) || 'null'}</div>
       <button data-testid="expire-session" onClick={props.onSessionExpired}>
         Expire Session
       </button>
@@ -444,6 +449,182 @@ describe('Bot.tsx - Props Integration & Merging Logic', () => {
 
         // Verify default values are applied for missing API data
         expect(screen.getByTestId('persisted-messages-count')).toHaveTextContent('0');
+      });
+    });
+  });
+
+  describe('5. Avatar and CustomCSS Props Integration Tests', () => {
+    describe('5.1 Avatar Props Basic Integration', () => {
+      it('should include avatar props in the merged configuration and pass them to components', async () => {
+        const propsAvatar: AvatarProps = {
+          hostAvatar: {
+            url: 'https://example.com/props-host.png',
+            isEnabled: true
+          },
+          guestAvatar: {
+            url: 'https://example.com/props-guest.png',
+            isEnabled: false
+          }
+        };
+
+        render(() => 
+          <Bot 
+            agentName="test-agent" 
+            avatar={propsAvatar}
+            stream={true}
+            persistSession={true}
+          />
+        );
+        
+        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
+
+        // Verify avatar props are passed to StreamConversation through agentConfig
+        expect(screen.getByTestId('host-avatar-url')).toHaveTextContent('https://example.com/props-host.png');
+        expect(screen.getByTestId('host-avatar-enabled')).toHaveTextContent('true');
+        expect(screen.getByTestId('guest-avatar-url')).toHaveTextContent('https://example.com/props-guest.png');
+        expect(screen.getByTestId('guest-avatar-enabled')).toHaveTextContent('false');
+      });
+    });
+
+    describe('5.2 CustomCSS Props Basic Integration', () => {
+      it('should include customCss props in the merged configuration and render them', async () => {
+        const propsCustomCss = '.props-integration-test { color: purple; }';
+
+        const { container } = render(() => 
+          <Bot 
+            agentName="test-agent" 
+            customCss={propsCustomCss}
+            stream={true}
+            persistSession={true}
+          />
+        );
+        
+        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
+
+        // Verify customCSS is rendered in style tag
+        const styleElements = container.querySelectorAll('style');
+        const customCssStyle = Array.from(styleElements).find(style => 
+          style.textContent?.includes('.props-integration-test')
+        );
+        expect(customCssStyle).toBeTruthy();
+        expect(customCssStyle?.textContent).toContain('.props-integration-test { color: purple; }');
+      });
+    });
+
+    describe('5.3 Combined Avatar and CustomCSS Props', () => {
+      it('should handle both avatar and customCss props together with input props', async () => {
+        const propsAvatar: AvatarProps = {
+          hostAvatar: {
+            url: 'https://example.com/combined-host.png',
+            isEnabled: true
+          }
+        };
+
+        const propsCustomCss = '.combined-test { background: orange; }';
+        
+        const propsInput = {
+          type: "combined input",
+          options: {
+            labels: {
+              placeholder: "Combined placeholder"
+            }
+          }
+        };
+
+        const { container } = render(() => 
+          <Bot 
+            agentName="test-agent" 
+            avatar={propsAvatar}
+            customCss={propsCustomCss}
+            input={propsInput}
+            stream={true}
+            persistSession={true}
+          />
+        );
+        
+        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
+
+        // Verify all props are applied correctly
+        expect(screen.getByTestId('host-avatar-url')).toHaveTextContent('https://example.com/combined-host.png');
+        expect(screen.getByTestId('host-avatar-enabled')).toHaveTextContent('true');
+        expect(screen.getByTestId('initial-input-type')).toHaveTextContent('combined input');
+        expect(screen.getByTestId('initial-input-placeholder')).toHaveTextContent('Combined placeholder');
+
+        const styleElements = container.querySelectorAll('style');
+        const customCssStyle = Array.from(styleElements).find(style => 
+          style.textContent?.includes('.combined-test')
+        );
+        expect(customCssStyle).toBeTruthy();
+        expect(customCssStyle?.textContent).toContain('.combined-test { background: orange; }');
+      });
+    });
+
+    describe('5.4 Props Precedence with New Props', () => {
+      it('should maintain proper precedence for avatar and customCss props over API data', async () => {
+        // Ensure API has avatar and customCss data
+        const apiWithCustomizations = {
+          ...mockApiResponse,
+          agentConfig: {
+            ...mockApiResponse.agentConfig,
+            theme: {
+              ...mockApiResponse.agentConfig.theme,
+              customCss: '.api-custom { color: blue; }',
+              chat: {
+                ...mockApiResponse.agentConfig.theme.chat,
+                hostAvatar: {
+                  url: 'https://api.example.com/api-host.png',
+                  isEnabled: false
+                },
+                guestAvatar: {
+                  url: 'https://api.example.com/api-guest.png',
+                  isEnabled: true
+                }
+              }
+            }
+          }
+        };
+        (getInitialChatReplyQuery as any).mockResolvedValue({ data: apiWithCustomizations, error: null });
+
+        const propsAvatar: AvatarProps = {
+          hostAvatar: {
+            url: 'https://props.example.com/props-host.png',
+            isEnabled: true
+          }
+        };
+
+        const propsCustomCss = '.props-precedence { color: red; }';
+
+        const { container } = render(() => 
+          <Bot 
+            agentName="test-agent" 
+            avatar={propsAvatar}
+            customCss={propsCustomCss}
+            stream={true}
+            persistSession={true}
+          />
+        );
+        
+        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
+
+        // Verify props take precedence over API
+        expect(screen.getByTestId('host-avatar-url')).toHaveTextContent('https://props.example.com/props-host.png');
+        expect(screen.getByTestId('host-avatar-enabled')).toHaveTextContent('true');
+        
+        // Verify guestAvatar falls back to API (partial override)
+        expect(screen.getByTestId('guest-avatar-url')).toHaveTextContent('https://api.example.com/api-guest.png');
+        expect(screen.getByTestId('guest-avatar-enabled')).toHaveTextContent('true');
+
+        // Verify props customCSS completely overrides API customCSS
+        const styleElements = container.querySelectorAll('style');
+        const propsCustomCssStyle = Array.from(styleElements).find(style => 
+          style.textContent?.includes('.props-precedence')
+        );
+        expect(propsCustomCssStyle).toBeTruthy();
+
+        const apiCustomCssStyle = Array.from(styleElements).find(style => 
+          style.textContent?.includes('.api-custom')
+        );
+        expect(apiCustomCssStyle).toBeFalsy();
       });
     });
   });

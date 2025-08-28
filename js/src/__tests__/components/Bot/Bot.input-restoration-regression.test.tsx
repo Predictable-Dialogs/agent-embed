@@ -95,7 +95,7 @@ describe('Bot Input Restoration Regression Tests', () => {
 
       // Verify that StreamConversation received the restored input
       expect(capturedStreamConversationProps).toBeTruthy();
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(testInput);
+      expect(capturedStreamConversationProps.input).toEqual(testInput);
       
       // Verify API was not called since we're using persisted data
       expect(mockGetInitialChatReplyQuery).not.toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       }, { timeout: 5000 });
 
       // Verify that StreamConversation received null input (no stored input)
-      expect(capturedStreamConversationProps.initialAgentReply.input).toBeNull();
+      expect(capturedStreamConversationProps.input).toBeNull();
     });
   });
 
@@ -160,7 +160,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       );
 
       // Verify StreamConversation received the API input
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(apiInput);
+      expect(capturedStreamConversationProps.input).toEqual(apiInput);
     });
 
     it('should not store input if API response has no input field', async () => {
@@ -231,7 +231,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       }, { timeout: 5000 });
 
       // Verify props input takes precedence over restored input
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(propsInput);
+      expect(capturedStreamConversationProps.input).toEqual(propsInput);
     });
 
     it('should prioritize props.input over API input in fresh sessions', async () => {
@@ -265,7 +265,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       }, { timeout: 5000 });
 
       // Verify props input takes precedence over API input
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(propsInput);
+      expect(capturedStreamConversationProps.input).toEqual(propsInput);
     });
   });
 
@@ -314,7 +314,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       }, { timeout: 5000 });
 
       // The component should use persisted data successfully first
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(testInput);
+      expect(capturedStreamConversationProps.input).toEqual(testInput);
 
       // Note: Testing the actual clearSession call would require triggering session expiration,
       // which is complex to test. The important part is that the useAgentStorage hook 
@@ -349,7 +349,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       }, { timeout: 5000 });
 
       // Should handle malformed data gracefully and default to null
-      expect(capturedStreamConversationProps.initialAgentReply.input).toBeNull();
+      expect(capturedStreamConversationProps.input).toBeNull();
     });
 
     it('should work correctly when localStorage is unavailable', async () => {
@@ -375,7 +375,7 @@ describe('Bot Input Restoration Regression Tests', () => {
       }, { timeout: 5000 });
 
       // Should still work by falling back to API data
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(mockApiResponse.input);
+      expect(capturedStreamConversationProps.input).toEqual(mockApiResponse.input);
 
       // Restore original localStorage
       Object.defineProperty(window, 'localStorage', {

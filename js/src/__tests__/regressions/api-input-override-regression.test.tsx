@@ -56,24 +56,20 @@ vi.mock('@/hooks/useAgentStorage', () => ({
   })),
 }));
 
-// Mock mergePropsWithApiData utility
+// Mock mergePropsWithApiData utility (simplified - no longer handles input)
 vi.mock('@/utils/mergePropsWithApiData', () => ({
   mergePropsWithApiData: vi.fn((props, apiData) => ({
-    ...apiData,
-    ...props, // Props should override API data
-    customCss: '',
     messages: apiData?.messages || [],
-    clientSideActions: apiData?.clientSideActions || [],
-    // CRITICAL: Input from API should be used when props.input is undefined
-    input: props.input !== undefined ? props.input : apiData?.input,
+    sessionId: apiData?.sessionId,
+    agentConfig: apiData?.agentConfig,
   })),
 }));
 
-// Simple mock for StreamConversation that shows the input type received
+// Simple mock for StreamConversation that shows the input received as separate prop
 vi.mock('@/components/StreamConversation', () => ({
   StreamConversation: (props: any) => {
-    const inputType = props.initialAgentReply?.input?.options?.type || 'no-input';
-    const placeholder = props.initialAgentReply?.input?.options?.labels?.placeholder || 'default-placeholder';
+    const inputType = props.input?.options?.type || 'no-input';
+    const placeholder = props.input?.options?.labels?.placeholder || 'default-placeholder';
     
     return (
       <div data-testid="stream-conversation">
@@ -155,7 +151,7 @@ describe('API Input Override Regression Tests', () => {
       const inputType = await screen.findByTestId('input-type');
       const inputPlaceholder = await screen.findByTestId('input-placeholder');
       
-      // CRITICAL TEST: Should use API-provided values
+      // CRITICAL TEST: Should use API-provided values (now passed as separate input prop)
       expect(inputType.textContent).toBe('fixed-bottom');
       expect(inputPlaceholder.textContent).toBe('API-provided placeholder');
     });
@@ -209,7 +205,7 @@ describe('API Input Override Regression Tests', () => {
       const inputType = await screen.findByTestId('input-type');
       const inputPlaceholder = await screen.findByTestId('input-placeholder');
       
-      // CRITICAL TEST: Should use props values, not API values
+      // CRITICAL TEST: Should use props values, not API values (now passed as separate input prop)
       expect(inputType.textContent).toBe('inline');
       expect(inputPlaceholder.textContent).toBe('Props-provided placeholder');
     });
@@ -243,10 +239,13 @@ describe('API Input Override Regression Tests', () => {
   });
 
   describe('Merge Props Priority Validation', () => {
-    it('should verify mergePropsWithApiData respects props > API priority', async () => {
+    it('should verify mergePropsWithApiData only handles core config (not input)', async () => {
       const { mergePropsWithApiData } = await import('@/utils/mergePropsWithApiData');
       
       const mockApiData = {
+        messages: [{ id: 1, content: 'test' }],
+        sessionId: 'test-session',
+        agentConfig: { theme: { customCss: 'test-css' } },
         input: {
           type: "text input",
           options: { type: "fixed-bottom", labels: { placeholder: "API value" } }
@@ -262,30 +261,31 @@ describe('API Input Override Regression Tests', () => {
       
       const result = mergePropsWithApiData(mockProps, mockApiData);
       
-      // CRITICAL: Props should override API data
-      expect(result.input.options.type).toBe('inline');
-      expect(result.input.options.labels.placeholder).toBe('Props value');
+      // CRITICAL: mergePropsWithApiData no longer handles input - only core config
+      expect(result.messages).toEqual(mockApiData.messages);
+      expect(result.sessionId).toBe(mockApiData.sessionId);
+      expect(result.agentConfig).toEqual(mockApiData.agentConfig);
+      expect(result).not.toHaveProperty('input'); // Input should not be in result
     });
 
-    it('should verify mergePropsWithApiData uses API when props undefined', async () => {
+    it('should verify input precedence is handled in Bot component, not mergePropsWithApiData', async () => {
+      // This test verifies that input precedence is now handled at the Bot component level
+      // The Bot component uses createMemo(() => props.input ?? apiData()?.input)
+      // We cannot directly test this logic without rendering the component
+      // This test is more of a documentation of the architectural change
       const { mergePropsWithApiData } = await import('@/utils/mergePropsWithApiData');
       
       const mockApiData = {
-        input: {
-          type: "text input",
-          options: { type: "fixed-bottom", labels: { placeholder: "API value" } }
-        }
+        messages: [],
+        sessionId: 'test',
+        agentConfig: {},
+        input: { type: "text input", options: { type: "fixed-bottom" } }
       };
       
-      const mockProps = {
-        input: undefined
-      };
+      const result = mergePropsWithApiData({}, mockApiData);
       
-      const result = mergePropsWithApiData(mockProps, mockApiData);
-      
-      // CRITICAL: Should use API data when props.input is undefined
-      expect(result.input.options.type).toBe('fixed-bottom');
-      expect(result.input.options.labels.placeholder).toBe('API value');
+      // Input handling is no longer part of this utility
+      expect(result).not.toHaveProperty('input');
     });
   });
 });

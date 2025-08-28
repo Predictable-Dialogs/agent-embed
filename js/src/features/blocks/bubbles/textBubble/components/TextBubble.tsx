@@ -97,7 +97,7 @@ export const TextBubble = (props: Props) => {
             )}            
             style={{
               width: isTyping() ? '64px' : '100%',
-              height: isTyping() ? '32px' : '100%',
+              height: '100%',
             }}
             data-testid="host-bubble"
           >

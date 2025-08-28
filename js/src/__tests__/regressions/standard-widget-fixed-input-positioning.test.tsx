@@ -56,22 +56,19 @@ vi.mock('@/hooks/useAgentStorage', () => ({
   })),
 }));
 
-// Mock mergePropsWithApiData utility
+// Mock mergePropsWithApiData utility (simplified - no longer handles input)
 vi.mock('@/utils/mergePropsWithApiData', () => ({
   mergePropsWithApiData: vi.fn((props, apiData) => ({
-    ...apiData,
-    ...props,
-    customCss: '',
     messages: apiData?.messages || [],
-    clientSideActions: apiData?.clientSideActions || [],
-    input: apiData?.input || props.input, // Ensure input is preserved from apiData
+    sessionId: apiData?.sessionId,
+    agentConfig: apiData?.agentConfig,
   })),
 }));
 
 // Mock StreamConversation to render FixedBottomInput when needed
 vi.mock('@/components/StreamConversation', () => ({
   StreamConversation: (props: any) => {
-    const hasFixedBottomInput = props.initialAgentReply?.input?.options?.type === 'fixed-bottom';
+    const hasFixedBottomInput = props.input?.options?.type === 'fixed-bottom';
     const isStandardWidget = props.widgetContext === 'standard';
     
     // Replicate the conditional positioning logic from our fix

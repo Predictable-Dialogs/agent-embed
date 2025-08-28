@@ -2,6 +2,17 @@ import type { BubbleProps } from './features/bubble'
 import type { PopupProps } from './features/popup'
 import type { BotProps } from './components/Bot'
 
+// Avatar structure interfaces
+export interface AvatarConfig {
+  url: string;
+  isEnabled: boolean;
+}
+
+export interface AvatarProps {
+  hostAvatar?: AvatarConfig;
+  guestAvatar?: AvatarConfig;
+}
+
 export const defaultBotProps: BotProps = {
   agentName: undefined,
   initialPrompt: 'Hi',
@@ -13,7 +24,9 @@ export const defaultBotProps: BotProps = {
   filterResponse: undefined,
   stream: true,
   persistSession: true,
-  input: undefined
+  input: undefined,
+  avatar: undefined,
+  customCss: undefined
 }
 
 export const defaultPopupProps: PopupProps = {

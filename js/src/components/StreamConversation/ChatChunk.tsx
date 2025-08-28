@@ -14,17 +14,18 @@ type Props =  {
   theme: Theme;
   settings: Settings;
   displayIndex: string;
-  onDisplayAssistantMessage: (bubbleOffsetTop?: number) => void;
-  context: BotContext;
+  onDisplayAssistantMessage: () => void;
   hideAvatar: boolean;
   streamingMessageId: ChatChunkType['streamingMessageId'];
-  onScrollToBottom: (top?: number) => void;
   filterResponse?: (response: string) => string;
   streamingHandlers?: {
     onInput?: (e: Event) => void;
     onSubmit: (e: Event) => void;
   };
   isPersisted: boolean;
+  isStreaming?: boolean;
+  scrollOccurredDuringStreaming?: boolean;
+  forceReposition?: boolean;
 };
 
 export const ChatChunk = (props: Props) => {
@@ -42,6 +43,9 @@ export const ChatChunk = (props: Props) => {
                 hostAvatarSrc={props.theme.chat.hostAvatar?.url}
                 hideAvatar={props.hideAvatar}
                 isPersisted={props.isPersisted}
+                isStreaming={props.isStreaming}
+                scrollOccurredDuringStreaming={props.scrollOccurredDuringStreaming}
+                forceReposition={props.forceReposition}
               />
             </Show>
 
@@ -84,7 +88,6 @@ export const ChatChunk = (props: Props) => {
           block={props.input}
           hasHostAvatar={props.theme.chat.hostAvatar?.isEnabled ?? false}
           guestAvatar={props.theme.chat.guestAvatar}
-          context={props.context}
           isInputPrefillEnabled={props.settings.general.isInputPrefillEnabled ?? true}
           streamingHandlers={props.streamingHandlers}
         />

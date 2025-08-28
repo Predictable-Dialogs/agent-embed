@@ -1,7 +1,6 @@
  **UNIT TEST WRITE COMMAND**
 
 **Variables:**
-component_doc: $ARGUMENTS
 component_src: $ARGUMENTS
 component_test_plan: $ARGUMENTS
 

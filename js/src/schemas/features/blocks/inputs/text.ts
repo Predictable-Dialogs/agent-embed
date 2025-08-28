@@ -28,14 +28,14 @@ export const textInputOptionsSchema = textInputOptionsBaseSchema
   .merge(
     z.object({
       isLong: z.boolean(),
-      type: z.enum(['standard', 'fixed-bottom']).optional().default('standard'),
+      type: z.enum(['floating', 'fixed-bottom']).optional().default('floating'),
       shortcuts: shortcutsSchema.optional(),
     })
   )
 
 export const defaultTextInputOptions: TextInputOptions = {
   isLong: false,
-  type: 'standard',
+  type: 'floating',
   labels: { button: defaultButtonLabel, placeholder: 'Type your answer...' },
 }
 

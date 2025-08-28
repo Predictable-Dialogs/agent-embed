@@ -7,11 +7,7 @@ export const Avatar = (props: { initialAvatarSrc?: string, isPersisted?: boolean
   const [avatarSrc, setAvatarSrc] = createSignal(props.initialAvatarSrc)
 
   createEffect(() => {
-    if (
-      avatarSrc()?.startsWith('{{') &&
-      props.initialAvatarSrc?.startsWith('http')
-    )
-      setAvatarSrc(props.initialAvatarSrc)
+    setAvatarSrc(props.initialAvatarSrc)
   })
 
   return (

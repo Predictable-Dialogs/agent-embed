@@ -84,6 +84,7 @@ describe('StreamConversation - Working Tests', () => {
       initialAgentReply: createMockInitialChatReply(),
       persistedMessages: [],
       agentConfig: createMockAgentConfig(),
+      input: { type: 'test-input', options: { labels: { placeholder: 'Test placeholder' } } },
       context: {
         ...createMockBotContext(),
         sessionId: 'test-session',
@@ -161,7 +162,7 @@ describe('StreamConversation - Working Tests', () => {
       expect(transformMessage).toHaveBeenCalledWith(
         initialMessages[0],
         'assistant',
-        props.initialAgentReply.input
+        props.input
       );
 
       // Verify useChat was called with transformed messages

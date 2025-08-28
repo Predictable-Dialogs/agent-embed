@@ -467,7 +467,7 @@ select option {
 }
 
 /* Fixed input overlay - masks content above and below the input */
-.fixed-input-overlay::before {
+/* .fixed-input-overlay::before {
   content: '';
   position: absolute;
   bottom: 100%;
@@ -477,9 +477,9 @@ select option {
   background: linear-gradient(to bottom, transparent, var(--agent-embed-container-bg-color));
   z-index: 5;
   pointer-events: none;
-}
+} */
 
-.fixed-input-overlay::after {
+/* .fixed-input-overlay::after {
   content: '';
   position: absolute;
   top: 100%;
@@ -489,6 +489,6 @@ select option {
   background-color: var(--agent-embed-container-bg-color);
   z-index: 5;
   pointer-events: none;
-}
+} */
 
 

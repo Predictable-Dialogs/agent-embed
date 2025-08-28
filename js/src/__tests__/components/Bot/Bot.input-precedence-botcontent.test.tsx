@@ -22,9 +22,9 @@ vi.mock('@/components/StreamConversation', () => ({
     capturedStreamConversationProps = props;
     return (
       <div data-testid="stream-conversation">
-        <div data-testid="initial-agent-reply-input-type">{props.initialAgentReply?.input?.type || 'null'}</div>
-        <div data-testid="initial-agent-reply-input-placeholder">{props.initialAgentReply?.input?.options?.labels?.placeholder || 'null'}</div>
-        <div data-testid="initial-agent-reply-input-button">{props.initialAgentReply?.input?.options?.labels?.button || 'null'}</div>
+        <div data-testid="input-type">{props.input?.type || 'null'}</div>
+        <div data-testid="input-placeholder">{props.input?.options?.labels?.placeholder || 'null'}</div>
+        <div data-testid="input-button">{props.input?.options?.labels?.button || 'null'}</div>
         <div data-testid="session-id">{props.context?.sessionId || 'null'}</div>
         <div data-testid="persisted-messages-count">{props.persistedMessages?.length || '0'}</div>
       </div>
@@ -125,14 +125,14 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Verify StreamConversation receives props.input, not API input
-      expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('props-input-type');
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('Props placeholder text');
-      expect(screen.getByTestId('initial-agent-reply-input-button')).toHaveTextContent('Props button text');
+      expect(screen.getByTestId('input-type')).toHaveTextContent('props-input-type');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('Props placeholder text');
+      expect(screen.getByTestId('input-button')).toHaveTextContent('Props button text');
 
       // Verify captured props directly
       expect(capturedStreamConversationProps).toBeTruthy();
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(propsInput);
-      expect(capturedStreamConversationProps.initialAgentReply.input).not.toEqual(apiResponseWithInput.input);
+      expect(capturedStreamConversationProps.input).toEqual(propsInput);
+      expect(capturedStreamConversationProps.input).not.toEqual(apiResponseWithInput.input);
     });
 
     it('should pass API input to StreamConversation when props.input is undefined', async () => {
@@ -165,13 +165,13 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Verify StreamConversation receives API input values
-      expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('api-input-type');
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('API placeholder text');
-      expect(screen.getByTestId('initial-agent-reply-input-button')).toHaveTextContent('API button text');
+      expect(screen.getByTestId('input-type')).toHaveTextContent('api-input-type');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('API placeholder text');
+      expect(screen.getByTestId('input-button')).toHaveTextContent('API button text');
 
       // Verify captured props directly
       expect(capturedStreamConversationProps).toBeTruthy();
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(apiResponseWithInput.input);
+      expect(capturedStreamConversationProps.input).toEqual(apiResponseWithInput.input);
     });
 
     it('should pass null input to StreamConversation when both props and API input are undefined', async () => {
@@ -194,13 +194,13 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Verify StreamConversation receives null input
-      expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('null');
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('null');
-      expect(screen.getByTestId('initial-agent-reply-input-button')).toHaveTextContent('null');
+      expect(screen.getByTestId('input-type')).toHaveTextContent('null');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('null');
+      expect(screen.getByTestId('input-button')).toHaveTextContent('null');
 
       // Verify captured props directly
       expect(capturedStreamConversationProps).toBeTruthy();
-      expect(capturedStreamConversationProps.initialAgentReply.input).toBeNull();
+      expect(capturedStreamConversationProps.input).toBeNull();
     });
   });
 
@@ -252,9 +252,9 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Verify initial props input is used
-      expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('initial-props-type');
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('Initial props placeholder');
-      expect(screen.getByTestId('initial-agent-reply-input-button')).toHaveTextContent('Initial props button');
+      expect(screen.getByTestId('input-type')).toHaveTextContent('initial-props-type');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('Initial props placeholder');
+      expect(screen.getByTestId('input-button')).toHaveTextContent('Initial props button');
 
       // Store initial captured props for comparison
       const initialCapturedProps = { ...capturedStreamConversationProps };
@@ -278,19 +278,19 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
 
       // Wait for StreamConversation to receive updated input
       await waitFor(() => {
-        expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('updated-props-type');
+        expect(screen.getByTestId('input-type')).toHaveTextContent('updated-props-type');
       });
 
       // Verify StreamConversation received updated props input
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('Updated props placeholder');
-      expect(screen.getByTestId('initial-agent-reply-input-button')).toHaveTextContent('Updated props button');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('Updated props placeholder');
+      expect(screen.getByTestId('input-button')).toHaveTextContent('Updated props button');
 
       // Verify captured props changed
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(updatedInput);
-      expect(capturedStreamConversationProps.initialAgentReply.input).not.toEqual(initialCapturedProps.initialAgentReply.input);
+      expect(capturedStreamConversationProps.input).toEqual(updatedInput);
+      expect(capturedStreamConversationProps.input).not.toEqual(initialCapturedProps.input);
 
       // Verify API input was never used
-      expect(capturedStreamConversationProps.initialAgentReply.input).not.toEqual(apiResponseWithInput.input);
+      expect(capturedStreamConversationProps.input).not.toEqual(apiResponseWithInput.input);
     });
 
     it('should maintain props precedence during dynamic updates even with API data present', async () => {
@@ -340,7 +340,7 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Verify initial state
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('Props placeholder 1');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('Props placeholder 1');
 
       // Change props multiple times to test persistence of precedence
       const updates = [
@@ -370,12 +370,12 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
         await flushPromises();
 
         await waitFor(() => {
-          expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent(`Props placeholder ${i + 2}`);
+          expect(screen.getByTestId('input-placeholder')).toHaveTextContent(`Props placeholder ${i + 2}`);
         });
 
         // Verify props input is always used, never API input
-        expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(updates[i]);
-        expect(capturedStreamConversationProps.initialAgentReply.input).not.toEqual(apiResponseWithInput.input);
+        expect(capturedStreamConversationProps.input).toEqual(updates[i]);
+        expect(capturedStreamConversationProps.input).not.toEqual(apiResponseWithInput.input);
       }
     });
   });
@@ -409,8 +409,8 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Should fall back to API input when props.input is undefined
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('Fallback API placeholder');
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(apiResponseWithInput.input);
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('Fallback API placeholder');
+      expect(capturedStreamConversationProps.input).toEqual(apiResponseWithInput.input);
     });
 
     it('should handle empty object props.input', async () => {
@@ -441,12 +441,12 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // Empty object should take precedence over API input
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(emptyInput);
-      expect(capturedStreamConversationProps.initialAgentReply.input).not.toEqual(apiResponseWithInput.input);
+      expect(capturedStreamConversationProps.input).toEqual(emptyInput);
+      expect(capturedStreamConversationProps.input).not.toEqual(apiResponseWithInput.input);
 
       // UI should show 'null' for missing properties
-      expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('null');
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('null');
+      expect(screen.getByTestId('input-type')).toHaveTextContent('null');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('null');
     });
 
     // it('should handle falsy but defined props.input values according to || operator behavior', async () => {
@@ -529,13 +529,13 @@ describe('Bot.tsx - Input Precedence with StreamConversation Verification', () =
       });
 
       // This test will FAIL if API input is used when props.input is truthy
-      expect(capturedStreamConversationProps.initialAgentReply.input).toEqual(truthyPropsInput);
-      expect(capturedStreamConversationProps.initialAgentReply.input).not.toEqual(apiResponseWithInput.input);
+      expect(capturedStreamConversationProps.input).toEqual(truthyPropsInput);
+      expect(capturedStreamConversationProps.input).not.toEqual(apiResponseWithInput.input);
       
       // Verify specific values to ensure props took precedence
-      expect(screen.getByTestId('initial-agent-reply-input-type')).toHaveTextContent('props-input-should-win');
-      expect(screen.getByTestId('initial-agent-reply-input-placeholder')).toHaveTextContent('Props placeholder should appear');
-      expect(screen.getByTestId('initial-agent-reply-input-button')).toHaveTextContent('Props button should appear');
+      expect(screen.getByTestId('input-type')).toHaveTextContent('props-input-should-win');
+      expect(screen.getByTestId('input-placeholder')).toHaveTextContent('Props placeholder should appear');
+      expect(screen.getByTestId('input-button')).toHaveTextContent('Props button should appear');
       
       // These should NOT appear if props precedence works correctly
       expect(screen.queryByText('API placeholder should not appear')).not.toBeInTheDocument();

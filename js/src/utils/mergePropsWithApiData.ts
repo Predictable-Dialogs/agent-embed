@@ -1,14 +1,14 @@
-/**
- * Centralized utility for merging Bot props with API data.
- * This function prioritizes props over API data when both are present,
- * providing a single source of truth for configuration merging.
- */
+import { AvatarProps, AvatarConfig } from '@/constants';
 
 export interface ApiData {
   input?: any;
   agentConfig?: {
     theme?: {
       customCss?: string;
+      chat?: {
+        hostAvatar?: AvatarConfig;
+        guestAvatar?: AvatarConfig;
+      };
     };
   };
   messages?: any[];
@@ -18,14 +18,11 @@ export interface ApiData {
 
 export interface BotProps {
   input?: any;
-  // Future props that may override API data can be added here
+  avatar?: AvatarProps;
 }
 
 export interface MergedConfig {
-  input: any | null;
-  customCss: string;
   messages: any[];
-  clientSideActions: any[];
   sessionId: string | undefined;
   agentConfig: any | undefined;
 }
@@ -41,20 +38,23 @@ export const mergePropsWithApiData = (
   props: BotProps,
   apiData: ApiData | null
 ): MergedConfig => {
-  // Props take precedence over API data
-  const input = props.input || apiData?.input;
 
-  const customCss = apiData?.agentConfig?.theme?.customCss ?? '';
   const messages = apiData?.messages ?? [];
-  const clientSideActions = apiData?.clientSideActions ?? [];
   const sessionId = apiData?.sessionId;
-  const agentConfig = apiData?.agentConfig;
+  
+  // Merge avatar data into agentConfig.theme.chat if needed
+  const agentConfig = apiData?.agentConfig ? {
+    ...apiData.agentConfig,
+    theme: {
+      ...apiData.agentConfig.theme,
+      chat: {
+        ...apiData.agentConfig.theme?.chat,
+      }
+    }
+  } : undefined;
 
   return {
-    input,
-    customCss,
     messages,
-    clientSideActions,
     sessionId,
     agentConfig,
   };

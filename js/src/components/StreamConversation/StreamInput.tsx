@@ -11,7 +11,6 @@ type Props = {
   block: NonNullable<ChatReply['input']>;
   hasHostAvatar: boolean;
   guestAvatar?: Theme['chat']['guestAvatar'];
-  context: BotContext;
   isInputPrefillEnabled: boolean;
   streamingHandlers?: {
     onInput?: (e: Event) => void;
@@ -32,7 +31,6 @@ export const StreamInput = (props: Props) => {
         />
       )}
       <Input
-        context={props.context}
         block={props.block}
         isInputPrefillEnabled={props.isInputPrefillEnabled}
         streamingHandlers={props.streamingHandlers}
@@ -42,7 +40,6 @@ export const StreamInput = (props: Props) => {
 };
 
 const Input = (props: {
-  context: BotContext;
   block: NonNullable<ChatReply['input']>;
   isInputPrefillEnabled: boolean;
   streamingHandlers?: {

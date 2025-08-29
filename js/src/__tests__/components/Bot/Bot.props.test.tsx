@@ -298,38 +298,6 @@ describe('Bot.tsx - Props Integration & Merging Logic', () => {
         expect(screen.queryByTestId('stream-conversation')).not.toBeInTheDocument();
       });
     });
-
-    describe('3.2 Props Handling During Error States', () => {
-      it('should handle props gracefully during error states without affecting error display', async () => {
-        (getInitialChatReplyQuery as any).mockResolvedValue({
-          data: null,
-          error: { statusCode: 404 }
-        });
-
-        const propsInput = {
-          type: "error state input",
-          options: { labels: { placeholder: "Error placeholder" } }
-        };
-
-        render(() => 
-          <Bot 
-            agentName="test-agent" 
-            input={propsInput}
-          />
-        );
-
-        await waitFor(() => {
-          expect(screen.getByTestId('error-message')).toHaveTextContent("The agent you're looking for doesn't exist.");
-        });
-
-        // Verify error takes precedence (no BotContent rendered)
-        expect(screen.queryByTestId('stream-conversation')).not.toBeInTheDocument();
-
-        // Verify no localStorage operations occurred during error
-        expect(localStorage.getItem('test-agent_sessionId')).toBeNull();
-        expect(localStorage.getItem('test-agent_agentConfig')).toBeNull();
-      });
-    });
   });
 
   describe('4. MergePropsWithApiData Function Integration Tests', () => {

@@ -44,27 +44,34 @@ const cssVariableNames = {
   },
 } as const;
 
-export const setCssVariablesValue = (theme: Theme | undefined, container: HTMLDivElement) => {
+export const setCssVariablesValue = (theme: Theme | undefined, container: HTMLDivElement, font?: string, backgroundOverride?: Background, hostBubblesOverride?: { color: string; backgroundColor: string }, guestBubblesOverride?: { color: string; backgroundColor: string }, inputStylesOverride?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors }) => {
   if (!theme) return;
   const documentStyle = container?.style;
   if (!documentStyle) return;
-  if (theme.general) setGeneralTheme(theme.general, documentStyle);
-  if (theme.chat) setChatTheme(theme.chat, documentStyle);
+  if (theme.general) setGeneralTheme(theme.general, documentStyle, font, backgroundOverride);
+  if (theme.chat) setChatTheme(theme.chat, documentStyle, hostBubblesOverride, guestBubblesOverride, inputStylesOverride);
 };
 
-const setGeneralTheme = (generalTheme: GeneralTheme, documentStyle: CSSStyleDeclaration) => {
+const setGeneralTheme = (generalTheme: GeneralTheme, documentStyle: CSSStyleDeclaration, fontOverride?: string, backgroundOverride?: Background) => {
   const { background, font } = generalTheme;
-  if (background) setAgentBackground(background, documentStyle);
-  if (font) documentStyle.setProperty(cssVariableNames.general.fontFamily, font);
+  const finalBackground = backgroundOverride || background;
+  if (finalBackground) setAgentBackground(finalBackground, documentStyle);
+  const finalFont = fontOverride || font;
+  if (finalFont) documentStyle.setProperty(cssVariableNames.general.fontFamily, finalFont);
 };
 
-const setChatTheme = (chatTheme: ChatTheme, documentStyle: CSSStyleDeclaration) => {
+const setChatTheme = (chatTheme: ChatTheme, documentStyle: CSSStyleDeclaration, hostBubblesOverride?: { color: string; backgroundColor: string }, guestBubblesOverride?: { color: string; backgroundColor: string }, inputStylesOverride?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors }) => {
   const { hostBubbles, guestBubbles, buttons, inputs, roundness } = chatTheme;
-  if (hostBubbles) setHostBubbles(hostBubbles, documentStyle);
-  if (guestBubbles) setGuestBubbles(guestBubbles, documentStyle);
-  if (buttons) setButtons(buttons, documentStyle);
-  if (inputs) setInputs(inputs, documentStyle);
-  if (roundness) setRoundness(roundness, documentStyle);
+  const finalHostBubbles = hostBubblesOverride || hostBubbles;
+  const finalGuestBubbles = guestBubblesOverride || guestBubbles;
+  const finalButtons = inputStylesOverride?.buttons || buttons;
+  const finalInputs = inputStylesOverride?.inputs || inputs;
+  const finalRoundness = inputStylesOverride?.roundness || roundness;
+  if (finalHostBubbles) setHostBubbles(finalHostBubbles, documentStyle);
+  if (finalGuestBubbles) setGuestBubbles(finalGuestBubbles, documentStyle);
+  if (finalButtons) setButtons(finalButtons, documentStyle);
+  if (finalInputs) setInputs(finalInputs, documentStyle);
+  if (finalRoundness) setRoundness(finalRoundness, documentStyle);
 };
 
 const setHostBubbles = (hostBubbles: ContainerColors, documentStyle: CSSStyleDeclaration) => {

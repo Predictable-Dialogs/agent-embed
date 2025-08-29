@@ -13,6 +13,17 @@ export interface AvatarProps {
   guestAvatar?: AvatarConfig;
 }
 
+// Bubble theme structure interfaces
+export interface BubbleThemeConfig {
+  color: string;
+  backgroundColor: string;
+}
+
+export interface BubbleThemeProps {
+  hostBubbles?: BubbleThemeConfig;
+  guestBubbles?: BubbleThemeConfig;
+}
+
 export const defaultBotProps: BotProps = {
   agentName: undefined,
   initialPrompt: 'Hi',
@@ -26,7 +37,10 @@ export const defaultBotProps: BotProps = {
   persistSession: true,
   input: undefined,
   avatar: undefined,
-  customCss: undefined
+  bubble: undefined,
+  customCss: undefined,
+  font: undefined,
+  background: undefined
 }
 
 export const defaultPopupProps: PopupProps = {

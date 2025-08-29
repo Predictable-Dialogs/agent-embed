@@ -9,7 +9,9 @@ import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
-import { AvatarProps, AvatarConfig } from '@/constants';
+import { AvatarProps, AvatarConfig, BubbleThemeProps, BubbleThemeConfig } from '@/constants';
+import { ContainerColors, InputColors } from '@/schemas';
+import { Background } from '@/schemas';
 import immutableCss from '../assets/immutable.css';
 
 export type BotProps = {
@@ -25,7 +27,10 @@ export type BotProps = {
   persistSession?: boolean;
   input?: any;
   avatar?: AvatarProps;
+  bubble?: BubbleThemeProps;
   customCss?: string;
+  font?: string;
+  background?: { type: "Color" | "Image" | "None", content: string };
   widgetContext?: WidgetContext;
 };
 
@@ -39,8 +44,22 @@ export const Bot = (props: BotProps & { class?: string }) => {
 
   const input = createMemo(() => props.input ?? apiData()?.input);
   const customCss = createMemo(() => props.customCss ?? apiData()?.agentConfig?.theme?.customCss ?? '');
+  const font = createMemo(() => props.font ?? apiData()?.agentConfig?.theme?.general?.font ?? 'Open Sans');
+  const background = createMemo(() => props.background ?? apiData()?.agentConfig?.theme?.general?.background);
   const mergedHostAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.hostAvatar ?? apiData()?.agentConfig?.theme?.chat?.hostAvatar);
   const mergedGuestAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.guestAvatar ?? apiData()?.agentConfig?.theme?.chat?.guestAvatar);
+  const mergedHostBubbles = createMemo<BubbleThemeConfig | undefined>(() => props.bubble?.hostBubbles ?? apiData()?.agentConfig?.theme?.chat?.hostBubbles);
+  const mergedGuestBubbles = createMemo<BubbleThemeConfig | undefined>(() => props.bubble?.guestBubbles ?? apiData()?.agentConfig?.theme?.chat?.guestBubbles);
+  const mergedInputStyles = createMemo(() => {
+    const inputStyles = props.input?.styles;
+    const apiStyles = apiData()?.agentConfig?.theme?.chat;
+    if (!inputStyles) return apiStyles;
+    return {
+      roundness: inputStyles.roundness ?? apiStyles?.roundness,
+      inputs: inputStyles.inputs ?? apiStyles?.inputs,
+      buttons: inputStyles.buttons ?? apiStyles?.buttons
+    };
+  });
   
   const storage = useAgentStorage(props.agentName);
   let cooldownTimeoutId: NodeJS.Timeout | undefined;
@@ -158,15 +177,32 @@ export const Bot = (props: BotProps & { class?: string }) => {
     let storedAgentConfig = apiData()?.agentConfig;
     const host = mergedHostAvatar();
     const guest = mergedGuestAvatar();
-    if (host || guest) {
+    const hostBubbles = mergedHostBubbles();
+    const guestBubbles = mergedGuestBubbles();
+    const mergedFont = font();
+    const mergedBackground = background();
+    const inputStyles = mergedInputStyles();
+    if (host || guest || hostBubbles || guestBubbles || mergedFont || mergedBackground || inputStyles) {
       storedAgentConfig = {
         ...storedAgentConfig,
         theme: {
           ...storedAgentConfig?.theme,
+          ...(mergedFont || mergedBackground ? { 
+            general: {
+              ...storedAgentConfig?.theme?.general,
+              ...(mergedFont ? { font: mergedFont } : {}),
+              ...(mergedBackground ? { background: mergedBackground } : {})
+            }
+          } : {}),
           chat: {
             ...storedAgentConfig?.theme?.chat,
             ...(host ? { hostAvatar: host } : {}),
             ...(guest ? { guestAvatar: guest } : {}),
+            ...(hostBubbles ? { hostBubbles: hostBubbles } : {}),
+            ...(guestBubbles ? { guestBubbles: guestBubbles } : {}),
+            ...(inputStyles?.roundness !== undefined ? { roundness: inputStyles.roundness } : {}),
+            ...(inputStyles?.inputs ? { inputs: inputStyles.inputs } : {}),
+            ...(inputStyles?.buttons ? { buttons: inputStyles.buttons } : {}),
           }
         }
       };
@@ -207,7 +243,12 @@ export const Bot = (props: BotProps & { class?: string }) => {
               agentConfig={agentConfigValue}
               hostAvatar={mergedHostAvatar()}
               guestAvatar={mergedGuestAvatar()}
+              hostBubbles={mergedHostBubbles()}
+              guestBubbles={mergedGuestBubbles()}
+              font={font()}
+              background={background()}
               input={input()}
+              inputStyles={mergedInputStyles()}
               context={{
                 apiHost: props.apiHost,
                 apiStreamHost: props.apiStreamHost,
@@ -235,7 +276,12 @@ type BotContentProps = {
   agentConfig: any;
   hostAvatar?: AvatarConfig;
   guestAvatar?: AvatarConfig;
+  hostBubbles?: BubbleThemeConfig;
+  guestBubbles?: BubbleThemeConfig;
+  font?: string;
+  background?: Background;
   input?: any;
+  inputStyles?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors };
   context: BotContext;
   class?: string;
   filterResponse?: (response: string) => string;
@@ -248,7 +294,6 @@ type BotContentProps = {
 
 const BotContent = (props: BotContentProps) => {
   let botContainer: HTMLDivElement | undefined;
-
   const resizeObserver = new ResizeObserver((entries) => {
     return setIsMobile(entries[0].target.clientWidth < 400);
   });
@@ -258,12 +303,12 @@ const BotContent = (props: BotContentProps) => {
     if (
       existingFont
         ?.getAttribute('href')
-        ?.includes(props.agentConfig?.theme?.general?.font ?? 'Open Sans')
+        ?.includes(props.font ?? 'Open Sans')
     )
       return;
     const font = document.createElement('link');
     font.href = `https://fonts.bunny.net/css2?family=${
-      props.agentConfig?.theme?.general?.font ?? 'Open Sans'
+      props.font ?? 'Open Sans'
     }:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');')`;
     font.rel = 'stylesheet';
     font.id = 'bot-font';
@@ -280,7 +325,7 @@ const BotContent = (props: BotContentProps) => {
   createEffect(() => {
     injectCustomFont();
     if (!botContainer) return;
-    setCssVariablesValue(props.agentConfig.theme, botContainer);
+    setCssVariablesValue(props.agentConfig.theme, botContainer, props.font, props.background, props.hostBubbles, props.guestBubbles, props.inputStyles);
   });
 
   onCleanup(() => {

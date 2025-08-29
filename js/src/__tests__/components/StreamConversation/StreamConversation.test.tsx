@@ -430,14 +430,15 @@ describe('StreamConversation - Working Tests', () => {
         'flex-col', 
         'overflow-y-scroll',
         'w-full',
-        'min-h-full',
+        'h-full',
         'px-3',
         'pt-10',
         'relative',
         'scrollable-container',
         'agent-chat-view',
         'chat-container',
-        'gap-2'
+        'gap-2',
+        'overflow-y-scroll'
       );
     });
 

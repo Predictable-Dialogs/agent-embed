@@ -141,9 +141,16 @@ export const StreamConversation = (props: Props) => {
 
   createEffect(() => {
     const currentMessages = messages();
+    console.log('💬 Messages effect triggered. Message count:', currentMessages.length);
     if (currentMessages.length > 0) {
       const lastMessage = currentMessages[currentMessages.length - 1];
+      console.log('📝 Last message:', {
+        role: lastMessage.role,
+        id: lastMessage.id,
+        contentLength: lastMessage.content?.length || 0
+      });
     }
+    console.log('🔄 Calling autoScrollToBottom from messages effect...');
     autoScrollToBottom(); // Defaults to force=false, so checks isNearBottom
   });
 
@@ -200,6 +207,7 @@ export const StreamConversation = (props: Props) => {
           fileInputRef.value = '';
         }
 
+        console.log('📤 User submitted message, calling forced scroll...');
         autoScrollToBottom(true); // Force scroll to show user message
       },
     };
@@ -226,6 +234,7 @@ export const StreamConversation = (props: Props) => {
         setdisplayIndex(lastMessage.id);
       }
 
+      console.log('🏁 onMount: Calling initial forced scroll...');
       autoScrollToBottom(true); // Force initial scroll to bottom
 
       queueMicrotask(() => {
@@ -245,25 +254,11 @@ export const StreamConversation = (props: Props) => {
 
       chatContainer.addEventListener('scroll', handleScroll, { passive: true });
       
-      // Setup MutationObserver for DOM changes during streaming
-      const observer = new MutationObserver((mutations) => {
-        if (mutations.length > 0 && isStreaming()) {  // Only during active streaming
-          autoScrollToBottom();
-        }
-      });
-
-      observer.observe(chatContainer, {
-        childList: true,    // Detect added/removed nodes (e.g., text chunks)
-        subtree: true,      // Watch descendants (e.g., inside ChatChunk)
-        characterData: true // Detect text content changes
-      });
-      
-      // Cleanup scroll event listener and observer
+      // Cleanup scroll event listener
       onCleanup(() => {
         if (chatContainer) {
           chatContainer.removeEventListener('scroll', handleScroll);
         }
-        observer.disconnect();
         clearTimeout(scrollTimeout);
       });
     }
@@ -271,37 +266,50 @@ export const StreamConversation = (props: Props) => {
   
   const isNearBottom = () => {
     if (!chatContainer) {
+      console.log('🔴 isNearBottom: chatContainer is null');
       return false;
     }
-    // Force reflow: Access a geometric property to flush pending layout
-    const _ = chatContainer.offsetHeight;  // Dummy read; browser computes fresh
-
-    const threshold = 100;
+    const threshold = 100; // Adjustable; pixels from bottom to consider "near"
     const { scrollHeight, scrollTop, clientHeight } = chatContainer;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     const nearBottom = distanceFromBottom < threshold;
-    
+    console.log('📏 isNearBottom:', {
+      scrollHeight,
+      scrollTop,
+      clientHeight,
+      distanceFromBottom,
+      threshold,
+      nearBottom
+    });
     return nearBottom;
   };
 
-
   const autoScrollToBottom = (force: boolean = false) => {
+    console.log('🚀 autoScrollToBottom called with force:', force);
     if (!chatContainer) {
+      console.log('🔴 autoScrollToBottom: chatContainer is null');
       return;
     }
-    requestAnimationFrame(() => {
+    console.log('⏱️ autoScrollToBottom: Setting timeout...');
+    setTimeout(() => {
       if (!chatContainer) {
+        console.log('🔴 autoScrollToBottom timeout: chatContainer is null');
         return;
       }
       const shouldScroll = force || isNearBottom();
+      console.log('🤔 autoScrollToBottom: shouldScroll =', shouldScroll, '(force:', force, ')');
       if (shouldScroll) {
         const scrollTarget = chatContainer.scrollHeight;
+        console.log('⏭️ Scroll scrollTarget', scrollTarget);
         chatContainer.scrollTo({
           top: scrollTarget,
-          behavior: 'smooth',
+          behavior: 'auto', // 'auto' for instant; change to 'smooth' if preferred for UX
         });
+        console.log('✅ Scroll command executed');
+      } else {
+        console.log('⏭️ Scroll skipped - not near bottom and not forced');
       }
-    });
+    }, 0);
   };
   
   const onDisplayAssistantMessage = async () => {
@@ -377,6 +385,7 @@ export const StreamConversation = (props: Props) => {
 };
 
 const BottomSpacer = ({ type } : { type : string }) => {
+  console.log("BottomSpacer type:", type);
   return <div 
           class="w-full flex-shrink-0"
           classList={{

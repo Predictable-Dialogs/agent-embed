@@ -1,6 +1,9 @@
 # Ignore node_modules folders
 **/node_modules/
 
+# Claude
+.playwright-mcp/
+
 # Ignore dist folders
 **/dist/
 

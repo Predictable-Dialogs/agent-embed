@@ -108,25 +108,25 @@ textarea {
   font-weight: 300;
 }
 
-.slate-a {
+/* .slate-a {
   text-decoration: underline;
-}
+} */
 
 .slate-html-container > div {
   min-height: 24px;
 }
 
-.slate-bold {
+/* .slate-bold {
   font-weight: bold;
-}
+} */
 
-.slate-italic {
+/* .slate-italic {
   font-style: oblique;
-}
+} */
 
-.slate-underline {
+/* .slate-underline {
   text-decoration: underline;
-}
+} */
 
 .text-input::-webkit-input-placeholder {
   color: var(--agent-input-placeholder-color) !important;

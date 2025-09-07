@@ -13,10 +13,7 @@
   import Agent from '../../../../../dist/web.js'
   Agent.initStandard({
     agentName: "Chatbot-ed5e7",
-    apiHost: "https://app.predictabledialogs.com/web/incoming",
-    apiStreamHost: "https://app.predictabledialogs.com/web/stream",
     autoShowDelay: 3000,
-    persistSession: false,
     input: {
       "type": "text input",
       "options": {
@@ -25,7 +22,15 @@
           "placeholder": "What's on your mind?",
           "button": "Send"
         },
-        "isLong": true
+        "isLong": true,
+        "shortcuts": {
+          "preset": "custom",
+          "keymap": {
+            "submit": [["Mod","Enter"], ["Shift","Enter"]],
+            "newline": [["Enter"]]
+          },
+          "imeSafe": true
+        }
       }
      }
   });

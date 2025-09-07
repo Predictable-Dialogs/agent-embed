@@ -16,8 +16,9 @@
     agentName: "Chatbot-ed5e7",
     apiHost: "https://app.predictabledialogs.com/web/incoming",
     apiStreamHost: "https://app.predictabledialogs.com/web/stream",
-    persistSession: false,
     autoShowDelay: 5000,
+    onClose: () => console.log("Popup closed"),
+    onOpen: () => console.log("Popup opened"),
   });
   
   // Make Agent globally accessible for button click

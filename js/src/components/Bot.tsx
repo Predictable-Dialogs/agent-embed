@@ -145,14 +145,20 @@ export const Bot = (props: BotProps & { class?: string }) => {
       const storedSessionId = storage.getSessionId();
       const storedAgentConfig = storage.getAgentConfig();
       const storedCustomCss = storage.getCustomCss();
+
       const storedMessages = storage.getChatMessages();
       const storedInput = storage.getInput();
       
       if (storedMessages) setPersistedMessages(storedMessages);
       const restoredData = {
         sessionId: storedSessionId,
-        agentConfig: storedAgentConfig,
-        theme: { customCss: storedCustomCss || '' },
+        agentConfig: {
+          ...storedAgentConfig,
+          theme: {
+            ...storedAgentConfig?.theme,
+            customCss: storedCustomCss || storedAgentConfig?.theme?.customCss || '',  // Prioritize storedCustomCss
+          },
+        },
         messages: [],
         clientSideActions: [],
         input: storedInput,

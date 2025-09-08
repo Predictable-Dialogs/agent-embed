@@ -366,7 +366,7 @@ const BotContent = (props: BotContentProps) => {
           widgetContext={props.widgetContext}
         />
       </div>
-      <Show when={props.agentConfig.settings.general.isBrandingEnabled}>
+      <Show when={props.agentConfig?.settings?.general.isBrandingEnabled}>
         <LiteBadge botContainer={botContainer} />
       </Show>
       <ClearButton onClick={props.handleClearSession} isOnCooldown={props.isClearButtonOnCooldown} />

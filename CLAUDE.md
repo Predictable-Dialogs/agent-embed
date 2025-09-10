@@ -76,6 +76,19 @@ npm run build        # Currently just echoes message
 npm run test         # Currently just echoes message
 ```
 
+## Widget Loading
+
+The widget loads through a multi-layer system: web.ts registers custom elements via register.tsx, creating for e.g <agent-standard> using SolidJS's customElement. React wrapper creates this element and assigns props via Object.assign. The core Standard component uses IntersectionObserver to detect when the host element becomes visible, then conditionally renders the Bot component. Host CSS makes the element fill its container (width/height 100%). NextJS integration dynamically imports React wrapper with SSR disabled. Props flow from React → custom element → SolidJS component through property assignment rather than typical React prop passing.
+
+Notable source files:
+  @nextjs/src/index.ts 
+  @react/src/Standard.tsx
+  @Read js/src/window.ts
+  @Read js/src/web.ts
+  @Read js/src/register.tsx
+  @Read js/src/features/standard/components/Standard.tsx
+
+
 ## Build System
 
 - **Bundler**: Rollup with multiple output formats

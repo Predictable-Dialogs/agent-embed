@@ -24,12 +24,25 @@ export const Standard = (props: BotProps, { element }: { element: HTMLElement })
     }
   });
 
+  let fallbackId: number | undefined;
+
   onMount(() => {
     botLauncherObserver.observe(element);
+
+    // Fallback only: if observer hasn’t fired after 300ms, show bot anyway
+    fallbackId = window.setTimeout(() => {
+      if (!isBotDisplayed()) {
+        setIsBotDisplayed(true);
+      }
+    }, 300);
+
   });
 
   onCleanup(() => {
     botLauncherObserver.disconnect();
+    if (fallbackId) {
+      clearTimeout(fallbackId);
+    }
   });
 
   return (

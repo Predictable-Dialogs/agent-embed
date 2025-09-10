@@ -88,7 +88,7 @@ export const ChatChunk = (props: Props) => {
           block={props.input}
           hasHostAvatar={props.theme.chat.hostAvatar?.isEnabled ?? false}
           guestAvatar={props.theme.chat.guestAvatar}
-          isInputPrefillEnabled={props.settings.general.isInputPrefillEnabled ?? true}
+          isInputPrefillEnabled={props.settings?.general.isInputPrefillEnabled ?? true}
           streamingHandlers={props.streamingHandlers}
         />
       )} 

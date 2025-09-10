@@ -71,6 +71,12 @@
       import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
       Agent.initStandard({
         agentName: "Chatbot-1aeec",
+        apiHost: "https://app.predictabledialogs.com/web/incoming",
+        apiStreamHost: "https://app.predictabledialogs.com/web/stream",
+        onSend: () => { 
+          console.log('User sent message - showing conversation');
+          window.showChatConversation();
+        }
       });
 
       // Function to hide conversation while keeping input visible
@@ -94,10 +100,15 @@
           }
         }
       }
+
+      // Make showConversation globally accessible
+      window.showConversation = showConversation;
+
       
       // Function to transition from hero to chat
       window.showChatConversation = function() {
         const heroSection = document.getElementById('hero-section');
+        const resetButton = document.getElementById('reset-button');
         
         // Hide hero section
         heroSection.style.opacity = '0';
@@ -107,6 +118,9 @@
         
         // Show chat conversation
         showConversation();
+        
+        // Show reset button
+        resetButton.style.display = 'block';
       };
       
       // Add reset functionality
@@ -119,19 +133,22 @@
         
         // Show hero section again 
         const heroSection = document.getElementById('hero-section');
+        const resetButton = document.getElementById('reset-button');
         
         heroSection.style.display = 'flex';
         setTimeout(() => {
           heroSection.style.opacity = '1';
         }, 50);
         
+        // Hide reset button
+        resetButton.style.display = 'none';
       };
     </script>
 
     <agent-standard style="opacity: 1; transition: opacity 0.3s ease-in-out;"></agent-standard>
     
     <!-- Reset Button -->
-    <button onclick="resetChat()" style="
+    <button id="reset-button" onclick="resetChat()" style="
       position: fixed; 
       bottom: 20px; 
       right: 20px; 
@@ -145,10 +162,11 @@
       font-size: 0.9rem;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       transition: background 0.3s ease;
+      display: none;
     " 
     onmouseover="this.style.background='#ff3333'" 
     onmouseout="this.style.background='#ff4444'">
-      Reset Chat
+      Back to Hero
     </button>
 
   </body>

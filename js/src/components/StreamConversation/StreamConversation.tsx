@@ -45,6 +45,7 @@ type Props = {
   context: BotContext;
   filterResponse?: (response: string) => string;
   onSessionExpired?: () => void;
+  onSend?: () => void;
   widgetContext?: WidgetContext;
 };
 
@@ -369,6 +370,7 @@ export const StreamConversation = (props: Props) => {
             block={props.input}
             isDisabled={isFixedInputDisabled()}
             streamingHandlers={streamingHandlers()}
+            onSend={props.onSend}
             widgetContext={props.widgetContext}
           />
         </Show>

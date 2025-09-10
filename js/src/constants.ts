@@ -28,6 +28,7 @@ export const defaultBotProps: BotProps = {
   agentName: undefined,
   initialPrompt: 'Hi',
   onInit: undefined,
+  onSend: undefined,
   isPreview: undefined,
   prefilledVariables: undefined,
   apiHost: undefined,

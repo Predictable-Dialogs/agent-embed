@@ -23,6 +23,7 @@ export type BotProps = {
   apiHost?: string;
   apiStreamHost?: string;
   onInit?: () => void;
+  onSend?: () => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
@@ -276,6 +277,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               filterResponse={props.filterResponse}
               isDebugMode={isDebugMode()}
               onSessionExpired={handleSessionExpired}
+              onSend={props.onSend}
               widgetContext={props.widgetContext}
               handleClearSession={handleClearSession}
               isClearButtonOnCooldown={isClearButtonOnCooldown()}
@@ -304,6 +306,7 @@ type BotContentProps = {
   filterResponse?: (response: string) => string;
   isDebugMode?: boolean;
   onSessionExpired?: () => void;
+  onSend?: () => void;
   widgetContext?: WidgetContext;
   handleClearSession: () => Promise<void>;
   isClearButtonOnCooldown: boolean;
@@ -374,6 +377,7 @@ const BotContent = (props: BotContentProps) => {
           input={props.input}
           filterResponse={props.filterResponse}
           onSessionExpired={props.onSessionExpired}
+          onSend={props.onSend}
           widgetContext={props.widgetContext}
         />
       </div>

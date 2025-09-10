@@ -15,6 +15,7 @@ type Props = {
     onInput?: (e: Event) => void;
     onSubmit?: (e: Event) => void
   }
+  onSend?: () => void
   isDisabled?: boolean
   widgetContext?: WidgetContext
 }
@@ -55,6 +56,9 @@ export const FixedBottomInput = (props: Props) => {
   const submit = () => {
     if (props.isDisabled) return
     if (!checkIfInputIsValid()) return
+
+    // Call the onSend callback if provided
+    props.onSend?.()
 
     if (props.streamingHandlers?.onSubmit) {
       const event = new Event('submit')

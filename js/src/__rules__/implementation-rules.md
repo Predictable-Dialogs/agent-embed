@@ -4,6 +4,6 @@
 - We will not run any lint after implementaion.
 - We will run existing tests to ensure we have not broken existing functionality.
 - We should execute `npm run build` to ensure it works.
-- DO NOT create/modify/edit/delete any tests.
+- DO NOT modify/edit/delete any EXISTING tests.
 
 

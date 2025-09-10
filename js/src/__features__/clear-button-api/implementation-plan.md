@@ -89,3 +89,21 @@ Following the **implementation rules** at `agent-embed/js/src/__rules__/implemen
 - Existing functionality remains unaffected
 - Test passes with TDD approach (fails before, passes after implementation)
 - No TypeScript compilation errors
+
+
+
+  Key Features
+
+  ✅ Universal Widget Support - Works across Standard, Popup, and Bubble
+  widgets through centralized Bot component handling✅ Consistent API -
+  Available as window.Agent.reset() following existing command patterns✅
+  Proper Session Clearing - Clears localStorage, resets messages, and
+  reinitializes bot using existing handleClearSession logic✅ Cooldown 
+  Protection - Leverages existing 5-second cooldown mechanism✅ Type Safety
+   - Full TypeScript support with proper type definitions✅ No Performance 
+  Impact - Uses existing event handling patterns✅ Build Verification - npm
+   run build completed successfully with no errors
+
+  The reset command now works programmatically exactly like the existing
+  ClearButton, clearing all session data and reinitializing the chatbot for
+   a fresh conversation.

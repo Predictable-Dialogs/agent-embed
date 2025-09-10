@@ -12,6 +12,7 @@ import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { AvatarProps, AvatarConfig, BubbleThemeProps, BubbleThemeConfig } from '@/constants';
 import { ContainerColors, InputColors } from '@/schemas';
 import { Background } from '@/schemas';
+import { CommandData } from '@/features/commands';
 import immutableCss from '../assets/immutable.css';
 
 export type BotProps = {
@@ -133,6 +134,14 @@ export const Bot = (props: BotProps & { class?: string }) => {
     }, 1500); // Display "expired" message for 1.5 seconds
   };
 
+  const processIncomingEvent = (event: MessageEvent<CommandData>) => {
+    const { data } = event;
+    if (!data.isFromAgent) return;
+    if (data.command === 'reset') {
+      handleClearSession();
+    }
+  };
+
   onMount(() => {
     setIsDebugMode(storage.getDebugMode());
     if (!props.agentName) {
@@ -140,6 +149,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       console.info(`Initializing pd agent`);
       return;
     }
+    window.addEventListener('message', processIncomingEvent);
     if (props.persistSession && storage.hasCompleteSession()) {
       // If persisted data exists, use it and mark as initialized
       const storedSessionId = storage.getSessionId();
@@ -227,6 +237,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     if (cooldownTimeoutId) {
       clearTimeout(cooldownTimeoutId);
     }
+    window.removeEventListener('message', processIncomingEvent);
   });
 
   return (

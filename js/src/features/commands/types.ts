@@ -7,7 +7,7 @@ export type CommandData = {
   variables?: Record<string, string | number | boolean>
 } & (
   | {
-      command: 'open' | 'toggle' | 'close' | 'hidePreviewMessage'
+      command: 'open' | 'toggle' | 'close' | 'hidePreviewMessage' | 'reset'
     }
   | ShowMessageCommandData
   | SetPrefilledVariablesCommandData

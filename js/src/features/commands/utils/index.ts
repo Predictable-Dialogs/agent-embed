@@ -1,6 +1,7 @@
 export * from './close'
 export * from './hidePreviewMessage'
 export * from './open'
+export * from './reset'
 export * from './setPrefilledVariables'
 export * from './showPreviewMessage'
 export * from './toggle'

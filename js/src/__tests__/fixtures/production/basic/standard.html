@@ -68,11 +68,15 @@
     </div>
 
     <script type="module">
-      import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
+      import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@0.0.41/dist/web.js'
       Agent.initStandard({
         agentName: "Chatbot-1aeec",
-        apiHost: "https://app.predictabledialogs.com/web/incoming",
-        apiStreamHost: "https://app.predictabledialogs.com/web/stream",
+        prefilledVariables: {
+          user_id: "ab123",
+          user_name: "John Doe",
+          user_email: "john.doe@gmail.com",
+          user_segments: ["sports", "ott"]
+        },
         onSend: () => { 
           console.log('User sent message - showing conversation');
           window.showChatConversation();

@@ -20,6 +20,7 @@ export type BotProps = {
   initialPrompt?: string;
   isPreview?: boolean;
   prefilledVariables?: Record<string, unknown>;
+  user?: Record<string, unknown>;
   apiHost?: string;
   apiStreamHost?: string;
   onInit?: () => void;
@@ -100,6 +101,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       prefilledVariables: {
         ...prefilledVariables,
         ...props.prefilledVariables,
+        ...props.user
       },
     });
     if (error && 'code' in error && typeof error.code === 'string') {

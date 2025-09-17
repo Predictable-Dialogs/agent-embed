@@ -113,9 +113,11 @@ export const StreamConversation = (props: Props) => {
       onError: (error) => {
         clearTimeout(longRequest);
         setIsSending(false);
+        setIsFixedInputDisabled(false);
         if (error.message === 'Session expired. Starting a new session.') { 
           props.onSessionExpired?.();
         }
+        
         if (error.message.includes('Unterminated string in JSON')) {
           console.log('⚠️ Ignoring JSON parse error from stream - likely due to incomplete response.');
           // Remove the incomplete assistant message to avoid displaying partial content

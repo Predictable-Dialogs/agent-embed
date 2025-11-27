@@ -1,6 +1,6 @@
 {
   "name": "@agent-embed/react",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "description": "Convenient library to display Agent embed on your React website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

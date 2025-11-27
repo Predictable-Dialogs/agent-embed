@@ -10,7 +10,7 @@ export type CommandData = {
       command: 'open' | 'toggle' | 'close' | 'hidePreviewMessage' | 'reset'
     }
   | ShowMessageCommandData
-  | SetPrefilledVariablesCommandData
+  | SetContextVariablesCommandData
   | SetInputValueCommandData
 )
 
@@ -19,8 +19,8 @@ export type ShowMessageCommandData = {
   message?: Pick<PreviewMessageParams, 'avatarUrl' | 'message'>
 }
 
-export type SetPrefilledVariablesCommandData = {
-  command: 'setPrefilledVariables'
+export type SetContextVariablesCommandData = {
+  command: 'setContextVariables'
   variables: Record<string, string | number | boolean>
 }
 

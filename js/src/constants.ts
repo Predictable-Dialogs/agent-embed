@@ -30,7 +30,7 @@ export const defaultBotProps: BotProps = {
   onInit: undefined,
   onSend: undefined,
   isPreview: undefined,
-  prefilledVariables: undefined,
+  contextVariables: undefined,
   user: undefined,
   apiHost: undefined,
   apiStreamHost: undefined,

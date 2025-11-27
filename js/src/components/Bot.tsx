@@ -19,7 +19,7 @@ export type BotProps = {
   agentName: string | any;
   initialPrompt?: string;
   isPreview?: boolean;
-  prefilledVariables?: Record<string, unknown>;
+  contextVariables?: Record<string, unknown>;
   user?: Record<string, unknown>;
   apiHost?: string;
   apiStreamHost?: string;
@@ -87,9 +87,9 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const initializeBot = async () => {
     const urlParams = new URLSearchParams(location.search);
     props.onInit?.();
-    const prefilledVariables: { [key: string]: string } = {};
+    const contextVariables: { [key: string]: string } = {};
     urlParams.forEach((value, key) => {
-      prefilledVariables[key] = value;
+      contextVariables[key] = value;
     });
 
     const { data, error } = await getInitialChatReplyQuery({
@@ -98,9 +98,9 @@ export const Bot = (props: BotProps & { class?: string }) => {
       initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,
       isPreview: props.isPreview ?? false,
-      prefilledVariables: {
-        ...prefilledVariables,
-        ...props.prefilledVariables,
+      contextVariables: {
+        ...contextVariables,
+        ...props.contextVariables,
         ...props.user
       },
     });

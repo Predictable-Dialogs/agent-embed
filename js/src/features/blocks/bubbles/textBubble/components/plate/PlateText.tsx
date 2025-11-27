@@ -30,7 +30,7 @@ export const PlateText = (props: PlateTextProps) => {
   return (
     <div 
       innerHTML={htmlContent()}       
-      class="-mb-5"
+      class="ai-bubble"
     />
   )
 }

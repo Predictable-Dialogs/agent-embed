@@ -105,7 +105,7 @@ const startParamsSchema = z.object({
     .describe(
       "If set to `true`, it will start a Preview session with the unpublished bot and it won't be saved in the Results tab. You need to be authenticated for this to work."
     ),
-  prefilledVariables: z
+  contextVariables: z
     .record(z.unknown())
     .optional()
     .describe(

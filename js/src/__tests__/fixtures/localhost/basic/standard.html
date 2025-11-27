@@ -11,12 +11,15 @@
 <script type="module">
   import Agent from '../../../../../dist/web.js'
   Agent.initStandard({
-    agentName: "Chatbot-c9c7d",
+    agentName: "My Website Chatbot-d8ee7",
     apiHost: "http://localhost:8001/web/incoming",
     apiStreamHost: "http://localhost:8001/web/stream",
     user: {
       user_name: "John Doe",
       user_email: "john.doe@gmail.com"
+    },
+    contextVariables: {
+      "name": "Jai"
     },
     // font: 'BhuTuka Expanded One',
     // background: {

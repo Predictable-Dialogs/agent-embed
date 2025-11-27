@@ -8,7 +8,7 @@ import {
   hidePreviewMessage,
   open,
   reset,
-  setPrefilledVariables,
+  setContextVariables,
   showPreviewMessage,
   toggle,
   setInputValue,
@@ -48,7 +48,7 @@ type Agent = {
   hidePreviewMessage: typeof hidePreviewMessage;
   open: typeof open;
   reset: typeof reset;
-  setPrefilledVariables: typeof setPrefilledVariables;
+  setContextVariables: typeof setContextVariables;
   showPreviewMessage: typeof showPreviewMessage;
   toggle: typeof toggle;
   setInputValue: typeof setInputValue;
@@ -68,7 +68,7 @@ export const parsePredictable = () => ({
   hidePreviewMessage,
   open,
   reset,
-  setPrefilledVariables,
+  setContextVariables,
   showPreviewMessage,
   toggle,
   setInputValue,

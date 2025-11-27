@@ -26,9 +26,9 @@ export const Popup = (props: PopupProps) => {
   ]);
 
   const [initialPrompt, setInitialPrompt] = createSignal<string | undefined>();
-  const [prefilledVariables, setPrefilledVariables] = createSignal(
+  const [contextVariables, setContextVariables] = createSignal(
     // eslint-disable-next-line solid/reactivity
-    botProps.prefilledVariables
+    botProps.contextVariables
   );
 
   const [isBotOpened, setIsBotOpened] = createSignal(
@@ -58,10 +58,10 @@ export const Popup = (props: PopupProps) => {
   });
 
   createEffect(() => {
-    if (!props.prefilledVariables) return;
-    setPrefilledVariables((existingPrefilledVariables) => ({
-      ...existingPrefilledVariables,
-      ...props.prefilledVariables,
+    if (!props.contextVariables) return;
+    setContextVariables((existingContextVariables) => ({
+      ...existingContextVariables,
+      ...props.contextVariables,
     }));
   });
 
@@ -74,24 +74,24 @@ export const Popup = (props: PopupProps) => {
     if (!data.isFromAgent) return;
     if (data.command === 'open') {
       setInitialPrompt(data?.prompt);
-      setPrefilledVariables((existingPrefilledVariables) => {
-        let updatedPrefilledVariables = { ...existingPrefilledVariables, ...data?.variables };
+      setContextVariables((existingContextVariables) => {
+        let updatedContextVariables = { ...existingContextVariables, ...data?.variables };
 
         // If there's a prompt, remove the 'topic' key from the prefilled variables
         if (data?.prompt) {
-          const { topic, ...rest } = updatedPrefilledVariables;
-          updatedPrefilledVariables = rest;
+          const { topic, ...rest } = updatedContextVariables;
+          updatedContextVariables = rest;
         }
 
-        return updatedPrefilledVariables;
+        return updatedContextVariables;
       });
       openBot();
     }
     if (data.command === 'close') closeBot();
     if (data.command === 'toggle') toggleBot();
-    if (data.command === 'setPrefilledVariables')
-      setPrefilledVariables((existingPrefilledVariables) => ({
-        ...existingPrefilledVariables,
+    if (data.command === 'setContextVariables')
+      setContextVariables((existingContextVariables) => ({
+        ...existingContextVariables,
         ...data.variables,
       }));
   };
@@ -147,7 +147,7 @@ export const Popup = (props: PopupProps) => {
               <Bot
                 {...botProps}
                 initialPrompt={initialPrompt()}
-                prefilledVariables={prefilledVariables()}
+                contextVariables={contextVariables()}
                 widgetContext="popup"
               />
             </div>

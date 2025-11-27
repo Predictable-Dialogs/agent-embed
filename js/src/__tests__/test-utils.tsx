@@ -131,7 +131,7 @@ export function createMockBotContext(overrides = {}) {
       theme: fullAgentConfig.theme,
       settings: fullAgentConfig.settings,
     },
-    prefilledVariables: {},
+    contextVariables: {},
     ...overrides,
   };
 }

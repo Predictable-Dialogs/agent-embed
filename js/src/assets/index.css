@@ -466,29 +466,45 @@ select option {
   background-color: var(--agent-input-bg-color);
 }
 
-/* Fixed input overlay - masks content above and below the input */
-/* .fixed-input-overlay::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  height: 24px;
-  background: linear-gradient(to bottom, transparent, var(--agent-embed-container-bg-color));
-  z-index: 5;
-  pointer-events: none;
+/* Keep pre-wrap where you need it (paragraph-like content) */
+.ai-bubble {
+  white-space: normal;
+}
+
+.ai-bubble p,
+.ai-bubble ul,
+.ai-bubble ol {
+  margin: 0 0 0.5rem;
+}
+
+/* this is the key: extra space after a list when it's the last thing */
+/* .ai-bubble > ul:last-child,
+.ai-bubble > ol:last-child {
+  margin-bottom: 0.5em;  
 } */
 
-/* .fixed-input-overlay::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background-color: var(--agent-embed-container-bg-color);
-  z-index: 5;
-  pointer-events: none;
-} */
+/* Turn it back off for structured elements that contain markup + newlines */
+.ai-bubble ul,
+.ai-bubble ol {
+  padding-left: 1.5rem;       /* indent for bullets/numbers */
+}
 
+.ai-bubble ul {
+  list-style-type: disc;      /* solid bullets */
+  list-style-position: outside;
+}
 
+.ai-bubble ol {
+  list-style-type: decimal;   /* 1., 2., 3., ... */
+  list-style-position: outside;
+}
+
+/* List items */
+.ai-bubble li {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ai-bubble > :last-child {
+  margin-bottom: 0;
+}

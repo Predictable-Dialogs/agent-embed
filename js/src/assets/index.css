@@ -474,7 +474,7 @@ select option {
 .ai-bubble p,
 .ai-bubble ul,
 .ai-bubble ol {
-  margin: 0 0 0.5rem;
+  margin: 0 0 8px;
 }
 
 /* this is the key: extra space after a list when it's the last thing */
@@ -486,7 +486,7 @@ select option {
 /* Turn it back off for structured elements that contain markup + newlines */
 .ai-bubble ul,
 .ai-bubble ol {
-  padding-left: 1.5rem;       /* indent for bullets/numbers */
+  padding-left: 24px;       /* indent for bullets/numbers */
 }
 
 .ai-bubble ul {
@@ -501,7 +501,7 @@ select option {
 
 /* List items */
 .ai-bubble li {
-  margin: 0;
+  margin: 4px;
   line-height: 1.3;
 }
 

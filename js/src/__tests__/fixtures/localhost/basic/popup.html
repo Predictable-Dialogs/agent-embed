@@ -11,14 +11,14 @@
 <script type="module">
   import Agent from '../../../../../dist/web.js'
   Agent.initPopup({
-    agentName: "Chatbot-67689",
+    agentName: "My Website Chatbot-d8ee7",
     apiHost: "http://localhost:8001/web/incoming",
     apiStreamHost: "http://localhost:8001/web/stream",
-    autoShowDelay: 3000,
+    theme: { width: "min(600px, 90vw)", height: "300px" },
+    autoShowDelay: 0,
+    contextVariables: { name: "Jai" }
     // persistSession: true,
   });
 </script>
-<agent-standard style="width: 100%; height: 600px; "></agent-standard>
-
   </body>
 </html>

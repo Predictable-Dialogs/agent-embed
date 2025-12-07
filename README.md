@@ -6,6 +6,85 @@ Create an agent on [https://predictabledialogs.com](https://predictabledialogs.c
 
 The [agent-embed](https://github.com/Predictable-Dialogs/agent-embed) repository provides components which can be embedded on a website and communicates with the predictable dialogs backend which in turn talks to the openAI LLM models. It currently provides components for chat. The chat components it provides are Bubbles, Standard, Popup. 
 
+## Example with all props:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Agent Example</title>
+</head>
+<body>
+  <script type="module">
+    import Agent from '../../../../dist/web.js'
+    Agent.initStandard({
+      agentName: "My Website Chatbot-d8ee7",
+      apiHost: "http://localhost:8001/web/incoming",
+      apiStreamHost: "http://localhost:8001/web/stream",
+      user: {
+        user_id: '123',
+        user_name: "John Doe",
+        user_email: "john.doe@gmail.com",
+        user_segments: ["live_theming"]
+      },
+      contextVariables: {
+        "name": "Jai"
+      },
+      font: 'BhuTuka Expanded One',
+      background: {
+        type: "Image",
+        content: "https://picsum.photos/1920/1080"
+      },
+      avatar: {
+        "hostAvatar": {
+          isEnabled: true,
+          url: "https://i.pravatar.cc/300",
+        },
+        "guestAvatar": {
+          isEnabled: true,
+          url: "https://i.pravatar.cc/300",
+        }
+      },
+      input: {
+        "type": "text input",
+        "options": {
+          "type": "fixed-bottom",
+          "labels": {
+            "placeholder": "Ask anything...",
+            "button": "Send"
+          },
+          "isLong": false,
+          "shortcuts": {
+            "preset": "custom",
+            "keymap": {
+              "submit": [["Mod", "Enter"], ["Shift", "Enter"]],
+              "newline": [["Enter"]]
+            },
+            "imeSafe": true
+          }
+        }
+      },
+      bubble: {
+        hostBubbles: {
+          color: "#2b2c2b",
+          backgroundColor: "#ff6b35"
+        },
+        guestBubbles: {
+          color: "#f8faf4",
+          backgroundColor: "#0066cc"
+        }
+      },
+      customCss: ".agent-chat-view { background: green; width: 400px;}",
+      persistSession: false,
+    });
+
+  </script>
+  <agent-standard style="width: 100%; height: 600px; "></agent-standard>
+</body>
+</html>
+```
+
 
 ## Introduction
 The embed code can be added to HTML or JS, here is an example to add the embed code to HTML 

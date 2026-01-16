@@ -26,9 +26,11 @@
   },
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@ai-sdk/solid": "1.1.23",
+    "@kodehort/ai-sdk-solid": "1.0.4",
     "@stripe/stripe-js": "1.54.1",
     "@udecode/plate-common": "^21.1.5",
+    "ai": "^5.0.110",
+    "ai-sdk-solid": "file:ai-sdk-solid-0.0.1.tgz",
     "dompurify": "^3.2.4",
     "eventsource-parser": "^1.0.0",
     "marked": "^14.0.0",

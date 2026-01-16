@@ -153,10 +153,10 @@ describe('Bot.tsx - SessionId Functionality', () => {
         setupLocalStorage({
           'agent-a_sessionId': 'sess_agent_a_123',
           'agent-a_agentConfig': agentAConfig,
-          'agent-a_chatMessages': [{ id: '1', content: 'Message A', role: 'user' }],
+          'agent-a_chatMessages': [{ id: '1', parts: [{ type: 'text', text: 'Message A' }], role: 'user' }],
           'agent-b_sessionId': 'sess_agent_b_456', 
           'agent-b_agentConfig': agentBConfig,
-          'agent-b_chatMessages': [{ id: '2', content: 'Message B', role: 'user' }],
+          'agent-b_chatMessages': [{ id: '2', parts: [{ type: 'text', text: 'Message B' }], role: 'user' }],
         });
 
         // Render component with agent-a
@@ -171,7 +171,7 @@ describe('Bot.tsx - SessionId Functionality', () => {
         // Verify agent-b data remains untouched with specific structure checks
         verifyStorageValue('agent-b_sessionId', 'sess_agent_b_456');
         const agentBMessages = JSON.parse(localStorage.getItem('agent-b_chatMessages') || '[]');
-        expect(agentBMessages[0].content).toBe('Message B');
+        expect(agentBMessages[0].parts?.[0]?.text).toBe('Message B');
       });
     });
   });
@@ -214,7 +214,7 @@ describe('Bot.tsx - SessionId Functionality', () => {
       it('should call API when sessionId is missing', async () => {
         setupLocalStorage({
           'test-agent_agentConfig': realisticTestData.agentConfig,
-          'test-agent_chatMessages': [{ id: 'msg-1', content: 'test', role: 'user' }],
+          'test-agent_chatMessages': [{ id: 'msg-1', parts: [{ type: 'text', text: 'test' }], role: 'user' }],
         });
 
         render(() => <Bot agentName="test-agent" stream={true} persistSession={true} />);
@@ -229,7 +229,7 @@ describe('Bot.tsx - SessionId Functionality', () => {
       it('should call API when agentConfig is missing', async () => {
         setupLocalStorage({
           'test-agent_sessionId': 'sess_existing_123',
-          'test-agent_chatMessages': [{ id: 'msg-1', content: 'test', role: 'user' }],
+          'test-agent_chatMessages': [{ id: 'msg-1', parts: [{ type: 'text', text: 'test' }], role: 'user' }],
         });
 
         render(() => <Bot agentName="test-agent" stream={true} persistSession={true} />);
@@ -271,10 +271,10 @@ describe('Bot.tsx - SessionId Functionality', () => {
   describe('2. Session Restoration Tests', () => {
     describe('2.1 Complete Session Restoration', () => {
       it('should skip API call and restore session when all required data exists', async () => {
-        const storedMessages = [
-          { id: 'msg-user-1', content: 'Hello', role: 'user', createdAt: '2025-07-29T05:25:54.145Z' },
-          { id: 'msg-asst-1', content: 'Hi there!', role: 'assistant', createdAt: '2025-07-29T05:25:55.116Z' },
-        ];
+      const storedMessages = [
+        { id: 'msg-user-1', parts: [{ type: 'text', text: 'Hello' }], role: 'user', createdAt: '2025-07-29T05:25:54.145Z' },
+        { id: 'msg-asst-1', parts: [{ type: 'text', text: 'Hi there!' }], role: 'assistant', createdAt: '2025-07-29T05:25:55.116Z' },
+      ];
 
         setupLocalStorage({
           'test-agent_sessionId': 'sess_restored_456',
@@ -300,7 +300,7 @@ describe('Bot.tsx - SessionId Functionality', () => {
         setupLocalStorage({
           'test-agent_sessionId': 'sess_restored_456',
           'test-agent_agentConfig': realisticTestData.agentConfig,
-          'test-agent_chatMessages': [{ id: 'msg-1', content: 'test', role: 'user' }],
+          'test-agent_chatMessages': [{ id: 'msg-1', parts: [{ type: 'text', text: 'test' }], role: 'user' }],
         });
 
         render(() => <Bot agentName="test-agent" persistSession={true} />);
@@ -325,7 +325,7 @@ describe('Bot.tsx - SessionId Functionality', () => {
         setupLocalStorage({
           'test-agent_sessionId': 'sess_expired_789',
           'test-agent_agentConfig': realisticTestData.agentConfig,
-          'test-agent_chatMessages': [{ id: 'msg-1', content: 'test message', role: 'user', createdAt: '2025-07-29T05:25:54.145Z' }],
+          'test-agent_chatMessages': [{ id: 'msg-1', parts: [{ type: 'text', text: 'test message' }], role: 'user', createdAt: '2025-07-29T05:25:54.145Z' }],
         });
 
         render(() => <Bot agentName="test-agent" stream={true} persistSession={true} />);
@@ -358,7 +358,7 @@ describe('Bot.tsx - SessionId Functionality', () => {
         setupLocalStorage({
           'test-agent_sessionId': 'sess_expired_789',
           'test-agent_agentConfig': realisticTestData.agentConfig,
-          'test-agent_chatMessages': [{ id: 'msg-1', content: 'test message', role: 'user' }],
+          'test-agent_chatMessages': [{ id: 'msg-1', parts: [{ type: 'text', text: 'test message' }], role: 'user' }],
         });
 
         render(() => <Bot agentName="test-agent" stream={true} persistSession={true} />);

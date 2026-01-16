@@ -3,11 +3,13 @@ import type {
   TypingEmulation
 } from '@/schemas';
 
+type MessageLike = {
+  parts?: Array<{ type?: string; text?: string }>;
+  content?: string;
+};
+
 type Props = {
-  message: {
-    content: string;
-  };
-  // messages: any;
+  message: MessageLike;
   typingEmulation: TypingEmulation;
   onTransitionEnd: (offsetTop?: number) => void;
   filterResponse?: (response: string) => string;
@@ -21,7 +23,7 @@ export const HostBubble = (props: Props) => {
   
   return (
     <TextBubble
-      content={props.message.content}
+      message={props.message}
       typingEmulation={props.isPersisted ? {
         enabled: false,
         speed: 300,

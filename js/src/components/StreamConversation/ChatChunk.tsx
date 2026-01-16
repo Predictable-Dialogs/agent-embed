@@ -7,6 +7,7 @@ import { AvatarSideContainer } from './AvatarSideContainer';
 import { Match, Switch } from 'solid-js';
 import { GuestBubble } from '../bubbles/GuestBubble';
 import { StreamInput } from './StreamInput';
+import { getMessageText } from '@/utils/transformMessages';
 
 type Props =  {
   message: any;
@@ -71,7 +72,7 @@ export const ChatChunk = (props: Props) => {
           <Match when={props.message.role === 'user'}>
             <div class="flex flex-col flex-1">
               <GuestBubble
-                message={props.message.content} // or however you store user text
+                message={getMessageText(props.message)}
                 showAvatar={props.theme.chat.guestAvatar?.isEnabled ?? false}
                 avatarSrc={props.theme.chat.guestAvatar?.url}
                 isPersisted={props.isPersisted}

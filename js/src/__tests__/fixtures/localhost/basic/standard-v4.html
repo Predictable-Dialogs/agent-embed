@@ -22,13 +22,16 @@
   </head>
   <body>
     <script type="module">
-      import Agent from '../../../../../dist/web.js'
+      import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
       Agent.initStandard({
         // agentName: "oai-test",
         agentName: "My Website Chatbot-3-jan",
             // agentName: "My Website Chatbot-58515",
-        // agentName: "My Website Chatbot-test1",
-        contextVariables: { name: "Jai" },
+    //     agentName: "Chatbot-d8893",
+    //         apiHost: "https://app.predictabledialogs.com/web/incoming",
+    // apiStreamHost: "https://app.predictabledialogs.com/web/stream",
+    // persistSession: false,
+
         apiHost: "http://localhost:8001/web/incoming",
         apiStreamHost: "http://localhost:8001/web/stream",
         user: { user_name: "John Doe", user_email: "john.doe@gmail.com" },
@@ -38,5 +41,8 @@
     </script>
 
     <agent-standard></agent-standard>
+    <!-- <ai-button id="1">Button For Topic #1</ai-button>
+<ai-button id="3">Button For Topic #2</ai-button> -->
+
   </body>
 </html>

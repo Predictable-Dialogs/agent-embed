@@ -1,14 +1,18 @@
 import { TypingBubble } from '@/components'
 import type { TypingEmulation } from '@/schemas'
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js'
-import { computeTypingDuration } from '../helpers/computeTypingDuration'
+import { For, createEffect, createMemo, createSignal } from 'solid-js'
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
 import { applyFilterText } from '../helpers/applyFilterRichText'
 import { PlateText } from './plate/PlateText'
 
+type MessageLike = {
+  parts?: Array<{ type?: string; text?: string }>
+  content?: string
+}
+
 type Props = {
-  content: string
+  message: MessageLike
   typingEmulation: TypingEmulation
   onTransitionEnd: (offsetTop?: number) => void
   filterResponse?: (response: string) => string
@@ -17,38 +21,29 @@ type Props = {
 
 export const showAnimationDuration = 400
 
-const defaultTypingEmulation = {
-  enabled: true,
-  speed: 300,
-  maxDelay: 1.5,
-}
-
-let typingTimeout: NodeJS.Timeout
-
 export const TextBubble = (props: Props) => {
   let ref: HTMLDivElement | undefined
   const [isTyping, setIsTyping] = createSignal(true)
-  const [filteredText, setFilteredText] = createSignal(props.content)
+  const textParts = createMemo(() => {
+    const parts = props.message.parts ?? []
+    const texts = parts.filter((p): p is { type?: string; text: string } => p?.type === 'text' && typeof p.text === 'string')
 
-  createEffect(async () => {
-    const newText = applyFilterText(props.content, props.filterResponse);    
-    setFilteredText(newText);
-    
-    // If content arrives and we're still typing, end the typing animation
-    if (props.content?.trim() && isTyping()) {
-      const typingDuration =
-        props.typingEmulation?.enabled === false
-          ? 0
-          : computeTypingDuration(
-              props.content,
-              props.typingEmulation ?? defaultTypingEmulation
-            )
-      
-      // Clear any existing timeout and set a new one
-      if (typingTimeout) clearTimeout(typingTimeout)
-      typingTimeout = setTimeout(onTypingEnd, typingDuration)
+    if (texts.length > 0) return texts
+
+    if (typeof props.message.content === 'string') {
+      return [{ type: 'text', text: props.message.content }]
     }
-  });
+
+    return []
+  })
+  const filteredTextParts = createMemo(() => textParts().map(part => applyFilterText(part.text, props.filterResponse)))
+
+  createEffect(() => {
+    const hasText = filteredTextParts().some(part => part.trim())
+    if (isTyping() && hasText) {
+      onTypingEnd()
+    }
+  })
   
   const onTypingEnd = () => {
     if (!isTyping()) return
@@ -57,30 +52,6 @@ export const TextBubble = (props: Props) => {
       props.onTransitionEnd(ref?.offsetTop)
     }, showAnimationDuration)
   }
-
-  onMount(() => {
-    if (!isTyping) return
-    const typingDuration =
-      props.typingEmulation?.enabled === false
-        ? 0
-        : computeTypingDuration(
-            props.content,
-            props.typingEmulation ?? defaultTypingEmulation
-          )
-    
-    // If content is empty or only whitespace, keep typing animation until content arrives
-    if (props.content?.trim()) {
-      typingTimeout = setTimeout(onTypingEnd, typingDuration)
-    }
-    
-    const newText = applyFilterText(props.content, props.filterResponse);    
-    setFilteredText(newText);
-  })
-
-  onCleanup(() => {
-    if (typingTimeout) clearTimeout(typingTimeout)
-  })
-
   return (
     <div 
       class={"flex flex-col" + (props.isPersisted ? '' : ' animate-fade-in')} 
@@ -115,7 +86,9 @@ export const TextBubble = (props: Props) => {
               transition: 'height 350ms ease-out',
             }}
           >
-            <PlateText content={filteredText()} />
+            <For each={filteredTextParts()}>
+              {text => <PlateText content={text} />}
+            </For>
           </div>
         </div>
       </div>

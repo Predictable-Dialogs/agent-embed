@@ -210,7 +210,7 @@ describe('Bot.tsx - Props Integration & Merging Logic', () => {
       it('should maintain props precedence during session restoration', async () => {
         // Setup stored session data with API input
         const storedMessages = [
-          { id: 'msg-1', content: 'Hello', role: 'user' }
+          { id: 'msg-1', parts: [{ type: 'text', text: 'Hello' }], role: 'user' }
         ];
 
         setupLocalStorage({

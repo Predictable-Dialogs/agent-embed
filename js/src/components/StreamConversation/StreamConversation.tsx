@@ -5,8 +5,9 @@ import { FixedBottomInput } from './FixedBottomInput';
 import { BotContext, InitialChatReply, WidgetContext } from '@/types';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
-import { useChat } from '@ai-sdk/solid';
-import { transformMessage, EnhancedUIMessage } from '@/utils/transformMessages';
+import { useChat } from 'ai-sdk-solid';
+import { DefaultChatTransport } from 'ai';
+import { transformMessage, EnhancedUIMessage, getMessageText } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { isNotEmpty } from '@/lib/utils';
@@ -64,6 +65,7 @@ export const StreamConversation = (props: Props) => {
   let scrollTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
+  const [pendingInputValue, setPendingInputValue] = createSignal('');
   let fileInputRef: HTMLInputElement | undefined;
 
   const theme = createMemo(() => {
@@ -81,65 +83,71 @@ export const StreamConversation = (props: Props) => {
     }, dyn);
   });
 
-  const initialMessages = createMemo(() => 
+  const initialMessages = createMemo(() =>
     props.persistedMessages.length > 0
-      ? props.persistedMessages.map(msg => ({ ...msg, isPersisted: true }))      
-      : props.initialAgentReply.messages.map((msg: any) =>
-        ({ ...transformMessage({ ...msg }, 'assistant', props.input), isPersisted: false })
-      )
+      ? props.persistedMessages.map((msg) => ({
+          ...transformMessage({ ...msg }, msg.role, props.input),
+          isPersisted: true,
+        }))
+      : props.initialAgentReply.messages.map((msg: any) => ({
+          ...transformMessage({ ...msg }, 'assistant', props.input),
+          isPersisted: false,
+        }))
   );
 
-  const {
-    status,
-    messages,
-    setMessages,
-    data,
-    error,
-    handleInputChange,
-    handleSubmit,
-    reload
-  } = useChat({
+  const chatHelpers = useChat({
+    transport: new DefaultChatTransport({ 
       api: `${isNotEmpty(props.context.apiStreamHost) ? props.context.apiStreamHost : getApiStreamEndPoint()}`,
-      streamProtocol: 'data',
-      initialMessages: initialMessages(),  
-      experimental_prepareRequestBody({ messages }) {
-        return {
-          message: messages[messages.length - 1].content,
-          // messages: messages,
+      prepareSendMessagesRequest: ({ messages }) => ({
+        body: {
+          clientVersion: 'v5',
+          message: getMessageText(messages[messages.length - 1]),
           sessionId: props.context.sessionId,
           agentName: props.context.agentName,
-        };
-      },
-      onError: (error) => {
-        clearTimeout(longRequest);
-        setIsSending(false);
-        setIsFixedInputDisabled(false);
-        if (error.message === 'Session expired. Starting a new session.') { 
-          props.onSessionExpired?.();
         }
-        
-        if (error.message.includes('Unterminated string in JSON')) {
-          console.log('⚠️ Ignoring JSON parse error from stream - likely due to incomplete response.');
-          // Remove the incomplete assistant message to avoid displaying partial content
-          setMessages((prevMessages) => {
-            const lastMessage = prevMessages[prevMessages.length - 1];
-            if (lastMessage && lastMessage.role === 'assistant') {
-              return prevMessages.slice(0, -1);
-            }
-            return prevMessages;
-          });
-          // Retry generating the response
-          reload();
-        }
+      })
+    }),
+    messages: initialMessages(),  
+    onError: (error) => {
+      clearTimeout(longRequest);
+      setIsSending(false);
+      setIsFixedInputDisabled(false);
+      if (error.message === 'Session expired. Starting a new session.') { 
+        props.onSessionExpired?.();
       }
+      
+      if (error.message.includes('Unterminated string in JSON')) {
+        console.log('⚠️ Ignoring JSON parse error from stream - likely due to incomplete response.');
+        // Remove the incomplete assistant message to avoid displaying partial content
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          if (lastMessage && lastMessage.role === 'assistant') {
+            return prevMessages.slice(0, -1);
+          }
+          return prevMessages;
+        });
+        // Retry generating the response
+        regenerate();
+      }
+
+      console.error('[StreamConversation] useChat error', { error });
+    }
   });
+
+  const messages = () => chatHelpers.messages;
+  const status = () => chatHelpers.status;
+  const error = () => chatHelpers.error;
+  const setMessages = chatHelpers.setMessages;
+  const sendMessage = chatHelpers.sendMessage;
+  const regenerate = chatHelpers.regenerate;
 
   const isStreaming = createMemo(() => status() === 'streaming');
   
   const storage = useAgentStorage(props.context.agentName);
   
   createEffect(() => {
-    storage.setChatMessages(messages());
+    const currentMessages = messages();
+    storage.setChatMessages(currentMessages);
   });
 
   createEffect(() => {
@@ -182,10 +190,11 @@ export const StreamConversation = (props: Props) => {
   })
 
   const streamingHandlers = createMemo(() => {
-    if (!handleInputChange || !handleSubmit) return undefined;
-
     return {
-      onInput: handleInputChange as (e: Event) => void,
+      onInput: (event: Event) => {
+        const target = event.currentTarget as HTMLInputElement | HTMLTextAreaElement;
+        setPendingInputValue(target?.value ?? '');
+      },
       onSubmit: (e: Event) => {
         e.preventDefault();
         setdisplayIndex('#HIDE');
@@ -193,9 +202,12 @@ export const StreamConversation = (props: Props) => {
         longRequest = setTimeout(() => {
           setIsSending(true);
         }, 2000);
-        handleSubmit(e, {
-          experimental_attachments: files(),
+        void sendMessage({
+          text: pendingInputValue(),
+          files: files(),
         });
+
+        setPendingInputValue('');
 
         // Reset form
         setFiles(undefined);
@@ -330,7 +342,7 @@ export const StreamConversation = (props: Props) => {
         }}
       >
         <For each={messages()}>
-          {(message) => {        
+          {(message) => {
             if (message.role === 'assistant') {
               clearTimeout(longRequest);
               setIsSending(false);

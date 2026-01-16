@@ -9,8 +9,7 @@ import {
   waitForEffects 
 } from '../test-utils';
 
-// Mock the useChat hook from @ai-sdk/solid
-vi.mock('@ai-sdk/solid', () => ({
+vi.mock('ai-sdk-solid', () => ({
   useChat: vi.fn(),
 }));
 
@@ -91,7 +90,7 @@ describe('API Input Override Regression Tests', () => {
       status: 'ready',
     });
     
-    (vi.mocked(import('@ai-sdk/solid')) as any).useChat = vi.fn(() => mockUseChat);
+    (vi.mocked(import('ai-sdk-solid')) as any).useChat = vi.fn(() => mockUseChat);
     
     vi.clearAllMocks();
   });

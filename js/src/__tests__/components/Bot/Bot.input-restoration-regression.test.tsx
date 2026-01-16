@@ -76,7 +76,7 @@ describe('Bot Input Restoration Regression Tests', () => {
         [`${agentName}_sessionId`]: 'session-123',
         [`${agentName}_agentConfig`]: createMockAgentConfig(),
         [`${agentName}_chatMessages`]: [
-          { id: '1', role: 'assistant', content: 'Hello from restored session' }
+          { id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello from restored session' }] }
         ],
         [`${agentName}_customCss`]: '.test { color: blue; }'
       });
@@ -109,7 +109,7 @@ describe('Bot Input Restoration Regression Tests', () => {
         [`${agentName}_sessionId`]: 'session-123',
         [`${agentName}_agentConfig`]: createMockAgentConfig(),
         [`${agentName}_chatMessages`]: [
-          { id: '1', role: 'assistant', content: 'Hello' }
+          { id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello' }] }
         ]
       });
 
@@ -213,7 +213,7 @@ describe('Bot Input Restoration Regression Tests', () => {
         [`${agentName}_sessionId`]: 'session-123',
         [`${agentName}_agentConfig`]: createMockAgentConfig(),
         [`${agentName}_chatMessages`]: [
-          { id: '1', role: 'assistant', content: 'Hello' }
+          { id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello' }] }
         ]
       });
 
@@ -289,7 +289,7 @@ describe('Bot Input Restoration Regression Tests', () => {
         [`${agentName}_sessionId`]: 'session-123',
         [`${agentName}_agentConfig`]: createMockAgentConfig(),
         [`${agentName}_chatMessages`]: [
-          { id: '1', role: 'assistant', content: 'Hello' }
+          { id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello' }] }
         ]
       });
 
@@ -332,7 +332,7 @@ describe('Bot Input Restoration Regression Tests', () => {
         [`${agentName}_sessionId`]: 'session-123',
         [`${agentName}_agentConfig`]: createMockAgentConfig(),
         [`${agentName}_chatMessages`]: [
-          { id: '1', role: 'assistant', content: 'Hello' }
+          { id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello' }] }
         ]
       });
 

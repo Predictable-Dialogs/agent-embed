@@ -184,43 +184,45 @@ export function createMockUseChat(overrides = {}) {
   let dataValue: any = null;
   
   const mock = {
-    messages: vi.fn(() => messagesData),
+    messages: messagesData,
     input: '',
     handleInputChange: vi.fn(),
     handleSubmit: vi.fn(),
     isLoading: false,
-    error: vi.fn(() => errorData),
+    error: errorData,
     reload: vi.fn(),
     stop: vi.fn(),
     append: vi.fn(),
     setMessages: vi.fn(),
     setInput: vi.fn(),
-    status: vi.fn(() => statusData),
-    data: vi.fn(() => dataValue),
+    status: statusData,
+    data: dataValue,
+    sendMessage: vi.fn(),
+    regenerate: vi.fn(),
     ...overrides,
   } as any;
   
   // Allow tests to set the underlying data
   Object.defineProperty(mock, 'messages', {
-    get() { return vi.fn(() => messagesData); },
+    get() { return messagesData; },
     set(value: any) { messagesData = value; },
     configurable: true
   });
   
   Object.defineProperty(mock, 'error', {
-    get() { return vi.fn(() => errorData); },
+    get() { return errorData; },
     set(value: any) { errorData = value; },
     configurable: true
   });
   
   Object.defineProperty(mock, 'status', {
-    get() { return vi.fn(() => statusData); },
+    get() { return statusData; },
     set(value: any) { statusData = value; },
     configurable: true
   });
   
   Object.defineProperty(mock, 'data', {
-    get() { return vi.fn(() => dataValue); },
+    get() { return dataValue; },
     set(value: any) { dataValue = value; },
     configurable: true
   });

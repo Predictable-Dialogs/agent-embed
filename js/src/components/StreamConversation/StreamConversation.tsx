@@ -45,9 +45,11 @@ type Props = {
   input: any
   context: BotContext;
   filterResponse?: (response: string) => string;
-  onSessionExpired?: () => void;
+  onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
   widgetContext?: WidgetContext;
+  pendingExpiredMessage?: { text?: string; files?: FileList | undefined };
+  onPendingExpiredMessageConsumed?: () => void;
 };
 
 export const StreamConversation = (props: Props) => {
@@ -66,6 +68,8 @@ export const StreamConversation = (props: Props) => {
 
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
   const [pendingInputValue, setPendingInputValue] = createSignal('');
+  const [lastSubmittedMessage, setLastSubmittedMessage] = createSignal<{ text?: string; files?: FileList | undefined }>();
+  const [hasResentPendingMessage, setHasResentPendingMessage] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
 
   const theme = createMemo(() => {
@@ -113,7 +117,8 @@ export const StreamConversation = (props: Props) => {
       setIsSending(false);
       setIsFixedInputDisabled(false);
       if (error.message === 'Session expired. Starting a new session.') { 
-        props.onSessionExpired?.();
+        const payload = lastSubmittedMessage();
+        props.onSessionExpired?.(payload);
       }
       
       if (error.message.includes('Unterminated string in JSON')) {
@@ -151,6 +156,12 @@ export const StreamConversation = (props: Props) => {
   });
 
   createEffect(() => {
+    // Reset auto-resend guard whenever the pending message changes
+    props.pendingExpiredMessage;
+    setHasResentPendingMessage(false);
+  });
+
+  createEffect(() => {
     const currentMessages = messages();
     if (currentMessages.length > 0) {
       const lastMessage = currentMessages[currentMessages.length - 1];
@@ -169,6 +180,29 @@ export const StreamConversation = (props: Props) => {
       }
     }  
   })
+
+  createEffect(() => {
+    const pending = props.pendingExpiredMessage;
+    // const hasInitialMessages = (props.initialAgentReply.messages ?? []).length > 0;
+    if (!pending || hasResentPendingMessage()) return;
+    if (status() !== 'ready') return;
+
+    const text = pending.text?.trim();
+    if (!text) return;
+
+    setHasResentPendingMessage(true);
+    setdisplayIndex('#HIDE');
+    setIsFixedInputDisabled(true);
+    longRequest = setTimeout(() => {
+      setIsSending(true);
+    }, 2000);
+    void sendMessage({
+      text,
+      files: pending.files,
+    });
+    props.onPendingExpiredMessageConsumed?.();
+    autoScrollToBottom(true);
+  });
 
   // Track when scrolling starts during streaming
   createEffect(() => {
@@ -202,6 +236,7 @@ export const StreamConversation = (props: Props) => {
         longRequest = setTimeout(() => {
           setIsSending(true);
         }, 2000);
+        setLastSubmittedMessage({ text: pendingInputValue(), files: files() });
         void sendMessage({
           text: pendingInputValue(),
           files: files(),
@@ -222,10 +257,10 @@ export const StreamConversation = (props: Props) => {
 
   onMount(() => {
     const currentMessages = messages();
-    if (currentMessages.length > 0) {
+    // if (currentMessages.length > 0) {
       const lastMessage = currentMessages?.[currentMessages.length - 1];
       // If the last message is from a user and is persisted, remove it
-      if (lastMessage.role === 'user' && (lastMessage as EnhancedUIMessage).isPersisted) {
+      if (lastMessage?.role === 'user' && (lastMessage as EnhancedUIMessage)?.isPersisted) {
         const filteredMessages = currentMessages.slice(0, -1);
         setMessages(filteredMessages);
         
@@ -236,17 +271,17 @@ export const StreamConversation = (props: Props) => {
             setdisplayIndex(newLastMessage.id);
           }
         }
-      } else if (lastMessage.id && (lastMessage as EnhancedUIMessage).isPersisted) {
+      } else if (lastMessage?.id && (lastMessage as EnhancedUIMessage)?.isPersisted) {
         // Set display index for the last persisted message (if it's not a user message)
         setdisplayIndex(lastMessage.id);
       }
 
-      autoScrollToBottom(true); // Force initial scroll to bottom
+    autoScrollToBottom(true); // Force initial scroll to bottom
 
-      queueMicrotask(() => {
-        chatContainer?.classList.add('ready');
-      });
-    }
+    queueMicrotask(() => {
+      chatContainer?.classList.add('ready');
+    });
+    // }
 
     // Add scroll event listener to track scrolling state - needed for host avatar container.
     if (chatContainer) {
@@ -379,7 +414,16 @@ export const StreamConversation = (props: Props) => {
         </Show>
         <BottomSpacer type={props.input?.options?.type}/>
       </div>
-        <Show when={props.input?.options?.type === 'fixed-bottom'}>
+        <Show when={messages().length === 0 && props.input}>
+          <FixedBottomInput
+            block={props.input}
+            isDisabled={isFixedInputDisabled()}
+            streamingHandlers={streamingHandlers()}
+            onSend={props.onSend}
+            widgetContext={props.widgetContext}
+          />
+        </Show>
+        <Show when={messages().length > 0 && props.input?.options?.type === 'fixed-bottom'}>
           <FixedBottomInput
             block={props.input}
             isDisabled={isFixedInputDisabled()}

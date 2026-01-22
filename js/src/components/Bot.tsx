@@ -44,6 +44,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [isDebugMode, setIsDebugMode] = createSignal(false);
   const [persistedMessages, setPersistedMessages] = createSignal<any[]>([]);
   const [isClearButtonOnCooldown, setIsClearButtonOnCooldown] = createSignal(false);
+  const [pendingExpiredMessage, setPendingExpiredMessage] = createSignal<{ text?: string; files?: FileList | undefined }>();
 
   const input = createMemo(() => props.input ?? apiData()?.input);
   const customCss = createMemo(() => props.customCss ?? apiData()?.agentConfig?.theme?.customCss ?? '');
@@ -70,6 +71,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const handleClearSession = async () => {
     // Start cooldown immediately
     setIsClearButtonOnCooldown(true);
+    setPendingExpiredMessage(undefined);
     
     // Clear localStorage session data
     storage.clearSession();
@@ -125,7 +127,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
     }
   };
 
-  const handleSessionExpired = () => {
+  const handleSessionExpired = (payload?: { text?: string; files?: FileList | undefined }) => {
+    setPendingExpiredMessage(payload);
     // Clear local storage
     storage.clearSession();
     setPersistedMessages([]);
@@ -283,6 +286,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
               widgetContext={props.widgetContext}
               handleClearSession={handleClearSession}
               isClearButtonOnCooldown={isClearButtonOnCooldown()}
+              pendingExpiredMessage={pendingExpiredMessage()}
+              onPendingExpiredMessageConsumed={() => setPendingExpiredMessage(undefined)}
             />
           );
         }}
@@ -307,11 +312,13 @@ type BotContentProps = {
   class?: string;
   filterResponse?: (response: string) => string;
   isDebugMode?: boolean;
-  onSessionExpired?: () => void;
+  onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
   widgetContext?: WidgetContext;
   handleClearSession: () => Promise<void>;
   isClearButtonOnCooldown: boolean;
+  pendingExpiredMessage?: { text?: string; files?: FileList | undefined };
+  onPendingExpiredMessageConsumed?: () => void;
 };
 
 const BotContent = (props: BotContentProps) => {
@@ -381,6 +388,8 @@ const BotContent = (props: BotContentProps) => {
           onSessionExpired={props.onSessionExpired}
           onSend={props.onSend}
           widgetContext={props.widgetContext}
+          pendingExpiredMessage={props.pendingExpiredMessage}
+          onPendingExpiredMessageConsumed={props.onPendingExpiredMessageConsumed}
         />
       </div>
       <Show when={props.agentConfig?.settings?.general.isBrandingEnabled}>

@@ -26,7 +26,7 @@ export interface BubbleThemeProps {
 
 export const defaultBotProps: BotProps = {
   agentName: undefined,
-  initialPrompt: 'Hi',
+  initialPrompt: undefined,
   onInit: undefined,
   onSend: undefined,
   isPreview: undefined,

@@ -170,8 +170,8 @@ export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
   const hasCompleteSession = (): boolean => {
     const sessionId = getSessionId();
     const agentConfig = getAgentConfig(); 
-    const messages = getChatMessages();
-    return !!(sessionId && agentConfig && messages.length > 0);
+    // const messages = getChatMessages();
+    return !!(sessionId && agentConfig);
   };
 
   return {

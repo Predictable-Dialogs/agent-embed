@@ -222,6 +222,8 @@ textarea {
 
 .agent-host-bubble {
   color: var(--agent-host-bubble-color);
+  max-width: 100%;
+  min-width: 0;
 }
 
 .agent-host-bubble > .bubble-typing {
@@ -240,6 +242,10 @@ textarea {
   color: var(--agent-guest-bubble-color);
   background-color: var(--agent-guest-bubble-bg-color);
   border-radius: 6px;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .agent-input {
@@ -469,6 +475,19 @@ select option {
 /* Keep pre-wrap where you need it (paragraph-like content) */
 .ai-bubble {
   white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.ai-bubble pre,
+.ai-bubble code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.ai-bubble pre {
+  overflow-x: auto;
 }
 
 .ai-bubble p,

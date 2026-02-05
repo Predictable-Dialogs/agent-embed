@@ -68,21 +68,28 @@
     </div>
 
     <script type="module">
-      import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
+      const agentInitScript = document.createElement("script");
+      agentInitScript.type = "module";
+      agentInitScript.innerHTML = `import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
       Agent.initStandard({
-        // agentName: "Samael AI Agent",
-    agentName: "My Website Chatbot-19jan-2",
+        agentName: "Armor & Fire",
         user: {
-          user_id: "ab123",
-          user_name: "Jaikant Kumaran",
-          user_email: "jaikant@gmail.com",
-          user_segments: ["sports", "ott"]
+          user_id: "unique_user_id_12345",
+          user_name: "your_user_name",
+          user_email: "your_user_email",
+          user_segments: ["abc", "def"],
         },
         onSend: () => { 
           console.log('User sent message - showing conversation');
           window.showChatConversation();
         }
+        filterResponse: function(response) {
+            const citationRegex = /【d+:d+†[^【】]+】/g;
+            return response.replace(citationRegex, "");
+          }
       });
+      `;
+      document.body.append(agentInitScript);
 
       // Function to hide conversation while keeping input visible
       function hideConversation() {

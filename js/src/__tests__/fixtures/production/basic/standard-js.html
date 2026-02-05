@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Agent Example</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: grid;
+        place-items: center;   /* centers horizontally + vertically */
+      }
+      agent-standard {
+        display: block;        /* ensures it behaves like a block */
+        width: 75%;
+        height: 75vh;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const agentInitScript = document.createElement("script");
+      agentInitScript.type = "module";
+      agentInitScript.innerHTML = `import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
+      Agent.initStandard({
+        agentName: "Armor & Fire",
+        user: {
+          user_id: "unique_user_id_12345",
+          user_name: "your_user_name",
+          user_email: "your_user_email",
+          user_segments: ["abc", "def"],
+        },
+        filterResponse: function(response) {
+            const citationRegex = /【d+:d+†[^【】]+】/g;
+            return response.replace(citationRegex, "");
+          }
+      });
+      `;
+      document.body.append(agentInitScript);
+    </script>
+
+    <agent-standard style="width: 100%; height: 600px; "></agent-standard>
+  </body>
+</html>

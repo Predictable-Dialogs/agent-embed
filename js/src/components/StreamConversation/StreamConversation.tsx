@@ -2,7 +2,8 @@ import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show, onCleanup } from 'solid-js'; // Added onCleanup
 import { ChatChunk } from './ChatChunk';
 import { FixedBottomInput } from './FixedBottomInput';
-import { BotContext, InitialChatReply, WidgetContext } from '@/types';
+import { BotContext, InitialChatReply, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { MAX_INITIAL_PROMPTS } from '@/constants';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
 import { useChat } from 'ai-sdk-solid';
@@ -42,6 +43,8 @@ type Props = {
   agentConfig: any;
   hostAvatar?: AvatarConfig;
   guestAvatar?: AvatarConfig;
+  initialPrompts?: InitialPrompt[];
+  welcome?: WelcomeContent;
   input: any
   context: BotContext;
   filterResponse?: (response: string) => string;
@@ -71,6 +74,19 @@ export const StreamConversation = (props: Props) => {
   const [lastSubmittedMessage, setLastSubmittedMessage] = createSignal<{ text?: string; files?: FileList | undefined }>();
   const [hasResentPendingMessage, setHasResentPendingMessage] = createSignal(false);
   let fileInputRef: HTMLInputElement | undefined;
+
+  const initialPrompts = createMemo<InitialPrompt[]>(() =>
+    (props.initialPrompts ?? []).filter((prompt) => Boolean(prompt?.text)).slice(0, MAX_INITIAL_PROMPTS)
+  );
+  const hasWelcomeContent = createMemo(
+    () =>
+      Boolean(
+        props.welcome?.title ||
+        props.welcome?.subtitle ||
+        props.welcome?.icon ||
+        props.welcome?.iconUrl
+      )
+  );
 
   const theme = createMemo(() => {
     const dyn = dynamicTheme();
@@ -145,7 +161,15 @@ export const StreamConversation = (props: Props) => {
   const setMessages = chatHelpers.setMessages;
   const sendMessage = chatHelpers.sendMessage;
   const regenerate = chatHelpers.regenerate;
-
+  const hasUserMessages = createMemo(() =>
+    messages().some((message) => message.role === 'assistant' || message.role === 'user')
+  );
+  const shouldShowInitialPrompts = createMemo(
+    () =>
+      (initialPrompts().length > 0 || hasWelcomeContent()) &&
+      props.persistedMessages.length === 0 &&
+      !hasUserMessages()
+  );
   const isStreaming = createMemo(() => status() === 'streaming');
   
   const storage = useAgentStorage(props.context.agentName);
@@ -255,6 +279,27 @@ export const StreamConversation = (props: Props) => {
     };
   });
 
+  const handleInitialPromptClick = (prompt: InitialPrompt) => {
+    if (!prompt?.text || isFixedInputDisabled() || isSending()) return;
+    setdisplayIndex('#HIDE');
+    setIsFixedInputDisabled(true);
+    setLastSubmittedMessage({ text: prompt.text, files: undefined });
+    longRequest = setTimeout(() => {
+      setIsSending(true);
+    }, 2000);
+    props.onSend?.();
+    setPendingInputValue('');
+    setFiles(undefined);
+    if (fileInputRef) {
+      fileInputRef.value = '';
+    }
+    void sendMessage({
+      text: prompt.text,
+      files: undefined,
+    });
+    autoScrollToBottom(true);
+  };
+
   onMount(() => {
     const currentMessages = messages();
     // if (currentMessages.length > 0) {
@@ -363,7 +408,57 @@ export const StreamConversation = (props: Props) => {
   };
   
   return (
-    <>
+    <div class="flex flex-col w-full items-center gap-4">
+      <Show when={shouldShowInitialPrompts() && props.input}>
+        <div class="px-3 pt-12 pb-5 mb-6 w-full flex justify-center">
+          <div class="initial-prompts-panel w-full agent-input-container">
+            <Show when={props.welcome?.title || props.welcome?.subtitle}>
+              <div class="initial-prompts-heading">
+                <Show when={props.welcome?.title}>
+                  <div class="initial-prompts-title">
+                    <Show when={props.welcome?.iconUrl}>
+                      <span class="initial-prompts-title-icon">
+                        <img src={props.welcome?.iconUrl} alt="" />
+                      </span>
+                    </Show>
+                    <Show when={!props.welcome?.iconUrl && props.welcome?.icon}>
+                      <span class="initial-prompts-title-icon">{props.welcome?.icon}</span>
+                    </Show>
+                    <span>{props.welcome?.title}</span>
+                  </div>
+                </Show>
+                <Show when={props.welcome?.subtitle}>
+                  <div class="initial-prompts-subtitle">
+                    {props.welcome?.subtitle}
+                  </div>
+                </Show>
+              </div>
+            </Show>
+            <div class="initial-prompts-list">
+              <For each={initialPrompts()}>
+                {(prompt) => (
+                  <button
+                    type="button"
+                    class="initial-prompt-button"
+                    onClick={() => handleInitialPromptClick(prompt)}
+                  >
+                    <Show when={prompt.iconUrl}>
+                      <span class="initial-prompt-icon">
+                        <img src={prompt.iconUrl} alt="" />
+                      </span>
+                    </Show>
+                    <Show when={!prompt.iconUrl && prompt.icon}>
+                      <span class="initial-prompt-icon">{prompt.icon}</span>
+                    </Show>
+                    <span class="initial-prompt-text">{prompt.text}</span>
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+        </div>
+      </Show>
+
       <div
         ref={chatContainer}
         class="flex flex-col w-full px-3 pt-10 relative scrollable-container agent-chat-view chat-container gap-2"
@@ -414,25 +509,25 @@ export const StreamConversation = (props: Props) => {
         </Show>
         <BottomSpacer type={props.input?.options?.type}/>
       </div>
-        <Show when={messages().length === 0 && props.input}>
-          <FixedBottomInput
-            block={props.input}
-            isDisabled={isFixedInputDisabled()}
-            streamingHandlers={streamingHandlers()}
-            onSend={props.onSend}
-            widgetContext={props.widgetContext}
-          />
-        </Show>
-        <Show when={messages().length > 0 && props.input?.options?.type === 'fixed-bottom'}>
-          <FixedBottomInput
-            block={props.input}
-            isDisabled={isFixedInputDisabled()}
-            streamingHandlers={streamingHandlers()}
-            onSend={props.onSend}
-            widgetContext={props.widgetContext}
-          />
-        </Show>
-    </>
+      <Show when={messages().length === 0 && props.input}>
+        <FixedBottomInput
+          block={props.input}
+          isDisabled={isFixedInputDisabled()}
+          streamingHandlers={streamingHandlers()}
+          onSend={props.onSend}
+          widgetContext={props.widgetContext}
+        />
+      </Show>
+      <Show when={messages().length > 0 && props.input?.options?.type === 'fixed-bottom'}>
+        <FixedBottomInput
+          block={props.input}
+          isDisabled={isFixedInputDisabled()}
+          streamingHandlers={streamingHandlers()}
+          onSend={props.onSend}
+          widgetContext={props.widgetContext}
+        />
+      </Show>
+    </div>
   );
 };
 

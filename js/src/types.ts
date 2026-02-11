@@ -5,6 +5,20 @@ export type InputSubmitContent = {
   value: string
 }
 
+export type InitialPrompt = {
+  id?: string
+  text: string
+  icon?: string
+  iconUrl?: string
+}
+
+export type WelcomeContent = {
+  title?: string
+  subtitle?: string
+  icon?: string
+  iconUrl?: string
+}
+
 export type BotContext = {
   agentConfig?: InitialChatReply['agentConfig']
   isPreview: boolean

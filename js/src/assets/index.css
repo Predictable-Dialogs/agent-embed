@@ -24,6 +24,11 @@
   --agent-input-color: #303235;
   --agent-input-placeholder-color: #9095a0;
 
+  --agent-initial-prompt-radius: var(--agent-border-radius);
+  --agent-initial-prompt-bg-color: var(--agent-guest-bubble-bg-color);
+  --agent-initial-prompt-color: var(--agent-guest-bubble-color);
+  --agent-initial-prompt-border-color: rgba(var(--agent-guest-bubble-color), 0.25);
+
   --agent-header-bg-color: #ffffff;
   --agent-header-color: #303235;
 
@@ -257,6 +262,109 @@ textarea {
 
 .agent-input-error-message {
   color: var(--agent-input-color);
+}
+
+.initial-prompts-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px;
+}
+
+.initial-prompts-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 2px;
+  margin-bottom: 14px;
+}
+
+.initial-prompts-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--agent-input-color);
+  font-size: calc(1em + 8px);
+}
+
+.initial-prompts-subtitle {
+  font-size: 1em;
+  color: var(--agent-input-color);
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+.initial-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.initial-prompt-button {
+  width: 100%;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--agent-initial-prompt-radius);
+  border: 1px solid var(--agent-initial-prompt-border-color);
+  background-color: var(--agent-initial-prompt-bg-color);
+  color: var(--agent-initial-prompt-color);
+  transition: filter 120ms ease, box-shadow 120ms ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.initial-prompt-button:hover {
+  filter: brightness(0.9) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.initial-prompt-button:active {
+  filter: brightness(0.75) !important;
+}
+
+.initial-prompt-button:focus-visible {
+  outline: 2px solid rgba(var(--agent-button-bg-color-rgb), 0.35);
+  outline-offset: 2px;
+}
+
+.initial-prompt-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.initial-prompt-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.initial-prompt-text {
+  flex: 1;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.initial-prompts-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+}
+
+.initial-prompts-title-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .agent-button > .send-icon {

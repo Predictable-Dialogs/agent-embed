@@ -4,7 +4,7 @@ import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext, WidgetContext } from '@/types';
+import { BotContext, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
@@ -17,7 +17,9 @@ import immutableCss from '../assets/immutable.css';
 
 export type BotProps = {
   agentName: string | any;
+  /** @deprecated use initialPrompts instead */
   initialPrompt?: string;
+  initialPrompts?: InitialPrompt[];
   isPreview?: boolean;
   contextVariables?: Record<string, unknown>;
   user?: Record<string, unknown>;
@@ -35,6 +37,7 @@ export type BotProps = {
   font?: string;
   background?: { type: "Color" | "Image" | "None", content: string };
   widgetContext?: WidgetContext;
+  welcome?: WelcomeContent;
 };
 
 export const Bot = (props: BotProps & { class?: string }) => {
@@ -63,6 +66,15 @@ export const Bot = (props: BotProps & { class?: string }) => {
       inputs: inputStyles.inputs ?? apiStyles?.inputs,
       buttons: inputStyles.buttons ?? apiStyles?.buttons
     };
+  });
+  const initialPrompts = createMemo<InitialPrompt[] | undefined>(() => {
+    if (props.initialPrompts && props.initialPrompts.length > 0) {
+      return props.initialPrompts.slice(0, 8);
+    }
+    if (props.initialPrompt) {
+      return [{ id: 'legacy-initial-prompt', text: props.initialPrompt }];
+    }
+    return undefined;
   });
   
   const storage = useAgentStorage(props.agentName);
@@ -97,7 +109,6 @@ export const Bot = (props: BotProps & { class?: string }) => {
     const { data, error } = await getInitialChatReplyQuery({
       sessionId: undefined, // Start with no sessionId for new initialization
       agentName: props.agentName,
-      initialPrompt: props.initialPrompt,
       apiHost: props.apiHost,
       isPreview: props.isPreview ?? false,
       contextVariables: {
@@ -272,6 +283,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
               background={background()}
               input={input()}
               inputStyles={mergedInputStyles()}
+              initialPrompts={initialPrompts()}
+              welcome={props.welcome}
               context={{
                 apiHost: props.apiHost,
                 apiStreamHost: props.apiStreamHost,
@@ -307,6 +320,8 @@ type BotContentProps = {
   font?: string;
   background?: Background;
   input?: any;
+  initialPrompts?: InitialPrompt[];
+  welcome?: WelcomeContent;
   inputStyles?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors };
   context: BotContext;
   class?: string;
@@ -383,6 +398,8 @@ const BotContent = (props: BotContentProps) => {
           hostAvatar={props.hostAvatar}
           guestAvatar={props.guestAvatar}
           agentConfig={props.agentConfig}
+          initialPrompts={props.initialPrompts}
+          welcome={props.welcome}
           input={props.input}
           filterResponse={props.filterResponse}
           onSessionExpired={props.onSessionExpired}

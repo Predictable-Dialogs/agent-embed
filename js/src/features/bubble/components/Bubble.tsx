@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, splitProps, onCleanup, createEffect } from 'solid-js';
+import { createSignal, onMount, Show, splitProps, onCleanup, createEffect, createMemo } from 'solid-js';
 import styles from '../../../assets/index.css';
 import { CommandData } from '../../commands';
 import { BubbleButton } from './BubbleButton';
@@ -7,6 +7,8 @@ import { isDefined } from '@/lib/utils';
 import { BubbleParams } from '../types';
 import { Bot, BotProps } from '../../../components/Bot';
 import { getPaymentInProgressInStorage } from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage';
+import { MAX_INITIAL_PROMPTS } from '@/constants';
+import type { InitialPrompt } from '@/types';
 
 export type BubbleProps = BotProps &
   BubbleParams & {
@@ -25,7 +27,7 @@ export const Bubble = (props: BubbleProps) => {
     'autoShowDelay',
   ]);
 
-  const [initialPrompt, setInitialPrompt] = createSignal<string | undefined>();
+  const [initialPrompts, setInitialPrompts] = createSignal<InitialPrompt[] | undefined>();
   const [contextVariables, setContextVariables] = createSignal(
     // eslint-disable-next-line solid/reactivity
     botProps.contextVariables
@@ -75,7 +77,7 @@ export const Bubble = (props: BubbleProps) => {
     const { data } = event;
     if (!data.isFromAgent) return;
     if (data.command === 'open') {
-      setInitialPrompt(data?.prompt);
+      setInitialPrompts(data?.prompt ? [{ text: data.prompt }] : undefined);
       setContextVariables((existingContextVariables) => {
         let updatedContextVariables = { ...existingContextVariables, ...data?.variables };
 
@@ -99,6 +101,13 @@ export const Bubble = (props: BubbleProps) => {
         ...data.variables,
       }));
   };
+
+  const resolvedInitialPrompts = createMemo<InitialPrompt[] | undefined>(() => {
+    if (initialPrompts()) return initialPrompts();
+    if (botProps.initialPrompts) return botProps.initialPrompts.slice(0, MAX_INITIAL_PROMPTS);
+    if (botProps.initialPrompt) return [{ text: botProps.initialPrompt }];
+    return undefined;
+  });
 
   const openBot = () => {
     if (!isBotStarted()) setIsBotStarted(true);
@@ -167,16 +176,16 @@ export const Bubble = (props: BubbleProps) => {
           (props.theme?.button?.size === 'large' ? ' bottom-24' : ' bottom-20') +
           (props.theme?.placement === 'left' ? ' sm:left-5' : ' sm:right-5')
         }
-      >
-        <Show when={isBotStarted()}>
-          <Bot
-            {...botProps}
-            initialPrompt={initialPrompt()}
-            contextVariables={contextVariables()}
-            class="rounded-lg"
-            widgetContext="bubble"
-          />
-        </Show>
+        >
+          <Show when={isBotStarted()}>
+            <Bot
+              {...botProps}
+              initialPrompts={resolvedInitialPrompts()}
+              contextVariables={contextVariables()}
+              class="rounded-lg"
+              widgetContext="bubble"
+            />
+          </Show>
       </div>
     </>
   );

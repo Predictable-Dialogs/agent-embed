@@ -95,7 +95,7 @@ The embed code can be added to HTML or JS, here is an example to add the embed c
   Agent.initStandard({
     agentName: "your assistant name",
     apiHost: "https://app.predictabledialogs.com/web/incoming",
-    initialPrompt: 'Tell me a joke',
+    initialPrompts: [{ text: 'Tell me a joke' }],
     filterResponse: function(response) {
       const annotationRegex = /【\d+:\d+†[^\s】]+】/g;
       return response.replace(annotationRegex, "");
@@ -107,7 +107,7 @@ The embed code can be added to HTML or JS, here is an example to add the embed c
 In the above we are adding a Standard widget - `Agent.initStandard`, 
 similarly the Bubble - `Agent.initBubble` and Popup - `Agent.initPopup` are initialized. 
 
-The `initialPrompt` prop is used only when the initialResponse is disabled on the server. Otherwise, if the initialResponse is enabled, the server's initial response will be returned, regardless of the initialPrompt.
+`initialPrompts` accepts 1-8 prompt objects shaped like `{ text, icon?, iconUrl? }` and renders them as clickable cards above the input; clicking one sends it as the first user message. Use the optional `welcome: { title, subtitle }` prop to show a heading above those prompts. The legacy `initialPrompt` prop is still accepted for backward compatibility and will be treated as a single-entry `initialPrompts` array.
 
 The `filterResponse` prop accepts a function that processes the AI's response. This function takes the response as an argument and allows for custom handling, such as filtering out annotations. The function should return the modified response, which will then be displayed in the widget.
 
@@ -165,7 +165,7 @@ After creating an agent, the install page gives the needed embed code, which can
 
 - agentName: Defines the name of the agent. This is generated on the predictable dialogs app.
 - apiHost: The value for this is "https://app.predictabledialogs.com/web/incoming". It specifies the URL of the backend service where the chat data is processed.
-- initialPrompt: Sets the initial message that appears when the user first opens the chat bubble. If no initialPrompt is set, then it defaults to "Hi"
+- initialPrompts: Optional array of up to 4 prompt objects (`{ text, icon? }`) that appear above the input before the first user message. Clicking one sends it as the opening user message. If you still pass `initialPrompt`, it is treated as a single-entry `initialPrompts` value.
 - theme: This can be used to *ONLY* style the bubble button and the Bubble Preview Message. The bubble button can be styled with a custom color, size, iconColor. You can also add a custom icon and a custom close icon. This is shown below. The chat window elements can be styled from the web app, using the theme tab.
 
 ### Styling the Bubble using the theme property:
@@ -189,7 +189,10 @@ E.g. Green background for the chat button and white icon color, with custom AirB
 Agent.initBubble({
   agentName: "your assistant name",
   apiHost: "https://app.predictabledialogs.com/web/incoming",
-  initialPrompt: "Hello! How can I assist you today?",
+  initialPrompts: [
+    { text: "Hello! How can I assist you today?", icon: "💬" },
+    { text: "Show me pricing plans" }
+  ],
     theme: {
       button: {
         size: 'large',
@@ -241,7 +244,7 @@ a set delay as shown below.
   Agent.initBubble({
     agentName: "your assistant name",
     apiHost: "https://api.example.com/chat",
-    initialPrompt: "Hello! How can I help you today?",
+    initialPrompts: [{ text: "Hello! How can I help you today?" }],
     previewMessage: {
       message: "Need help? Tap here to chat with us!",
       avatarUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/user.svg",
@@ -393,4 +396,3 @@ This program is a modification of the software available at
 https://github.com/baptisteArno/typebot.io/tree/main/packages/embeds. 
 The original software was licensed under the GNU Affero General Public License 
 version 3.
-

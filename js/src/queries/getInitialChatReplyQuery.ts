@@ -30,7 +30,7 @@ export async function getInitialChatReplyQuery({
           },
       agentName,
       sessionId,
-      message: initialPrompt,
+      ...(isNotEmpty(initialPrompt) ? { message: initialPrompt } : {}),
     } satisfies SendMessageInput,
   });
 

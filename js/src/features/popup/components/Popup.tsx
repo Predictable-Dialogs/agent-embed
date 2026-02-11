@@ -1,11 +1,13 @@
 // features/popup/components/Popup.tsx
 import styles from '../../../assets/index.css';
-import { createSignal, onMount, Show, splitProps, onCleanup, createEffect } from 'solid-js';
+import { createSignal, onMount, Show, splitProps, onCleanup, createEffect, createMemo } from 'solid-js';
 import { CommandData } from '../../commands';
 import { isDefined, isNotDefined } from '@/lib/utils';
 import { PopupParams } from '../types';
 import { Bot, BotProps } from '../../../components/Bot';
 import { getPaymentInProgressInStorage } from '@/features/blocks/inputs/payment/helpers/paymentInProgressStorage';
+import { MAX_INITIAL_PROMPTS } from '@/constants';
+import type { InitialPrompt } from '@/types';
 
 export type PopupProps = BotProps &
   PopupParams & {
@@ -25,7 +27,7 @@ export const Popup = (props: PopupProps) => {
     'defaultOpen',
   ]);
 
-  const [initialPrompt, setInitialPrompt] = createSignal<string | undefined>();
+  const [initialPrompts, setInitialPrompts] = createSignal<InitialPrompt[] | undefined>();
   const [contextVariables, setContextVariables] = createSignal(
     // eslint-disable-next-line solid/reactivity
     botProps.contextVariables
@@ -73,7 +75,7 @@ export const Popup = (props: PopupProps) => {
     const { data } = event;
     if (!data.isFromAgent) return;
     if (data.command === 'open') {
-      setInitialPrompt(data?.prompt);
+      setInitialPrompts(data?.prompt ? [{ text: data.prompt }] : undefined);
       setContextVariables((existingContextVariables) => {
         let updatedContextVariables = { ...existingContextVariables, ...data?.variables };
 
@@ -95,6 +97,13 @@ export const Popup = (props: PopupProps) => {
         ...data.variables,
       }));
   };
+
+  const resolvedInitialPrompts = createMemo<InitialPrompt[] | undefined>(() => {
+    if (initialPrompts()) return initialPrompts();
+    if (botProps.initialPrompts) return botProps.initialPrompts.slice(0, MAX_INITIAL_PROMPTS);
+    if (botProps.initialPrompt) return [{ text: botProps.initialPrompt }];
+    return undefined;
+  });
 
   const openBot = () => {
     setIsBotOpened(true);
@@ -146,7 +155,7 @@ export const Popup = (props: PopupProps) => {
             >
               <Bot
                 {...botProps}
-                initialPrompt={initialPrompt()}
+                initialPrompts={resolvedInitialPrompts()}
                 contextVariables={contextVariables()}
                 widgetContext="popup"
               />

@@ -42,6 +42,11 @@ const cssVariableNames = {
       baseAlpha: '--selectable-base-alpha',
     },
   },
+  initialPrompts: {
+    radius: '--agent-initial-prompt-radius',
+    bgColor: '--agent-initial-prompt-bg-color',
+    color: '--agent-initial-prompt-color',
+  },
 } as const;
 
 export const setCssVariablesValue = (theme: Theme | undefined, container: HTMLDivElement, font?: string, backgroundOverride?: Background, hostBubblesOverride?: { color: string; backgroundColor: string }, guestBubblesOverride?: { color: string; backgroundColor: string }, inputStylesOverride?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors }) => {
@@ -69,6 +74,7 @@ const setChatTheme = (chatTheme: ChatTheme, documentStyle: CSSStyleDeclaration, 
   const finalRoundness = inputStylesOverride?.roundness || roundness;
   if (finalHostBubbles) setHostBubbles(finalHostBubbles, documentStyle);
   if (finalGuestBubbles) setGuestBubbles(finalGuestBubbles, documentStyle);
+  if (finalGuestBubbles) setInitialPrompts(finalGuestBubbles, documentStyle);
   if (finalButtons) setButtons(finalButtons, documentStyle);
   if (finalInputs) setInputs(finalInputs, documentStyle);
   if (finalRoundness) setRoundness(finalRoundness, documentStyle);
@@ -92,6 +98,15 @@ const setGuestBubbles = (guestBubbles: ContainerColors, documentStyle: CSSStyleD
     );
   if (guestBubbles.color)
     documentStyle.setProperty(cssVariableNames.chat.guestBubbles.color, guestBubbles.color);
+};
+
+const setInitialPrompts = (guestBubbles: ContainerColors, documentStyle: CSSStyleDeclaration) => {
+  if (guestBubbles.backgroundColor) {
+    documentStyle.setProperty(cssVariableNames.initialPrompts.bgColor, guestBubbles.backgroundColor);
+  }
+  if (guestBubbles.color) {
+    documentStyle.setProperty(cssVariableNames.initialPrompts.color, guestBubbles.color);
+  }
 };
 
 const setButtons = (buttons: ContainerColors, documentStyle: CSSStyleDeclaration) => {
@@ -167,12 +182,15 @@ const setRoundness = (
   switch (roundness) {
     case 'none':
       documentStyle.setProperty('--agent-border-radius', '0');
+      documentStyle.setProperty(cssVariableNames.initialPrompts.radius, '0');
       break;
     case 'medium':
       documentStyle.setProperty('--agent-border-radius', '6px');
+      documentStyle.setProperty(cssVariableNames.initialPrompts.radius, '6px');
       break;
     case 'large':
       documentStyle.setProperty('--agent-border-radius', '20px');
+      documentStyle.setProperty(cssVariableNames.initialPrompts.radius, '20px');
       break;
   }
 };

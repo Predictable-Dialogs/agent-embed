@@ -24,9 +24,12 @@ export interface BubbleThemeProps {
   guestBubbles?: BubbleThemeConfig;
 }
 
+export const MAX_INITIAL_PROMPTS = 10;
+
 export const defaultBotProps: BotProps = {
   agentName: undefined,
   initialPrompt: undefined,
+  initialPrompts: undefined,
   onInit: undefined,
   onSend: undefined,
   isPreview: undefined,
@@ -42,7 +45,8 @@ export const defaultBotProps: BotProps = {
   bubble: undefined,
   customCss: undefined,
   font: undefined,
-  background: undefined
+  background: undefined,
+  welcome: undefined
 }
 
 export const defaultPopupProps: PopupProps = {

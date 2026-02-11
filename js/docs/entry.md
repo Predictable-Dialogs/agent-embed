@@ -16,7 +16,7 @@ First, when the script is loaded, web.ts runs and:
  Agent.initStandard({ 
   agentName: "Assistant OpenAI-...", 
   apiHost: "https://...",
-  initialPrompt: "Hi" 
+  initialPrompts: [{ text: "Hi" }] 
   });
  ```
 
@@ -43,7 +43,7 @@ The call in the script tag passes the props to `initStandard` function in `windo
 
 - This registration makes the props available to the Standard component through Solid.js's custom element system.
 
-The props passed (agentName, apiHost, initialPrompt) override any defaultBotProps
+The props passed (agentName, apiHost, initialPrompts) override any defaultBotProps
 
 ### Summary Flow
 - Register Web components

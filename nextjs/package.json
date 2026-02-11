@@ -1,6 +1,6 @@
 {
   "name": "@agent-embed/nextjs",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Convenient library to display agent embed on your Next.js website",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

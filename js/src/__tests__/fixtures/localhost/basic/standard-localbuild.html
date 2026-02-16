@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Agent Example</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: grid;
+        place-items: center;   /* centers horizontally + vertically */
+      }
+      agent-standard {
+        display: block;        /* ensures it behaves like a block */
+        width: 75%;
+        height: 75vh;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import Agent from '../../../../../dist/web.js'
+      Agent.initStandard({
+        agentName: "My Website Chatbot-2",
+        // initialPrompts: [
+        //   { text: "Hello! How can I assist you today?", icon: "💬" },
+        //   { text: "Can you walk me through setting up my first chatbot", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/user.svg" },
+        //   { text: "Help me choose the right theme for my website", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/activity.svg" },
+        //   { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
+        //   { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
+        //   { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
+        // ],
+        // welcome: {
+        //   title: "Welcome to Predictable Dialogs", 
+        //   // icon: "🙏",
+        //   iconUrl: "https://predictabledialogs.com/logo.png",
+        //   subtitle: "I can help you find answers in Predictable Dialogs. What are you looking for?"
+        // },
+        contextVariables: { name: "Jai" },
+        apiHost: "http://localhost:8001/web/incoming",
+        apiStreamHost: "http://localhost:8001/web/stream",
+        user: { user_name: "John Doe", user_email: "john.doe@gmail.com" },
+      });
+
+    </script>
+
+    <agent-standard style="width: 30%; height: 600px; "></agent-standard>
+  </body>
+</html>

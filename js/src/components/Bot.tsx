@@ -7,9 +7,8 @@ import { setIsMobile } from '@/utils/isMobileSignal';
 import { BotContext, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
-import { mergePropsWithApiData } from '@/utils/mergePropsWithApiData';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
-import { AvatarProps, AvatarConfig, BubbleThemeProps, BubbleThemeConfig } from '@/constants';
+import { AvatarProps, AvatarConfig, BubbleThemeProps, BubbleThemeConfig, MAX_INITIAL_PROMPTS } from '@/constants';
 import { ContainerColors, InputColors } from '@/schemas';
 import { Background } from '@/schemas';
 import { CommandData } from '@/features/commands';
@@ -57,6 +56,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const mergedGuestAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.guestAvatar ?? apiData()?.agentConfig?.theme?.chat?.guestAvatar);
   const mergedHostBubbles = createMemo<BubbleThemeConfig | undefined>(() => props.bubble?.hostBubbles ?? apiData()?.agentConfig?.theme?.chat?.hostBubbles);
   const mergedGuestBubbles = createMemo<BubbleThemeConfig | undefined>(() => props.bubble?.guestBubbles ?? apiData()?.agentConfig?.theme?.chat?.guestBubbles);
+  const welcome = createMemo<WelcomeContent | undefined>(() => props.welcome ?? apiData()?.agentConfig?.welcome);
   const mergedInputStyles = createMemo(() => {
     const inputStyles = props.input?.styles;
     const apiStyles = apiData()?.agentConfig?.theme?.chat;
@@ -69,7 +69,11 @@ export const Bot = (props: BotProps & { class?: string }) => {
   });
   const initialPrompts = createMemo<InitialPrompt[] | undefined>(() => {
     if (props.initialPrompts && props.initialPrompts.length > 0) {
-      return props.initialPrompts.slice(0, 8);
+      return props.initialPrompts.filter((prompt) => Boolean(prompt?.text)).slice(0, MAX_INITIAL_PROMPTS);
+    }
+    const apiInitialPrompts = apiData()?.agentConfig?.initialPrompts;
+    if (apiInitialPrompts && apiInitialPrompts.length > 0) {
+      return apiInitialPrompts.filter((prompt: InitialPrompt) => Boolean(prompt?.text)).slice(0, MAX_INITIAL_PROMPTS);
     }
     if (props.initialPrompt) {
       return [{ id: 'legacy-initial-prompt', text: props.initialPrompt }];
@@ -215,6 +219,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
     const mergedFont = font();
     const mergedBackground = background();
     const inputStyles = mergedInputStyles();
+    const mergedInitialPrompts = initialPrompts();
+    const mergedWelcome = welcome();
     if (host || guest || hostBubbles || guestBubbles || mergedFont || mergedBackground || inputStyles) {
       storedAgentConfig = {
         ...storedAgentConfig,
@@ -238,6 +244,18 @@ export const Bot = (props: BotProps & { class?: string }) => {
             ...(inputStyles?.buttons ? { buttons: inputStyles.buttons } : {}),
           }
         }
+      };
+    }
+    if (mergedInitialPrompts) {
+      storedAgentConfig = {
+        ...storedAgentConfig,
+        initialPrompts: mergedInitialPrompts,
+      };
+    }
+    if (mergedWelcome) {
+      storedAgentConfig = {
+        ...storedAgentConfig,
+        welcome: mergedWelcome,
       };
     }
     if (storedAgentConfig) {
@@ -284,7 +302,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               input={input()}
               inputStyles={mergedInputStyles()}
               initialPrompts={initialPrompts()}
-              welcome={props.welcome}
+              welcome={welcome()}
               context={{
                 apiHost: props.apiHost,
                 apiStreamHost: props.apiStreamHost,

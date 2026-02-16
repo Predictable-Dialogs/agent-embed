@@ -24,7 +24,7 @@ export interface BubbleThemeProps {
   guestBubbles?: BubbleThemeConfig;
 }
 
-export const MAX_INITIAL_PROMPTS = 10;
+export const MAX_INITIAL_PROMPTS = 8;
 
 export const defaultBotProps: BotProps = {
   agentName: undefined,

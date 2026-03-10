@@ -21,6 +21,7 @@ export const textInputOptionsBaseSchema = z.object({
     placeholder: z.string(),
     button: z.string(),
   }),
+  buttonIconUrl: z.string().nullable().optional(),
 })
 
 export const textInputOptionsSchema = textInputOptionsBaseSchema
@@ -36,6 +37,7 @@ export const textInputOptionsSchema = textInputOptionsBaseSchema
 export const defaultTextInputOptions: TextInputOptions = {
   isLong: false,
   type: 'floating',
+  buttonIconUrl: null,
   labels: { button: defaultButtonLabel, placeholder: 'Type your answer...' },
 }
 

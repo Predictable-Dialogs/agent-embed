@@ -19,6 +19,10 @@ type Props = {
 export const TextInput = (props: Props) => {
   const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '')
   let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined
+  const buttonLabel = () => props.block?.options?.labels?.button ?? 'Send'
+  const buttonIconUrl = () => props.block?.options?.buttonIconUrl?.trim() ?? ''
+  const hasCustomButtonText = () => buttonLabel().trim() !== '' && buttonLabel() !== 'Send'
+  const shouldShowCustomButtonContent = () => hasCustomButtonText() || buttonIconUrl().length > 0
 
   const handleInput = (e: Event) => {
     const target = e.currentTarget as HTMLInputElement | HTMLTextAreaElement;
@@ -101,10 +105,16 @@ export const TextInput = (props: Props) => {
       <SendButton
         type="button"
         isDisabled={inputValue() === ''}
+        disableIcon={shouldShowCustomButtonContent()}
         class="my-2 ml-2"
+        aria-label={buttonLabel()}
         on:click={submit}
       >
-        {props.block?.options?.labels?.button ?? 'Send'}
+        {buttonIconUrl().length > 0 ? (
+          <img src={buttonIconUrl()} alt="" aria-hidden="true" class="send-icon-image" />
+        ) : (
+          buttonLabel()
+        )}
       </SendButton>
     </div>
   )

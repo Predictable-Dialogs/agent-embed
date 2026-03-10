@@ -9,15 +9,30 @@
     <!-- Adding a button to trigger the chat agent popup -->
 
 <script type="module">
-  import Agent from '../../../../../dist/web.js'
+  // import Agent from '../../../../../dist/web.js'
+    import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
+
   Agent.initStandard({
-    agentName: "Chatbot-7c4d0",
+    agentName: "oai-test",
     apiHost: "http://localhost:8001/web/incoming",
     apiStreamHost: "http://localhost:8001/web/stream",
     autoShowDelay: 3000,
     persistSession: false,
     input: {
       "type": "text input",
+        "styles": {
+    "roundness": "none",
+    "inputs": {
+      "color": "#2d3748",
+      "backgroundColor": "#ffffff",
+      "placeholderColor": "#838181"
+    },
+    "buttons": {
+      "color": "#1a1919",
+      "backgroundColor": "#e92b2b"
+    }
+  },
+
       "options": {
         "type": "fixed-bottom",
         "labels": {

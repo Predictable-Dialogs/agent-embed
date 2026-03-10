@@ -7,32 +7,36 @@
   </head>
   <body>
     <!-- Adding a button to trigger the chat agent popup -->
-
 <script type="module">
-  import Agent from '../../../../../dist/web.js'
+  import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
   Agent.initBubble({
-    agentName: "My Website Chatbot-9042d",
-    apiHost: "http://localhost:8001/web/incoming",
-    apiStreamHost: "http://localhost:8001/web/stream",
-    persistSession: false,
+    agentName: "My Website Chatbot-20feb",
     previewMessage: {
       message: "Need help? Tap here to chat with us!",
-      avatarUrl: "https://i.pravatar.cc/300?u=80",
+      avatarUrl: "https://pd-images-us-east.s3.amazonaws.com/theme-assets/jaikant-gmail.com/cmluexta2000a99nxbzlxa8si/1771563954959-56ed88c2-fd1b-4a44-894a-0d79020b5a9c.svg",
       autoShowDelay: 3000,
     },
     theme: {
-      placement: 'right',
+      placement: "right",
       button: {
-        size: 'medium',
-        backgroundColor: "#d7ccc8",
-        iconColor: "#3e2723"
+        size: "large",
+        backgroundColor: "#f8faf4",
+        customIconSrc: "https://pd-images-us-east.s3.amazonaws.com/theme-assets/jaikant-gmail.com/cmluexta2000a99nxbzlxa8si/1771563435631-28845070-2b5b-42a0-a0ec-a163af2220d7.svg",
       },
-      previewMessage: {
-        backgroundColor: '#d7ccc8',
-        textColor: '#3e2723'
-      }
     },
+    user: {
+      user_id: 'unique_user_id_12345',
+      user_name: 'your_user_name',
+      user_email: 'your_user_email',
+      user_segments: ["abc", "def"],
+    },
+    filterResponse: function(response) {
+        const citationRegex = /【d+:d+†[^【】]+】/g;
+        return response.replace(citationRegex, "");
+      },
+          apiHost: "http://localhost:8001/web/incoming",
+    apiStreamHost: "http://localhost:8001/web/stream",
   });
 </script>
-  </body>
+</body>
 </html>

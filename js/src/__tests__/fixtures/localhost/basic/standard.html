@@ -22,23 +22,23 @@
   </head>
   <body>
     <script type="module">
-      import Agent from '../../../../../dist/web.js'
+      import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js'
       Agent.initStandard({
         agentName: "oai-test",
-        initialPrompts: [
-          { text: "Hello! How can I assist you today?", icon: "💬" },
-          { text: "Can you walk me through setting up my first chatbot", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/user.svg" },
-          { text: "Help me choose the right theme for my website", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/activity.svg" },
-          { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
-          { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
-          { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
-        ],
-        welcome: {
-          title: "Welcome to Predictable Dialogs", 
-          // icon: "🙏",
-          iconUrl: "https://predictabledialogs.com/logo.png",
-          subtitle: "I can help you find answers in Predictable Dialogs. What are you looking for?"
-        },
+        // initialPrompts: [
+        //   { text: "Hello! How can I assist you today?", icon: "💬" },
+        //   { text: "Can you walk me through setting up my first chatbot", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/user.svg" },
+        //   { text: "Help me choose the right theme for my website", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/activity.svg" },
+        //   { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
+        //   { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
+        //   { text: "How do I add documents so that my chatbot answers from my documents", iconUrl: "https://unpkg.com/feather-icons@4.29.2/dist/icons/phone-off.svg"  },
+        // ],
+        // welcome: {
+        //   title: "Welcome to Predictable Dialogs", 
+        //   // icon: "🙏",
+        //   iconUrl: "https://predictabledialogs.com/logo.png",
+        //   subtitle: "I can help you find answers in Predictable Dialogs. What are you looking for?"
+        // },
         contextVariables: { name: "Jai" },
         apiHost: "http://localhost:8001/web/incoming",
         apiStreamHost: "http://localhost:8001/web/stream",

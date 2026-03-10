@@ -24,6 +24,10 @@ export const FixedBottomInput = (props: Props) => {
   const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '')
   const [shouldFocus, setShouldFocus] = createSignal(false)
   let inputRef: HTMLTextAreaElement | undefined
+  const buttonLabel = () => props.block?.options?.labels?.button ?? 'Send'
+  const buttonIconUrl = () => props.block?.options?.buttonIconUrl?.trim() ?? ''
+  const hasCustomButtonText = () => buttonLabel().trim() !== '' && buttonLabel() !== 'Send'
+  const shouldShowCustomButtonContent = () => hasCustomButtonText() || buttonIconUrl().length > 0
 
   // Determine positioning based on widget context
   const isStandardWidget = createMemo(() => props.widgetContext === 'standard')
@@ -124,10 +128,16 @@ export const FixedBottomInput = (props: Props) => {
         <SendButton
           type="button"
           isDisabled={inputValue() === '' || props.isDisabled}
+          disableIcon={shouldShowCustomButtonContent()}
           class="my-2 mx-2"
+          aria-label={buttonLabel()}
           on:click={submit}
         >
-          {props.block?.options?.labels?.button ?? 'Send'}
+          {buttonIconUrl().length > 0 ? (
+            <img src={buttonIconUrl()} alt="" aria-hidden="true" class="send-icon-image" />
+          ) : (
+            buttonLabel()
+          )}
         </SendButton>
       </div>
     </div>

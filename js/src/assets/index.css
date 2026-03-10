@@ -157,6 +157,7 @@ textarea {
   font-family: var(--agent-embed-container-font-family), -apple-system,
     BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  border-radius: var(--agent-border-radius);
 }
 
 .agent-button {
@@ -234,7 +235,7 @@ textarea {
 .agent-host-bubble > .bubble-typing {
   background-color: var(--agent-host-bubble-bg-color);
   border: var(--agent-host-bubble-border);
-  border-radius: 6px;
+  border-radius: var(--agent-border-radius);
 }
 
 .agent-host-bubble img,
@@ -246,7 +247,7 @@ textarea {
 .agent-guest-bubble {
   color: var(--agent-guest-bubble-color);
   background-color: var(--agent-guest-bubble-bg-color);
-  border-radius: 6px;
+  border-radius: var(--agent-border-radius);
   max-width: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
@@ -369,6 +370,12 @@ textarea {
 
 .agent-button > .send-icon {
   fill: var(--agent-button-color);
+}
+
+.agent-button > .send-icon-image {
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
 }
 
   /* - Purpose: Layout constraint for chat content

@@ -129,6 +129,18 @@ export const StreamConversation = (props: Props) => {
           isPersisted: false,
         }))
   );
+  const getInitialCompletedAssistantIds = () => {
+    const ids = new Set<string>();
+    for (const message of initialMessages()) {
+      if (message.role !== 'assistant') continue;
+      // if (typeof message.id !== 'string' || message.id.length === 0) continue;
+      ids.add(message.id);
+    }
+    return ids;
+  };
+  const [completedAssistantMessageIds, setCompletedAssistantMessageIds] = createSignal<Set<string>>(
+    getInitialCompletedAssistantIds()
+  );
 
   const chatHelpers = useChat({
     transport: new DefaultChatTransport({ 
@@ -167,7 +179,17 @@ export const StreamConversation = (props: Props) => {
       }
 
       console.error('[StreamConversation] useChat error', { error });
-    }
+    },
+    onFinish: ({ message }) => {
+      if (message.role !== 'assistant') return;
+      if (typeof message.id !== 'string' || message.id.length === 0) return;
+      setCompletedAssistantMessageIds((prev) => {
+        if (prev.has(message.id)) return prev;
+        const next = new Set(prev);
+        next.add(message.id);
+        return next;
+      });
+    },
   });
 
   const messages = () => chatHelpers.messages;
@@ -192,6 +214,29 @@ export const StreamConversation = (props: Props) => {
   createEffect(() => {
     const currentMessages = messages();
     storage.setChatMessages(currentMessages);
+  });
+
+  createEffect(() => {
+    const activeIds = new Set(
+      messages()
+        .map((message) => message.id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    );
+
+    setCompletedAssistantMessageIds((prev) => {
+      let changed = false;
+      const next = new Set<string>();
+
+      for (const id of prev) {
+        if (activeIds.has(id)) {
+          next.add(id);
+          continue;
+        }
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
   });
 
   createEffect(() => {
@@ -486,6 +531,12 @@ export const StreamConversation = (props: Props) => {
     }
   };
   
+  const isAssistantMessageComplete = (message: any) => {
+    if (message?.role !== 'assistant') return false;
+    // if (typeof message?.id !== 'string' || message.id.length === 0) return false;
+    return completedAssistantMessageIds().has(message.id);
+  };
+  
   return (
     <div class="flex flex-col w-full items-center gap-4">
       <Show when={shouldShowInitialPrompts() && props.input}>
@@ -575,6 +626,7 @@ export const StreamConversation = (props: Props) => {
                 scrollOccurredDuringStreaming={scrollOccurredDuringStreaming()}
                 forceReposition={forceReposition()}
                 isMessageActionBarEnabled={isMessageActionBarEnabled()}
+                aiMessageCompleted={isAssistantMessageComplete(message)}
                 isCorrectivePopupEnabled={isCorrectivePopupEnabled()}
                 feedbackType={(message as { feedbackType?: FeedbackType }).feedbackType}
                 isFeedbackPending={Boolean(pendingFeedbackState()[message.id])}

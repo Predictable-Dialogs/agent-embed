@@ -29,6 +29,7 @@ type Props =  {
   scrollOccurredDuringStreaming?: boolean;
   forceReposition?: boolean;
   isMessageActionBarEnabled: boolean;
+  aiMessageCompleted: boolean;
   isCorrectivePopupEnabled: boolean;
   feedbackType?: FeedbackType;
   isFeedbackPending?: boolean;
@@ -78,8 +79,7 @@ export const ChatChunk = (props: Props) => {
                 isPersisted={props.isPersisted}
                 showActionBar={
                   props.isMessageActionBarEnabled &&
-                  typeof props.message?.id === 'string' &&
-                  props.message.id.length > 0 &&
+                  props.aiMessageCompleted &&
                   !((props.message as any)?.isLegacyMessage) &&
                   getMessageText(props.message).trim().length > 0
                 }

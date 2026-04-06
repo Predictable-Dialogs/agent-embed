@@ -3,39 +3,55 @@ import { isMobile } from '@/utils/isMobileSignal';
 import { Avatar } from '../avatars/Avatar';
 
 type Props = { hostAvatarSrc?: string; hideAvatar?: boolean, isPersisted?: boolean, isStreaming?: boolean, scrollOccurredDuringStreaming?: boolean, forceReposition?: boolean };
+const hostBubbleSelector = '.agent-host-bubble';
 
 export const AvatarSideContainer = (props: Props) => {
   let avatarContainer: HTMLDivElement | undefined;
+  let observedElement: HTMLElement | undefined;
   const [top, setTop] = createSignal<number>(0);
+
+  const setTopFromElement = (element?: Element | null) => {
+    if (!element || !(element instanceof HTMLElement)) return;
+    const newTop = element.clientHeight - (isMobile() ? 24 : 40);
+    // Debounce position updates to reduce flicker
+    // the setTimeout reduces the avatar flicker
+    setTimeout(() => setTop(newTop), 10);
+  };
+
+  const getPositionElement = () => {
+    const hostBubbleElement = avatarContainer?.parentElement?.querySelector(hostBubbleSelector);
+    if (hostBubbleElement instanceof HTMLElement) {
+      return hostBubbleElement;
+    }
+    return avatarContainer;
+  };
 
   const resizeObserver = new ResizeObserver((entries) => {
     // Only block positioning if scrolling occurred during streaming AND we're still streaming
     if (props.scrollOccurredDuringStreaming && props.isStreaming && !props.forceReposition) return;
-    
-    const newTop = entries[0].target.clientHeight - (isMobile() ? 24 : 40);
-    // Debounce position updates to reduce flicker
-    // the setTimeout reduces the avatar flicker
-    setTimeout(() => setTop(newTop), 10);
+
+    setTopFromElement(entries[0]?.target);
   });
 
   // Handle force repositioning signal
   createEffect(() => {
-    if (props.forceReposition && avatarContainer) {
+    if (props.forceReposition) {
       // Manually trigger position update
-      const newTop = avatarContainer.clientHeight - (isMobile() ? 24 : 40);
-      setTimeout(() => setTop(newTop), 10);
+      setTopFromElement(getPositionElement());
     }
   });
 
   onMount(() => {
-    if (avatarContainer) {
-      resizeObserver.observe(avatarContainer);
+    observedElement = getPositionElement();
+    if (observedElement) {
+      setTopFromElement(observedElement);
+      resizeObserver.observe(observedElement);
     }
   });
 
   onCleanup(() => {
-    if (avatarContainer) {
-      resizeObserver.unobserve(avatarContainer);
+    if (observedElement) {
+      resizeObserver.unobserve(observedElement);
     }
   });
 

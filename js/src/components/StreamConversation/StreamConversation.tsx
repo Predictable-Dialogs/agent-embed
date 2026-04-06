@@ -6,12 +6,14 @@ import { BotContext, InitialChatReply, WidgetContext, InitialPrompt, WelcomeCont
 import { MAX_INITIAL_PROMPTS } from '@/constants';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
+import { BubbleThemeConfig } from '@/constants';
 import { useChat } from 'ai-sdk-solid';
 import { DefaultChatTransport } from 'ai';
 import { transformMessage, EnhancedUIMessage, getMessageText } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { isNotEmpty } from '@/lib/utils';
+import { sendFeedbackQuery, type FeedbackType } from '@/queries/sendFeedbackQuery';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -43,6 +45,8 @@ type Props = {
   agentConfig: any;
   hostAvatar?: AvatarConfig;
   guestAvatar?: AvatarConfig;
+  hostBubbles?: BubbleThemeConfig;
+  guestBubbles?: BubbleThemeConfig;
   initialPrompts?: InitialPrompt[];
   welcome?: WelcomeContent;
   input: any
@@ -73,6 +77,7 @@ export const StreamConversation = (props: Props) => {
   const [pendingInputValue, setPendingInputValue] = createSignal('');
   const [lastSubmittedMessage, setLastSubmittedMessage] = createSignal<{ text?: string; files?: FileList | undefined }>();
   const [hasResentPendingMessage, setHasResentPendingMessage] = createSignal(false);
+  const [pendingFeedbackState, setPendingFeedbackState] = createSignal<Record<string, boolean>>({});
   let fileInputRef: HTMLInputElement | undefined;
 
   const initialPrompts = createMemo<InitialPrompt[]>(() =>
@@ -93,15 +98,25 @@ export const StreamConversation = (props: Props) => {
     const base = props.agentConfig.theme;
     const host = props.hostAvatar ?? base?.chat?.hostAvatar;
     const guest = props.guestAvatar ?? base?.chat?.guestAvatar;
+    const hostBubbles = props.hostBubbles ?? base?.chat?.hostBubbles;
+    const guestBubbles = props.guestBubbles ?? base?.chat?.guestBubbles;
     return parseDynamicTheme({
       ...base,
       chat: {
         ...base.chat,
         hostAvatar: host,
         guestAvatar: guest,
+        hostBubbles,
+        guestBubbles,
       }
     }, dyn);
   });
+  const isMessageActionBarEnabled = createMemo(
+    () => theme()?.chat?.hostBubbles?.isMessageActionBarEnabled !== false
+  );
+  const isCorrectivePopupEnabled = createMemo(
+    () => theme()?.chat?.hostBubbles?.isCorrectivePopupEnabled !== false
+  );
 
   const initialMessages = createMemo(() =>
     props.persistedMessages.length > 0
@@ -406,6 +421,70 @@ export const StreamConversation = (props: Props) => {
       setdisplayIndex(lastMessage.id);
     }
   };
+
+  const handleFeedbackSubmit = async ({
+    messageId,
+    type,
+    correctiveAnswer,
+  }: {
+    messageId: string;
+    type: FeedbackType;
+    correctiveAnswer?: string;
+  }) => {
+    if (!messageId || !props.context.agentName || !props.context.sessionId) {
+      return;
+    }
+
+    const previousFeedback = (messages().find((message) => message.id === messageId) as EnhancedUIMessage & {
+      feedbackType?: FeedbackType;
+    } | undefined)?.feedbackType;
+
+    setMessages((prevMessages) =>
+      prevMessages.map((message) =>
+        message.id === messageId
+          ? { ...message, feedbackType: type }
+          : message
+      )
+    );
+
+    setPendingFeedbackState((prev) => ({
+      ...prev,
+      [messageId]: true,
+    }));
+
+    const { error } = await sendFeedbackQuery({
+      apiHost: props.context.apiHost,
+      agentName: props.context.agentName,
+      sessionId: props.context.sessionId,
+      messageId,
+      type,
+      ...(typeof correctiveAnswer === 'string' ? { correctiveAnswer } : {}),
+    });
+
+    setPendingFeedbackState((prev) => ({
+      ...prev,
+      [messageId]: false,
+    }));
+
+    if (error) {
+      setMessages((prevMessages) =>
+        prevMessages.map((message) => {
+          if (message.id !== messageId) {
+            return message;
+          }
+
+          if (previousFeedback) {
+            return { ...message, feedbackType: previousFeedback };
+          }
+
+          const { feedbackType: _feedbackType, ...rest } = message as EnhancedUIMessage & {
+            feedbackType?: FeedbackType;
+          };
+          return rest;
+        })
+      );
+    }
+  };
   
   return (
     <div class="flex flex-col w-full items-center gap-4">
@@ -495,6 +574,11 @@ export const StreamConversation = (props: Props) => {
                 isStreaming={isStreaming()}
                 scrollOccurredDuringStreaming={scrollOccurredDuringStreaming()}
                 forceReposition={forceReposition()}
+                isMessageActionBarEnabled={isMessageActionBarEnabled()}
+                isCorrectivePopupEnabled={isCorrectivePopupEnabled()}
+                feedbackType={(message as { feedbackType?: FeedbackType }).feedbackType}
+                isFeedbackPending={Boolean(pendingFeedbackState()[message.id])}
+                onFeedbackSubmit={handleFeedbackSubmit}
               />
             );
           }}

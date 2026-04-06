@@ -11,6 +11,13 @@ const containerColorsSchema = z.object({
   color: z.string(),
 })
 
+const hostBubbleThemeSchema = containerColorsSchema.merge(
+  z.object({
+    isMessageActionBarEnabled: z.boolean().optional(),
+    isCorrectivePopupEnabled: z.boolean().optional(),
+  })
+)
+
 const inputColorsSchema = containerColorsSchema.merge(
   z.object({
     placeholderColor: z.string(),
@@ -20,7 +27,7 @@ const inputColorsSchema = containerColorsSchema.merge(
 export const chatThemeSchema = z.object({
   hostAvatar: avatarPropsSchema.optional(),
   guestAvatar: avatarPropsSchema.optional(),
-  hostBubbles: containerColorsSchema,
+  hostBubbles: hostBubbleThemeSchema,
   guestBubbles: containerColorsSchema,
   buttons: containerColorsSchema,
   inputs: inputColorsSchema,
@@ -45,7 +52,12 @@ export const themeSchema = z.object({
 
 export const defaultTheme: Theme = {
   chat: {
-    hostBubbles: { backgroundColor: '#F7F8FF', color: '#303235' },
+    hostBubbles: {
+      backgroundColor: '#F7F8FF',
+      color: '#303235',
+      isMessageActionBarEnabled: true,
+      isCorrectivePopupEnabled: true,
+    },
     guestBubbles: { backgroundColor: '#FF8E21', color: '#FFFFFF' },
     buttons: { backgroundColor: '#0042DA', color: '#FFFFFF' },
     inputs: {

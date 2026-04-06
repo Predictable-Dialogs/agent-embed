@@ -4,6 +4,7 @@ import { UIMessage } from 'ai';
 export type EnhancedUIMessage = UIMessage & {
   input?: any;
   isPersisted?: boolean;
+  isLegacyMessage?: boolean;
 };
 
 // Extract plain text from legacy content structures
@@ -85,10 +86,13 @@ export const transformMessage = (
   const needsLegacyTransform = !Array.isArray(msg.parts) || msg.parts.length === 0;
 
   if (!needsLegacyTransform) {
+    const isLegacyMessage =
+      typeof msg.isLegacyMessage === 'boolean' ? msg.isLegacyMessage : false;
+
     if (role === 'assistant') {
-      return { ...msg, role, input };
+      return { ...msg, role, input, isLegacyMessage };
     }
-    return { ...msg, role };
+    return { ...msg, role, isLegacyMessage };
   }
 
   // Non ai-sdk message transformation
@@ -106,6 +110,7 @@ export const transformMessage = (
     createdAt: msg.createdAt || new Date().toISOString(),
     role,
     parts,
+    isLegacyMessage: true,
   };
 
   if (role === 'assistant') {

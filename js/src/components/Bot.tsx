@@ -415,6 +415,8 @@ const BotContent = (props: BotContentProps) => {
           persistedMessages={props.persistedMessages}
           hostAvatar={props.hostAvatar}
           guestAvatar={props.guestAvatar}
+          hostBubbles={props.hostBubbles}
+          guestBubbles={props.guestBubbles}
           agentConfig={props.agentConfig}
           initialPrompts={props.initialPrompts}
           welcome={props.welcome}

@@ -244,6 +244,135 @@ textarea {
   border-radius: var(--agent-border-radius);
 }
 
+.agent-message-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: 1rem;
+  margin-top: -0.125rem;
+}
+
+.agent-message-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  color: var(--agent-host-bubble-color);
+  opacity: 0.72;
+  background: transparent;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.agent-message-action-button .agent-message-action-icon-fill {
+  fill: var(--agent-host-bubble-color);
+  opacity: 0;
+  transition: opacity 0.2s ease, fill 0.2s ease;
+}
+
+.agent-message-action-button .agent-message-action-icon-outline {
+  fill: var(--agent-host-bubble-color);
+}
+
+.agent-message-action-button:hover {
+  opacity: 0.8;
+}
+
+.agent-message-action-button.selected {
+  opacity: 1;
+}
+
+.agent-message-action-button:hover .agent-message-action-icon-fill {
+  fill: var(--agent-host-bubble-color);
+  opacity: 0.8;
+}
+
+.agent-message-action-button.selected .agent-message-action-icon-fill {
+  fill: var(--agent-host-bubble-color);
+  opacity: 1;
+}
+
+.agent-message-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.agent-feedback-popup {
+  margin-left: 1rem;
+  margin-top: 0.25rem;
+  max-width: min(100%, 460px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(48, 50, 53, 0.16);
+  background-color: #ffffff;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  padding: 0.625rem;
+}
+
+.agent-feedback-popup-label {
+  color: #1f2937;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.agent-feedback-popup-input {
+  width: 100%;
+  min-height: 68px;
+  resize: vertical;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(48, 50, 53, 0.2);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: #fff;
+}
+
+.agent-feedback-popup-input:focus {
+  outline: none;
+  border-color: rgba(var(--agent-button-bg-color-rgb), 0.7);
+  box-shadow: 0 0 0 2px rgba(var(--agent-button-bg-color-rgb), 0.16);
+}
+
+.agent-feedback-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.agent-feedback-popup-button {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(var(--agent-button-bg-color-rgb), 0.45);
+  background-color: rgba(var(--agent-button-bg-color-rgb), 0.12);
+  color: var(--agent-button-bg-color);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.agent-feedback-popup-button:hover {
+  background-color: rgba(var(--agent-button-bg-color-rgb), 0.2);
+}
+
+.agent-feedback-popup-button.secondary {
+  background-color: transparent;
+  color: #374151;
+  border-color: rgba(55, 65, 81, 0.3);
+}
+
+.agent-feedback-popup-button.secondary:hover {
+  background-color: rgba(55, 65, 81, 0.08);
+}
+
+.agent-feedback-popup-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .agent-guest-bubble {
   color: var(--agent-guest-bubble-color);
   background-color: var(--agent-guest-bubble-bg-color);

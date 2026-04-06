@@ -15,8 +15,10 @@ export interface AvatarProps {
 
 // Bubble theme structure interfaces
 export interface BubbleThemeConfig {
-  color: string;
-  backgroundColor: string;
+  color?: string;
+  backgroundColor?: string;
+  isMessageActionBarEnabled?: boolean;
+  isCorrectivePopupEnabled?: boolean;
 }
 
 export interface BubbleThemeProps {

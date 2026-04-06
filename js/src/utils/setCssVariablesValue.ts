@@ -49,7 +49,19 @@ const cssVariableNames = {
   },
 } as const;
 
-export const setCssVariablesValue = (theme: Theme | undefined, container: HTMLDivElement, font?: string, backgroundOverride?: Background, hostBubblesOverride?: { color: string; backgroundColor: string }, guestBubblesOverride?: { color: string; backgroundColor: string }, inputStylesOverride?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors }) => {
+export const setCssVariablesValue = (
+  theme: Theme | undefined,
+  container: HTMLDivElement,
+  font?: string,
+  backgroundOverride?: Background,
+  hostBubblesOverride?: Partial<ContainerColors>,
+  guestBubblesOverride?: Partial<ContainerColors>,
+  inputStylesOverride?: {
+    roundness?: 'none' | 'medium' | 'large';
+    inputs?: InputColors;
+    buttons?: ContainerColors;
+  },
+) => {
   if (!theme) return;
   const documentStyle = container?.style;
   if (!documentStyle) return;
@@ -65,7 +77,17 @@ const setGeneralTheme = (generalTheme: GeneralTheme, documentStyle: CSSStyleDecl
   if (finalFont) documentStyle.setProperty(cssVariableNames.general.fontFamily, finalFont);
 };
 
-const setChatTheme = (chatTheme: ChatTheme, documentStyle: CSSStyleDeclaration, hostBubblesOverride?: { color: string; backgroundColor: string }, guestBubblesOverride?: { color: string; backgroundColor: string }, inputStylesOverride?: { roundness?: 'none' | 'medium' | 'large'; inputs?: InputColors; buttons?: ContainerColors }) => {
+const setChatTheme = (
+  chatTheme: ChatTheme,
+  documentStyle: CSSStyleDeclaration,
+  hostBubblesOverride?: Partial<ContainerColors>,
+  guestBubblesOverride?: Partial<ContainerColors>,
+  inputStylesOverride?: {
+    roundness?: 'none' | 'medium' | 'large';
+    inputs?: InputColors;
+    buttons?: ContainerColors;
+  },
+) => {
   const { hostBubbles, guestBubbles, buttons, inputs, roundness } = chatTheme;
   const finalHostBubbles = hostBubblesOverride || hostBubbles;
   const finalGuestBubbles = guestBubblesOverride || guestBubbles;
@@ -80,7 +102,7 @@ const setChatTheme = (chatTheme: ChatTheme, documentStyle: CSSStyleDeclaration, 
   if (finalRoundness) setRoundness(finalRoundness, documentStyle);
 };
 
-const setHostBubbles = (hostBubbles: ContainerColors, documentStyle: CSSStyleDeclaration) => {
+const setHostBubbles = (hostBubbles: Partial<ContainerColors>, documentStyle: CSSStyleDeclaration) => {
   if (hostBubbles.backgroundColor)
     documentStyle.setProperty(
       cssVariableNames.chat.hostBubbles.bgColor,
@@ -90,7 +112,7 @@ const setHostBubbles = (hostBubbles: ContainerColors, documentStyle: CSSStyleDec
     documentStyle.setProperty(cssVariableNames.chat.hostBubbles.color, hostBubbles.color);
 };
 
-const setGuestBubbles = (guestBubbles: ContainerColors, documentStyle: CSSStyleDeclaration) => {
+const setGuestBubbles = (guestBubbles: Partial<ContainerColors>, documentStyle: CSSStyleDeclaration) => {
   if (guestBubbles.backgroundColor)
     documentStyle.setProperty(
       cssVariableNames.chat.guestBubbles.bgColor,
@@ -100,7 +122,7 @@ const setGuestBubbles = (guestBubbles: ContainerColors, documentStyle: CSSStyleD
     documentStyle.setProperty(cssVariableNames.chat.guestBubbles.color, guestBubbles.color);
 };
 
-const setInitialPrompts = (guestBubbles: ContainerColors, documentStyle: CSSStyleDeclaration) => {
+const setInitialPrompts = (guestBubbles: Partial<ContainerColors>, documentStyle: CSSStyleDeclaration) => {
   if (guestBubbles.backgroundColor) {
     documentStyle.setProperty(cssVariableNames.initialPrompts.bgColor, guestBubbles.backgroundColor);
   }

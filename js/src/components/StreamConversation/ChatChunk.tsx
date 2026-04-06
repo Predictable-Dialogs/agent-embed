@@ -8,6 +8,7 @@ import { Match, Switch } from 'solid-js';
 import { GuestBubble } from '../bubbles/GuestBubble';
 import { StreamInput } from './StreamInput';
 import { getMessageText } from '@/utils/transformMessages';
+import type { FeedbackType } from '@/queries/sendFeedbackQuery';
 
 type Props =  {
   message: any;
@@ -27,6 +28,15 @@ type Props =  {
   isStreaming?: boolean;
   scrollOccurredDuringStreaming?: boolean;
   forceReposition?: boolean;
+  isMessageActionBarEnabled: boolean;
+  isCorrectivePopupEnabled: boolean;
+  feedbackType?: FeedbackType;
+  isFeedbackPending?: boolean;
+  onFeedbackSubmit?: (payload: {
+    messageId: string;
+    type: FeedbackType;
+    correctiveAnswer?: string;
+  }) => void | Promise<void>;
 };
 
 export const ChatChunk = (props: Props) => {
@@ -66,6 +76,17 @@ export const ChatChunk = (props: Props) => {
                 onTransitionEnd={props.onDisplayAssistantMessage}
                 filterResponse={props.filterResponse}
                 isPersisted={props.isPersisted}
+                showActionBar={
+                  props.isMessageActionBarEnabled &&
+                  typeof props.message?.id === 'string' &&
+                  props.message.id.length > 0 &&
+                  !((props.message as any)?.isLegacyMessage) &&
+                  getMessageText(props.message).trim().length > 0
+                }
+                isCorrectivePopupEnabled={props.isCorrectivePopupEnabled}
+                selectedFeedbackType={props.feedbackType}
+                isFeedbackPending={props.isFeedbackPending}
+                onFeedbackSubmit={props.onFeedbackSubmit}
               />
             </div>
           </Match>

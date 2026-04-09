@@ -38,9 +38,9 @@ export const AudioBubble = (props: Props) => {
   return (
     <div class="flex flex-col animate-fade-in" ref={ref}>
       <div class="flex w-full items-center">
-        <div class={'flex relative z-10 items-start agent-host-bubble'}>
+        <div class={'flex relative z-10 items-start agent-host-bubble-wrapper'}>
           <div
-            class="flex items-center absolute px-4 py-2 bubble-typing z-10 "
+            class="flex items-center absolute px-4 py-2 bubble-typing agent-host-bubble z-10 "
             style={{
               width: isTyping() ? '64px' : '100%',
               height: isTyping() ? '32px' : '100%',

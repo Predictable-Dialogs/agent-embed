@@ -226,21 +226,22 @@ textarea {
   background-color: var(--agent-button-bg-color);
 }
 
-.agent-host-bubble {
+.agent-host-bubble-wrapper {
   color: var(--agent-host-bubble-color);
   max-width: 100%;
   min-width: 0;
 }
 
-.agent-host-bubble > .bubble-typing {
+.agent-host-bubble {
+  color: var(--agent-host-bubble-color);
   background-color: var(--agent-host-bubble-bg-color);
   border: var(--agent-host-bubble-border);
   border-radius: var(--agent-border-radius);
 }
 
-.agent-host-bubble img,
-.agent-host-bubble iframe,
-.agent-host-bubble video {
+.agent-host-bubble-wrapper img,
+.agent-host-bubble-wrapper iframe,
+.agent-host-bubble-wrapper video {
   border-radius: var(--agent-border-radius);
 }
 

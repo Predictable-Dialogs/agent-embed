@@ -48,14 +48,33 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [isClearButtonOnCooldown, setIsClearButtonOnCooldown] = createSignal(false);
   const [pendingExpiredMessage, setPendingExpiredMessage] = createSignal<{ text?: string; files?: FileList | undefined }>();
 
+  const mergeBubbleConfig = (
+    bubbleFromProps?: BubbleThemeConfig,
+    bubbleFromApi?: BubbleThemeConfig,
+  ): BubbleThemeConfig | undefined => {
+    if (!bubbleFromProps) return bubbleFromApi;
+    if (!bubbleFromApi) return bubbleFromProps;
+    const bubbleOverrides = Object.fromEntries(
+      Object.entries(bubbleFromProps).filter(([, value]) => value !== undefined && value !== null)
+    ) as Partial<BubbleThemeConfig>;
+    return {
+      ...bubbleFromApi,
+      ...bubbleOverrides,
+    };
+  };
+
   const input = createMemo(() => props.input ?? apiData()?.input);
   const customCss = createMemo(() => props.customCss ?? apiData()?.agentConfig?.theme?.customCss ?? '');
   const font = createMemo(() => props.font ?? apiData()?.agentConfig?.theme?.general?.font ?? 'Open Sans');
   const background = createMemo(() => props.background ?? apiData()?.agentConfig?.theme?.general?.background);
   const mergedHostAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.hostAvatar ?? apiData()?.agentConfig?.theme?.chat?.hostAvatar);
   const mergedGuestAvatar = createMemo<AvatarConfig | undefined>(() => props.avatar?.guestAvatar ?? apiData()?.agentConfig?.theme?.chat?.guestAvatar);
-  const mergedHostBubbles = createMemo<BubbleThemeConfig | undefined>(() => props.bubble?.hostBubbles ?? apiData()?.agentConfig?.theme?.chat?.hostBubbles);
-  const mergedGuestBubbles = createMemo<BubbleThemeConfig | undefined>(() => props.bubble?.guestBubbles ?? apiData()?.agentConfig?.theme?.chat?.guestBubbles);
+  const mergedHostBubbles = createMemo<BubbleThemeConfig | undefined>(() =>
+    mergeBubbleConfig(props.bubble?.hostBubbles, apiData()?.agentConfig?.theme?.chat?.hostBubbles)
+  );
+  const mergedGuestBubbles = createMemo<BubbleThemeConfig | undefined>(() =>
+    mergeBubbleConfig(props.bubble?.guestBubbles, apiData()?.agentConfig?.theme?.chat?.guestBubbles)
+  );
   const welcome = createMemo<WelcomeContent | undefined>(() => props.welcome ?? apiData()?.agentConfig?.welcome);
   const mergedInputStyles = createMemo(() => {
     const inputStyles = props.input?.styles;

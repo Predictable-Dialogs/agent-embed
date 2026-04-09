@@ -3,7 +3,7 @@ import { isMobile } from '@/utils/isMobileSignal';
 import { Avatar } from '../avatars/Avatar';
 
 type Props = { hostAvatarSrc?: string; hideAvatar?: boolean, isPersisted?: boolean, isStreaming?: boolean, scrollOccurredDuringStreaming?: boolean, forceReposition?: boolean };
-const hostBubbleSelector = '.agent-host-bubble';
+const hostBubbleSelector = '.agent-host-bubble-wrapper';
 
 export const AvatarSideContainer = (props: Props) => {
   let avatarContainer: HTMLDivElement | undefined;

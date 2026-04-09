@@ -58,3 +58,16 @@
 #clear-button:active {
   filter: brightness(0.75) !important;
 }
+
+/*
+ * We intentionally apply !important here because `.agent-host-bubble` is used
+ * on both the visual bubble surface and the host text container. This guard
+ * prevents custom CSS like `.agent-host-bubble { border/background }` from
+ * drawing a second bubble around the text container.
+ */
+.agent-host-bubble-content {
+  border: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}

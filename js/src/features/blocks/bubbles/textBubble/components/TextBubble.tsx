@@ -37,11 +37,13 @@ export const showAnimationDuration = 400
 
 export const TextBubble = (props: Props) => {
   let ref: HTMLDivElement | undefined
+  let correctivePopupRef: HTMLDivElement | undefined
   const [isTyping, setIsTyping] = createSignal(true)
   const [isCopied, setIsCopied] = createSignal(false)
   const [isCorrectivePopupOpen, setIsCorrectivePopupOpen] = createSignal(false)
   const [correctiveAnswer, setCorrectiveAnswer] = createSignal('')
   let copiedStateTimeout: ReturnType<typeof setTimeout> | undefined
+  let wasCorrectivePopupOpen = false
 
   const textParts = createMemo(() => {
     const parts = props.message.parts ?? []
@@ -69,18 +71,25 @@ export const TextBubble = (props: Props) => {
   })
 
   createEffect(() => {
-    console.log(`messageText: ${messageText()}`)
-  })
-
-  createEffect(() => {
-    console.log(`filteredTextParts: ${filteredTextParts()}`)
-  })
-
-  createEffect(() => {
     const hasText = filteredTextParts().some(part => part.trim())
     if (isTyping() && hasText) {
       onTypingEnd()
     }
+  })
+
+  createEffect(() => {
+    const isPopupOpen = canShowActionBar() && isCorrectivePopupOpen()
+    if (isPopupOpen && !wasCorrectivePopupOpen) {
+      requestAnimationFrame(() => {
+        correctivePopupRef?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+          inline: 'nearest',
+        })
+      })
+    }
+
+    wasCorrectivePopupOpen = isPopupOpen
   })
 
   const onTypingEnd = () => {
@@ -166,11 +175,11 @@ export const TextBubble = (props: Props) => {
     >
       <div class="flex w-full items-center">
         <div
-          class="flex relative items-start agent-host-bubble"
+          class="flex relative items-start agent-host-bubble-wrapper"
         >
           <div
             class={clsx(
-              "flex items-center absolute px-4 py-2 bubble-typing",
+              "flex items-center absolute px-4 py-2 bubble-typing agent-host-bubble",
               props.isPersisted && "no-transition"
             )}
             style={{
@@ -183,7 +192,7 @@ export const TextBubble = (props: Props) => {
           </div>
           <div
             class={clsx(
-              'overflow-hidden mx-4 my-2 whitespace-pre-wrap slate-html-container relative text-ellipsis',
+              'overflow-hidden mx-4 my-2 whitespace-pre-wrap slate-html-container relative text-ellipsis agent-host-bubble agent-host-bubble-content',
               isTyping() ? 'opacity-0' : 'opacity-100',
               props.isPersisted ? '' : ' text-fade-in'
             )}
@@ -210,14 +219,19 @@ export const TextBubble = (props: Props) => {
         />
       </Show>
       <Show when={canShowActionBar() && isCorrectivePopupOpen()}>
-        <CorrectiveFeedbackPopup
-          inputId={`feedback-corrective-${props.message.id}`}
-          correctiveAnswer={correctiveAnswer()}
-          isFeedbackPending={props.isFeedbackPending}
-          onCorrectiveAnswerChange={setCorrectiveAnswer}
-          onSkip={handleSkipCorrectiveFeedback}
-          onSubmit={handleSubmitCorrectiveFeedback}
-        />
+        <div
+          ref={correctivePopupRef}
+          style={{ 'scroll-margin-bottom': 'calc(var(--space-safe-bottom) + 8rem)' }}
+        >
+          <CorrectiveFeedbackPopup
+            inputId={`feedback-corrective-${props.message.id}`}
+            correctiveAnswer={correctiveAnswer()}
+            isFeedbackPending={props.isFeedbackPending}
+            onCorrectiveAnswerChange={setCorrectiveAnswer}
+            onSkip={handleSkipCorrectiveFeedback}
+            onSubmit={handleSubmitCorrectiveFeedback}
+          />
+        </div>
       </Show>
     </div>
   )

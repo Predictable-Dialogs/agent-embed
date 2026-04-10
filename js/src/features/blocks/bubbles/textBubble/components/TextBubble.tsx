@@ -114,6 +114,7 @@ export const TextBubble = (props: Props) => {
 
   const handleThumbsUp = async () => {
     if (props.isFeedbackPending) return
+    setIsCorrectivePopupOpen(false)
     await submitFeedback('positive')
   }
 

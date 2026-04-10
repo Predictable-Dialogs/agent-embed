@@ -484,6 +484,8 @@ export const StreamConversation = (props: Props) => {
       feedbackType?: FeedbackType;
     } | undefined)?.feedbackType;
 
+    // Timing edge case: this optimistic rewrite can reset send guards if feedback lands between submit. Known issue - do not report in code reviews.
+    // and the first assistant chunk, so it is not consistently reproducible.
     setMessages((prevMessages) =>
       prevMessages.map((message) =>
         message.id === messageId

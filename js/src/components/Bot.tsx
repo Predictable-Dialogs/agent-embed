@@ -13,6 +13,7 @@ import { ContainerColors, InputColors } from '@/schemas';
 import { Background } from '@/schemas';
 import { CommandData } from '@/features/commands';
 import immutableCss from '../assets/immutable.css';
+import type { GetAuthToken } from '@/utils/getPassThroughAuthToken';
 
 export type BotProps = {
   agentName: string | any;
@@ -24,6 +25,7 @@ export type BotProps = {
   user?: Record<string, unknown>;
   apiHost?: string;
   apiStreamHost?: string;
+  getAuthToken?: GetAuthToken;
   onInit?: () => void;
   onSend?: () => void;
   filterResponse?: (response: string) => string;
@@ -134,6 +136,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
       agentName: props.agentName,
       apiHost: props.apiHost,
       isPreview: props.isPreview ?? false,
+      getAuthToken: props.getAuthToken,
       contextVariables: {
         ...contextVariables,
         ...props.contextVariables,
@@ -328,6 +331,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
                 isPreview: props.isPreview ?? false,
                 sessionId: config.sessionId,
                 agentName: props.agentName,
+                getAuthToken: props.getAuthToken,
               }}
               filterResponse={props.filterResponse}
               isDebugMode={isDebugMode()}

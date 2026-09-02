@@ -14,6 +14,7 @@ import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { isNotEmpty } from '@/lib/utils';
 import { sendFeedbackQuery, type FeedbackType } from '@/queries/sendFeedbackQuery';
+import { getPassThroughAuthToken } from '@/utils/getPassThroughAuthToken';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -145,14 +146,18 @@ export const StreamConversation = (props: Props) => {
   const chatHelpers = useChat({
     transport: new DefaultChatTransport({ 
       api: `${isNotEmpty(props.context.apiStreamHost) ? props.context.apiStreamHost : getApiStreamEndPoint()}`,
-      prepareSendMessagesRequest: ({ messages }) => ({
-        body: {
-          clientVersion: 'v5',
-          message: getMessageText(messages[messages.length - 1]),
-          sessionId: props.context.sessionId,
-          agentName: props.context.agentName,
-        }
-      })
+      prepareSendMessagesRequest: async ({ messages }) => {
+        const passThroughAuthToken = await getPassThroughAuthToken(props.context.getAuthToken);
+        return {
+          body: {
+            clientVersion: 'v5',
+            message: getMessageText(messages[messages.length - 1]),
+            sessionId: props.context.sessionId,
+            agentName: props.context.agentName,
+            ...(isNotEmpty(passThroughAuthToken) ? { passThroughAuthToken } : {}),
+          },
+        };
+      },
     }),
     messages: initialMessages(),  
     onError: (error) => {

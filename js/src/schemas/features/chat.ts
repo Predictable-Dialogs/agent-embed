@@ -127,6 +127,7 @@ export const sendMessageInputSchema = z.object({
     ),
   startParams: startParamsSchema.optional(),
   agentName: z.string().optional().describe('The agent name.'),
+  passThroughAuthToken: z.string().optional(),
 });
 
 const runtimeOptionsSchema = paymentInputRuntimeOptionsSchema.optional()

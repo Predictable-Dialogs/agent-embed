@@ -39,6 +39,7 @@ export const defaultBotProps: BotProps = {
   user: undefined,
   apiHost: undefined,
   apiStreamHost: undefined,
+  getAuthToken: undefined,
   filterResponse: undefined,
   stream: true,
   persistSession: true,

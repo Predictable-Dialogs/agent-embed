@@ -1,4 +1,5 @@
 import type { ChatReply } from './schemas';
+import type { GetAuthToken } from './utils/getPassThroughAuthToken';
 
 export type InputSubmitContent = {
   label?: string
@@ -26,6 +27,7 @@ export type BotContext = {
   apiStreamHost?: string
   sessionId: string | undefined
   agentName: string
+  getAuthToken?: GetAuthToken
 }
 
 export type InitialChatReply = ChatReply & {

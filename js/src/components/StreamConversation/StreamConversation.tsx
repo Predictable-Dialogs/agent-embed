@@ -2,7 +2,7 @@ import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show, onCleanup } from 'solid-js'; // Added onCleanup
 import { ChatChunk } from './ChatChunk';
 import { FixedBottomInput } from './FixedBottomInput';
-import { BotContext, InitialChatReply, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { BotContext, InitialChatReply, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { MAX_INITIAL_PROMPTS } from '@/constants';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
@@ -15,6 +15,7 @@ import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { isNotEmpty } from '@/lib/utils';
 import { sendFeedbackQuery, type FeedbackType } from '@/queries/sendFeedbackQuery';
 import { getPassThroughAuthToken } from '@/utils/getPassThroughAuthToken';
+import { extractCompletedToolResults } from '@/utils/toolResults';
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -55,6 +56,7 @@ type Props = {
   filterResponse?: (response: string) => string;
   onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
+  onToolResult?: (result: ToolResult) => void;
   widgetContext?: WidgetContext;
   pendingExpiredMessage?: { text?: string; files?: FileList | undefined };
   onPendingExpiredMessageConsumed?: () => void;
@@ -79,6 +81,7 @@ export const StreamConversation = (props: Props) => {
   const [lastSubmittedMessage, setLastSubmittedMessage] = createSignal<{ text?: string; files?: FileList | undefined }>();
   const [hasResentPendingMessage, setHasResentPendingMessage] = createSignal(false);
   const [pendingFeedbackState, setPendingFeedbackState] = createSignal<Record<string, boolean>>({});
+  const emittedToolCallIds = new Set<string>();
   let fileInputRef: HTMLInputElement | undefined;
 
   const initialPrompts = createMemo<InitialPrompt[]>(() =>
@@ -187,6 +190,14 @@ export const StreamConversation = (props: Props) => {
     },
     onFinish: ({ message }) => {
       if (message.role !== 'assistant') return;
+
+      const toolResults = extractCompletedToolResults(message);
+      for (const { toolCallId, result } of toolResults) {
+        if (emittedToolCallIds.has(toolCallId)) continue;
+        emittedToolCallIds.add(toolCallId);
+        props.onToolResult?.(result);
+      }
+
       if (typeof message.id !== 'string' || message.id.length === 0) return;
       setCompletedAssistantMessageIds((prev) => {
         if (prev.has(message.id)) return prev;
@@ -203,6 +214,7 @@ export const StreamConversation = (props: Props) => {
   const setMessages = chatHelpers.setMessages;
   const sendMessage = chatHelpers.sendMessage;
   const regenerate = chatHelpers.regenerate;
+
   const hasUserMessages = createMemo(() =>
     messages().some((message) => message.role === 'assistant' || message.role === 'user')
   );

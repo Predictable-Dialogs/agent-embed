@@ -20,6 +20,18 @@ export type WelcomeContent = {
   iconUrl?: string
 }
 
+export type ToolResult =
+  | {
+      toolName: string
+      status: 'success'
+      output: unknown
+    }
+  | {
+      toolName: string
+      status: 'error'
+      error: string
+    }
+
 export type BotContext = {
   agentConfig?: InitialChatReply['agentConfig']
   isPreview: boolean

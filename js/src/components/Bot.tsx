@@ -4,7 +4,7 @@ import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { BotContext, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
@@ -28,6 +28,7 @@ export type BotProps = {
   getAuthToken?: GetAuthToken;
   onInit?: () => void;
   onSend?: () => void;
+  onToolResult?: (result: ToolResult) => void;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
@@ -337,6 +338,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               isDebugMode={isDebugMode()}
               onSessionExpired={handleSessionExpired}
               onSend={props.onSend}
+              onToolResult={props.onToolResult}
               widgetContext={props.widgetContext}
               handleClearSession={handleClearSession}
               isClearButtonOnCooldown={isClearButtonOnCooldown()}
@@ -370,6 +372,7 @@ type BotContentProps = {
   isDebugMode?: boolean;
   onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
+  onToolResult?: (result: ToolResult) => void;
   widgetContext?: WidgetContext;
   handleClearSession: () => Promise<void>;
   isClearButtonOnCooldown: boolean;
@@ -447,6 +450,7 @@ const BotContent = (props: BotContentProps) => {
           filterResponse={props.filterResponse}
           onSessionExpired={props.onSessionExpired}
           onSend={props.onSend}
+          onToolResult={props.onToolResult}
           widgetContext={props.widgetContext}
           pendingExpiredMessage={props.pendingExpiredMessage}
           onPendingExpiredMessageConsumed={props.onPendingExpiredMessageConsumed}

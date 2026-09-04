@@ -34,6 +34,7 @@ export const defaultBotProps: BotProps = {
   initialPrompts: undefined,
   onInit: undefined,
   onSend: undefined,
+  onToolResult: undefined,
   isPreview: undefined,
   contextVariables: undefined,
   user: undefined,

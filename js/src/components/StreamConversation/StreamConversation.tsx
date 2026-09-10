@@ -226,7 +226,7 @@ export const StreamConversation = (props: Props) => {
   );
   const isStreaming = createMemo(() => status() === 'streaming');
   
-  const storage = useAgentStorage(props.context.agentName);
+  const storage = useAgentStorage(props.context.storageKey);
   
   createEffect(() => {
     const currentMessages = messages();

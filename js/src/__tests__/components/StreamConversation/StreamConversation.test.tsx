@@ -319,6 +319,7 @@ describe('StreamConversation - Working Tests', () => {
         context: {
           ...createMockBotContext(),
           agentName: '',
+          storageKey: '',
         },
       });
 

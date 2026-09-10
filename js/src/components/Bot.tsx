@@ -16,6 +16,7 @@ import immutableCss from '../assets/immutable.css';
 import type { GetAuthToken } from '@/utils/getPassThroughAuthToken';
 
 export type BotProps = {
+  id?: string;
   agentName: string | any;
   /** @deprecated use initialPrompts instead */
   initialPrompt?: string;
@@ -103,7 +104,8 @@ export const Bot = (props: BotProps & { class?: string }) => {
     return undefined;
   });
   
-  const storage = useAgentStorage(props.agentName);
+  const storageIdentity = props.id || props.agentName;
+  const storage = useAgentStorage(storageIdentity);
   let cooldownTimeoutId: NodeJS.Timeout | undefined;
 
   const handleClearSession = async () => {
@@ -332,6 +334,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
                 isPreview: props.isPreview ?? false,
                 sessionId: config.sessionId,
                 agentName: props.agentName,
+                storageKey: storageIdentity,
                 getAuthToken: props.getAuthToken,
               }}
               filterResponse={props.filterResponse}

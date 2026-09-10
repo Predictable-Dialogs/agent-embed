@@ -29,6 +29,7 @@ export interface BubbleThemeProps {
 export const MAX_INITIAL_PROMPTS = 8;
 
 export const defaultBotProps: BotProps = {
+  id: undefined,
   agentName: undefined,
   initialPrompt: undefined,
   initialPrompts: undefined,

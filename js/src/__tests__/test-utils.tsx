@@ -122,6 +122,7 @@ export function createMockBotContext(overrides = {}) {
   const fullAgentConfig = createMockAgentConfig();
   return {
     agentName: 'test-agent',
+    storageKey: 'test-agent',
     apiHost: 'https://api.test.com',
     apiStreamHost: 'https://stream.test.com',
     isPreview: false,

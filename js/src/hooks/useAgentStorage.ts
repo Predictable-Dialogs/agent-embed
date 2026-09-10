@@ -1,7 +1,7 @@
 /**
  * useAgentStorage hook - Centralized localStorage operations for agent-specific data
  * 
- * Provides agent-namespaced storage operations for sessionId, agentConfig, customCss, 
+ * Provides identity-namespaced storage operations for sessionId, agentConfig, customCss,
  * chatMessages, and debugMode. Includes session management and cleanup utilities.
  */
 
@@ -27,15 +27,14 @@ export interface UseAgentStorageReturn {
   getStorageKey: (key: string) => string;
 }
 
-export function useAgentStorage(agentName?: string): UseAgentStorageReturn {
-  
+export function useAgentStorage(storageIdentity?: string | null): UseAgentStorageReturn {
   /**
-   * Generate storage key with agent namespace
+   * Generate storage key with widget identity namespace
    * Special case: debugMode is not namespaced (global setting)
    */
   const getStorageKey = (key: string): string => {
     if (key === 'debugMode') return key; // Special case - not namespaced
-    return agentName ? `${agentName}_${key}` : key;
+    return storageIdentity ? `${storageIdentity}_${key}` : key;
   };
 
   /**

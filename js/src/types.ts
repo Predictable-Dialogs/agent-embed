@@ -39,6 +39,7 @@ export type BotContext = {
   apiStreamHost?: string
   sessionId: string | undefined
   agentName: string
+  storageKey: string
   getAuthToken?: GetAuthToken
 }
 

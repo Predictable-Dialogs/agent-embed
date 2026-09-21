@@ -9,7 +9,7 @@ import {
   waitForEffects 
 } from '../test-utils';
 
-vi.mock('ai-sdk-solid', () => ({
+vi.mock('@manushya/ai-sdk-solid', () => ({
   useChat: vi.fn(),
 }));
 
@@ -158,7 +158,7 @@ describe('Standard Widget - FixedBottomInput Positioning Regression Tests', () =
       status: 'ready',
     });
     
-    (vi.mocked(import('ai-sdk-solid')) as any).useChat = vi.fn(() => mockUseChat);
+    (vi.mocked(import('@manushya/ai-sdk-solid')) as any).useChat = vi.fn(() => mockUseChat);
     
     // Mock the initial chat reply query - this returns the complete Bot initialization data
     const mockInitialReply = createMockInitialChatReply({

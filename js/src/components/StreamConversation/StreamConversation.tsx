@@ -7,7 +7,7 @@ import { MAX_INITIAL_PROMPTS } from '@/constants';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
 import { BubbleThemeConfig } from '@/constants';
-import { useChat } from 'ai-sdk-solid';
+import { useChat } from '@manushya/ai-sdk-solid';
 import { DefaultChatTransport } from 'ai';
 import { transformMessage, EnhancedUIMessage, getMessageText } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';

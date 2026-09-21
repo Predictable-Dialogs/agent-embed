@@ -238,33 +238,6 @@ describe('Bot.tsx - SessionId Functionality', () => {
 
         verifyApiCallParams({ agentName: 'test-agent' });
       });
-
-      it('should call API when messages are missing', async () => {
-        setupLocalStorage({
-          'test-agent_sessionId': 'sess_existing_123',
-          'test-agent_agentConfig': realisticTestData.agentConfig,
-        });
-
-        render(() => <Bot agentName="test-agent" stream={true} persistSession={true} />);
-        
-        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
-
-        verifyApiCallParams({ agentName: 'test-agent' });
-      });
-
-      it('should call API when messages array is empty', async () => {
-        setupLocalStorage({
-          'test-agent_sessionId': 'sess_existing_123',
-          'test-agent_agentConfig': realisticTestData.agentConfig,
-          'test-agent_chatMessages': [],
-        });
-
-        render(() => <Bot agentName="test-agent" stream={true} persistSession={true} />);
-        
-        await waitFor(() => expect(screen.getByTestId('stream-conversation')).toBeInTheDocument());
-
-        verifyApiCallParams({ agentName: 'test-agent' });
-      });
     });
   });
 

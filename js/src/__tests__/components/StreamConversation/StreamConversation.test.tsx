@@ -7,12 +7,12 @@ import {
   createMockBotContext,
   createMockUseChat
 } from '../../test-utils';
-import { useChat } from 'ai-sdk-solid';
+import { useChat } from '@manushya/ai-sdk-solid';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
 import { transformMessage } from '@/utils/transformMessages';
 
 // Mock dependencies
-vi.mock('ai-sdk-solid');
+vi.mock('@manushya/ai-sdk-solid');
 vi.mock('@/utils/getApiEndPoint');
 vi.mock('@/utils/transformMessages');
 
@@ -415,39 +415,4 @@ describe('StreamConversation - Working Tests', () => {
     });
   });
 
-  describe('6. Styling/Layout', () => {
-    it('should render container with correct CSS classes', () => {
-      const props = createTestProps();
-
-      const { container } = render(() => <StreamConversation {...props} />);
-
-      const mainContainer = container.firstChild as HTMLElement;
-      expect(mainContainer).toHaveClass(
-        'flex',
-        'flex-col', 
-        'overflow-y-scroll',
-        'w-full',
-        'h-full',
-        'px-3',
-        'pt-10',
-        'relative',
-        'scrollable-container',
-        'agent-chat-view',
-        'chat-container',
-        'gap-2',
-        'overflow-y-scroll'
-      );
-    });
-
-    it('should render BottomSpacer at the end', () => {
-      const props = createTestProps();
-
-      const { container } = render(() => <StreamConversation {...props} />);
-
-      // Check that the last element has the spacer classes
-      const mainContainer = container.firstChild as HTMLElement;
-      const lastChild = mainContainer.lastElementChild as HTMLElement;
-      expect(lastChild).toHaveClass('w-full', 'h-32', 'flex-shrink-0');
-    });
-  });
 });

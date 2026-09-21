@@ -15,6 +15,9 @@
       "default": "./dist/web.js"
     }
   },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "rollup --watch --config rollup.config.js",
     "build": "rollup --config rollup.config.js",
@@ -26,11 +29,10 @@
   },
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@kodehort/ai-sdk-solid": "1.0.4",
+    "@manushya/ai-sdk-solid": "^1.1.0",
     "@stripe/stripe-js": "1.54.1",
     "@udecode/plate-common": "^21.1.5",
-    "ai": "^5.0.110",
-    "ai-sdk-solid": "file:ai-sdk-solid-0.0.1.tgz",
+    "ai": "^7.0.106",
     "dompurify": "^3.2.4",
     "eventsource-parser": "^1.0.0",
     "marked": "^14.0.0",

@@ -8,7 +8,7 @@ import tailwindcss from 'tailwindcss'
 import typescript from '@rollup/plugin-typescript'
 import { typescriptPaths } from 'rollup-plugin-typescript-paths'
 import replace from '@rollup/plugin-replace';
-import pkg from './package.json' assert { type: 'json' };
+import pkg from './package.json' with { type: 'json' };
 
 const extensions = ['.ts', '.tsx']
 

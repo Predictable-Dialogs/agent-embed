@@ -1,19 +1,24 @@
 #lite-badge {
   position: absolute !important;
-  padding: 4px 8px !important;
-  background-color: white !important;
+  box-sizing: border-box !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  background-color: var(--agent-embed-container-bg-color, #ffffff) !important;
   z-index: 52 !important;
   border-radius: 4px !important;
-  color: rgb(17 24 39) !important;
+  color: var(--agent-host-bubble-color) !important;
   gap: 8px !important;
   font-size: 14px !important;
   line-height: 20px !important;
   font-weight: 600 !important;
-  border-width: 1px !important;
+  border: 0 !important;
   /* Make sure the badge is always displayed */
   opacity: 1 !important;
   visibility: visible !important;
   display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   /* Position below input container with proper spacing */
   bottom: 16px !important;
   right: auto !important;
@@ -23,7 +28,7 @@
 }
 
 #lite-badge:hover {
-  background-color: #f7f8ff !important;
+  background-color: var(--agent-embed-container-bg-color, #ffffff) !important;
 }
 
 #clear-button {

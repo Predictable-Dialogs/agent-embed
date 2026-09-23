@@ -42,7 +42,7 @@ export const LiteBadge = (props: Props) => {
       class="lite-badge"
       id="lite-badge"
     >
-      <PredictableText width="70" />
+      <PredictableText width="20" />
     </a>
   );
 };

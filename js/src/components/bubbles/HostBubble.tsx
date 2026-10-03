@@ -3,6 +3,7 @@ import type {
   TypingEmulation
 } from '@/schemas';
 import type { FeedbackType } from '@/queries/sendFeedbackQuery';
+import type { ToolRenderer } from '@/types';
 
 type MessageLike = {
   parts?: Array<{ type?: string; text?: string }>;
@@ -11,6 +12,9 @@ type MessageLike = {
 
 type Props = {
   message: MessageLike;
+  uiRenderers?: Record<string, ToolRenderer>;
+  onSubmitToolInput?: (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => Promise<void>;
+  messageComplete?: boolean;
   typingEmulation: TypingEmulation;
   onTransitionEnd: (offsetTop?: number) => void;
   filterResponse?: (response: string) => string;
@@ -34,6 +38,9 @@ export const HostBubble = (props: Props) => {
   return (
     <TextBubble
       message={props.message}
+      uiRenderers={props.uiRenderers}
+      onSubmitToolInput={props.onSubmitToolInput}
+      messageComplete={props.messageComplete}
       typingEmulation={props.isPersisted ? {
         enabled: false,
         speed: 300,

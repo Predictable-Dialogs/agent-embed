@@ -2,20 +2,24 @@ import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show, onCleanup } from 'solid-js'; // Added onCleanup
 import { ChatChunk } from './ChatChunk';
 import { FixedBottomInput } from './FixedBottomInput';
-import { BotContext, InitialChatReply, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { BotContext, InitialChatReply, ToolRenderer, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { MAX_INITIAL_PROMPTS } from '@/constants';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
 import { BubbleThemeConfig } from '@/constants';
 import { useChat } from '@manushya/ai-sdk-solid';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, generateId } from 'ai';
 import { transformMessage, EnhancedUIMessage, getMessageText } from '@/utils/transformMessages';
 import { getApiStreamEndPoint } from '@/utils/getApiEndPoint';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
 import { isNotEmpty } from '@/lib/utils';
 import { sendFeedbackQuery, type FeedbackType } from '@/queries/sendFeedbackQuery';
 import { getPassThroughAuthToken } from '@/utils/getPassThroughAuthToken';
-import { extractCompletedToolResults } from '@/utils/toolResults';
+import { extractCompletedToolResults, getToolNameFromPart } from '@/utils/toolResults';
+
+const TOOL_CONTINUATION_PREFIX = 'pd-tool-continuation-';
+const isToolContinuationMessage = (message: { id: string; role: string }) =>
+  message.role === 'user' && message.id.startsWith(TOOL_CONTINUATION_PREFIX);
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -57,6 +61,7 @@ type Props = {
   onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
   onToolResult?: (result: ToolResult) => void;
+  uiRenderers?: Record<string, ToolRenderer>;
   widgetContext?: WidgetContext;
   pendingExpiredMessage?: { text?: string; files?: FileList | undefined };
   onPendingExpiredMessageConsumed?: () => void;
@@ -137,6 +142,7 @@ export const StreamConversation = (props: Props) => {
     const ids = new Set<string>();
     for (const message of initialMessages()) {
       if (message.role !== 'assistant') continue;
+      if ((message as EnhancedUIMessage).isStreamComplete === false) continue;
       // if (typeof message.id !== 'string' || message.id.length === 0) continue;
       ids.add(message.id);
     }
@@ -149,12 +155,17 @@ export const StreamConversation = (props: Props) => {
   const chatHelpers = useChat({
     transport: new DefaultChatTransport({ 
       api: `${isNotEmpty(props.context.apiStreamHost) ? props.context.apiStreamHost : getApiStreamEndPoint()}`,
-      prepareSendMessagesRequest: async ({ messages }) => {
+      prepareSendMessagesRequest: async ({ messages, body }) => {
         const passThroughAuthToken = await getPassThroughAuthToken(props.context.getAuthToken);
         return {
           body: {
             clientVersion: 'v5',
-            message: getMessageText(messages[messages.length - 1]),
+            ...(body?.toolResult
+              ? { toolResult: body.toolResult }
+              : {
+                  message: getMessageText(messages[messages.length - 1]),
+                  ...(body?.interruptPendingToolInput ? { interruptPendingToolInput: true } : {}),
+                }),
             sessionId: props.context.sessionId,
             agentName: props.context.agentName,
             ...(isNotEmpty(passThroughAuthToken) ? { passThroughAuthToken } : {}),
@@ -188,8 +199,17 @@ export const StreamConversation = (props: Props) => {
 
       console.error('[StreamConversation] useChat error', { error });
     },
-    onFinish: ({ message }) => {
+    onFinish: ({ message, isError, isAbort }) => {
       if (message.role !== 'assistant') return;
+
+      const isPendingAck = message.parts.length === 0 ||
+        message.parts.every((part) => part.type === 'data-pending-ack');
+      setMessages((previous) => {
+        const next = previous.filter((item) =>
+          !isToolContinuationMessage(item) && (!isPendingAck || item.id !== message.id));
+        return next.length === previous.length ? previous : next;
+      });
+      if (isPendingAck) return;
 
       const toolResults = extractCompletedToolResults(message);
       for (const { toolCallId, result } of toolResults) {
@@ -197,6 +217,8 @@ export const StreamConversation = (props: Props) => {
         emittedToolCallIds.add(toolCallId);
         props.onToolResult?.(result);
       }
+
+      if (isError || isAbort) return;
 
       if (typeof message.id !== 'string' || message.id.length === 0) return;
       setCompletedAssistantMessageIds((prev) => {
@@ -209,11 +231,73 @@ export const StreamConversation = (props: Props) => {
   });
 
   const messages = () => chatHelpers.messages;
+  const hasPendingToolInput = createMemo(() => messages().some((message) =>
+    message.role === 'assistant' && message.parts.some((part: any) =>
+      part?.toolMetadata?.pdInteraction === 'request_user_input' &&
+      part?.state === 'input-available')));
   const status = () => chatHelpers.status;
+  const canStartRequest = () => status() === 'ready' || status() === 'error';
   const error = () => chatHelpers.error;
   const setMessages = chatHelpers.setMessages;
   const sendMessage = chatHelpers.sendMessage;
+  const addToolOutput = chatHelpers.addToolOutput;
   const regenerate = chatHelpers.regenerate;
+
+  const sendVisitorMessage = async (text: string, upload?: FileList) => {
+    const interruptedToolCallIds = new Set<string>();
+    for (const message of messages()) {
+      if (message.role !== 'assistant') continue;
+      for (const part of message.parts) {
+        const toolPart = part as any;
+        if (toolPart?.toolMetadata?.pdInteraction === 'request_user_input' &&
+            toolPart.state === 'input-available' && typeof toolPart.toolCallId === 'string') {
+          interruptedToolCallIds.add(toolPart.toolCallId);
+        }
+      }
+    }
+    if (interruptedToolCallIds.size > 0) {
+      setMessages((previous) => previous.map((message) => message.role === 'assistant'
+        ? { ...message, parts: message.parts.map((part: any) => interruptedToolCallIds.has(part.toolCallId)
+          ? { ...part, state: 'output-available', output: { cancelled: true } }
+          : part) }
+        : message));
+    }
+    if (status() === 'error') chatHelpers.clearError();
+    await sendMessage({ text, files: upload }, {
+      body: interruptedToolCallIds.size > 0 ? { interruptPendingToolInput: true } : undefined,
+    });
+    if (status() === 'error') throw error() ?? new Error('Could not send this message.');
+  };
+
+  const submitToolInput = async (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => {
+    if (!canStartRequest()) throw new Error('Wait for the current response to finish.');
+    const assistant = messages()[messages().length - 1];
+    const part = assistant?.parts?.find((item: any) => item?.toolCallId === toolCallId) as any;
+    if (!part || assistant.role !== 'assistant') throw new Error('This input request is invalid, part or role is incorrect.');
+    const toolName = getToolNameFromPart(part);
+    if (!toolName) throw new Error('This input request isinvalid, no tool name found.');
+    if (status() === 'error') chatHelpers.clearError();
+    await addToolOutput({ tool: toolName, toolCallId, output: result });
+    try {
+      // A user message makes the AI SDK start a fresh assistant reply instead of copying the form.
+      await sendMessage({
+        id: `${TOOL_CONTINUATION_PREFIX}${generateId()}`,
+        parts: [],
+      }, { body: { toolResult: { toolCallId, result } } });
+      if (status() === 'error') {
+        throw error() ?? new Error('Could not submit this response.');
+      }
+    } catch (error) {
+      setMessages((previous) => previous
+        .filter((message) => !isToolContinuationMessage(message))
+        .map((message) => message.id === assistant.id
+          ? { ...message, parts: message.parts.map((item: any) => item.toolCallId === toolCallId
+            ? { ...item, state: 'input-available', output: undefined }
+            : item) }
+          : message));
+      throw error;
+    }
+  };
 
   const hasUserMessages = createMemo(() =>
     messages().some((message) => message.role === 'assistant' || message.role === 'user')
@@ -230,7 +314,10 @@ export const StreamConversation = (props: Props) => {
   
   createEffect(() => {
     const currentMessages = messages();
-    storage.setChatMessages(currentMessages);
+    const completedIds = completedAssistantMessageIds();
+    storage.setChatMessages(currentMessages.filter((message) => !isToolContinuationMessage(message)).map((message) => message.role === 'assistant'
+      ? { ...message, isStreamComplete: completedIds.has(message.id) }
+      : message));
   });
 
   createEffect(() => {
@@ -332,15 +419,19 @@ export const StreamConversation = (props: Props) => {
       },
       onSubmit: (e: Event) => {
         e.preventDefault();
+        if (!canStartRequest()) return;
+        const text = pendingInputValue();
+        const upload = files();
+        if (hasPendingToolInput() && !text.trim()) return;
         setdisplayIndex('#HIDE');
         setIsFixedInputDisabled(true);
         longRequest = setTimeout(() => {
           setIsSending(true);
         }, 2000);
-        setLastSubmittedMessage({ text: pendingInputValue(), files: files() });
-        void sendMessage({
-          text: pendingInputValue(),
-          files: files(),
+        setLastSubmittedMessage({ text, files: upload });
+        void sendVisitorMessage(text, upload).catch(() => {
+          setPendingInputValue(text);
+          setFiles(upload);
         });
 
         setPendingInputValue('');
@@ -357,7 +448,7 @@ export const StreamConversation = (props: Props) => {
   });
 
   const handleInitialPromptClick = (prompt: InitialPrompt) => {
-    if (!prompt?.text || isFixedInputDisabled() || isSending()) return;
+    if (!prompt?.text || !canStartRequest() || isFixedInputDisabled() || isSending()) return;
     setdisplayIndex('#HIDE');
     setIsFixedInputDisabled(true);
     setLastSubmittedMessage({ text: prompt.text, files: undefined });
@@ -370,10 +461,7 @@ export const StreamConversation = (props: Props) => {
     if (fileInputRef) {
       fileInputRef.value = '';
     }
-    void sendMessage({
-      text: prompt.text,
-      files: undefined,
-    });
+    void sendVisitorMessage(prompt.text).catch(() => {});
     autoScrollToBottom(true);
   };
 
@@ -620,7 +708,7 @@ export const StreamConversation = (props: Props) => {
           'position': props.widgetContext === 'standard' ? 'relative' : undefined
         }}
       >
-        <For each={messages()}>
+        <For each={messages().filter((message) => !isToolContinuationMessage(message))}>
           {(message) => {
             if (message.role === 'assistant') {
               clearTimeout(longRequest);
@@ -634,6 +722,8 @@ export const StreamConversation = (props: Props) => {
                 input={message.role === 'assistant' ? props.input : undefined}
                 onDisplayAssistantMessage={onDisplayAssistantMessage}
                 message={message}
+                uiRenderers={props.uiRenderers}
+                onSubmitToolInput={submitToolInput}
                 theme={theme()}
                 settings={props.agentConfig.settings}
                 streamingMessageId={undefined}
@@ -667,7 +757,7 @@ export const StreamConversation = (props: Props) => {
       <Show when={messages().length === 0 && props.input}>
         <FixedBottomInput
           block={props.input}
-          isDisabled={isFixedInputDisabled()}
+          isDisabled={isFixedInputDisabled() || !canStartRequest()}
           streamingHandlers={streamingHandlers()}
           onSend={props.onSend}
           widgetContext={props.widgetContext}
@@ -676,7 +766,7 @@ export const StreamConversation = (props: Props) => {
       <Show when={messages().length > 0 && props.input?.options?.type === 'fixed-bottom'}>
         <FixedBottomInput
           block={props.input}
-          isDisabled={isFixedInputDisabled()}
+          isDisabled={isFixedInputDisabled() || !canStartRequest()}
           streamingHandlers={streamingHandlers()}
           onSend={props.onSend}
           widgetContext={props.widgetContext}

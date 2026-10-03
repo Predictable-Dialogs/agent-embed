@@ -32,6 +32,25 @@ export type ToolResult =
       error: string
     }
 
+export type ToolUIInteractionState = 'waiting' | 'ready' | 'submitting' | 'resolved'
+
+export type ToolRendererHandle = {
+  cleanup?: () => void
+  getValues?: () => unknown
+  validate?: () => boolean | Promise<boolean>
+  onInteractionStateChange?: (state: ToolUIInteractionState) => void
+}
+
+export type ToolRenderer = (
+  container: HTMLDivElement,
+  uiData: unknown,
+  context: {
+    initialValues?: unknown
+    requestSubmit?: () => Promise<void>
+    requestCancel?: () => Promise<void>
+  }
+) => void | (() => void) | ToolRendererHandle
+
 export type BotContext = {
   agentConfig?: InitialChatReply['agentConfig']
   isPreview: boolean

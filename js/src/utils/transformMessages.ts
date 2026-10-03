@@ -5,6 +5,7 @@ export type EnhancedUIMessage = UIMessage & {
   input?: any;
   isPersisted?: boolean;
   isLegacyMessage?: boolean;
+  isStreamComplete?: boolean;
 };
 
 // Extract plain text from legacy content structures

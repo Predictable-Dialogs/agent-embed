@@ -1,14 +1,17 @@
 import { TypingBubble } from '@/components'
 import type { FeedbackType } from '@/queries/sendFeedbackQuery'
 import type { TypingEmulation } from '@/schemas'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { Index, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
 import { copyTextToClipboard } from '@/utils/copyTextToClipboard'
+import type { ToolRenderer } from '@/types'
+import { getToolUIData, getToolNameFromPart } from '@/utils/toolResults'
 import { applyFilterText } from '../helpers/applyFilterRichText'
 import { PlateText } from './plate/PlateText'
 import { CorrectiveFeedbackPopup } from './CorrectiveFeedbackPopup'
 import { MessageActionBar } from './MessageActionBar'
+import { ToolUISlot } from './ToolUISlot'
 
 type MessageLike = {
   id?: string
@@ -18,6 +21,9 @@ type MessageLike = {
 
 type Props = {
   message: MessageLike
+  uiRenderers?: Record<string, ToolRenderer>
+  onSubmitToolInput?: (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => Promise<void>
+  messageComplete?: boolean
   typingEmulation: TypingEmulation
   onTransitionEnd: (offsetTop?: number) => void
   filterResponse?: (response: string) => string
@@ -31,6 +37,21 @@ type Props = {
     type: FeedbackType
     correctiveAnswer?: string
   }) => void | Promise<void>
+}
+
+type DisplayPart =
+  | { type: 'text'; content: string }
+  | { type: 'tool'; part: unknown; message?: string }
+
+const getRequestInputMessage = (part: unknown): string | undefined => {
+  const isInputRequestTool = (part as { toolMetadata?: { pdInteraction?: string } })
+    ?.toolMetadata?.pdInteraction === 'request_user_input'
+  if (!isInputRequestTool) return undefined
+
+  const ui = getToolUIData(part, true)
+  if (ui?.source !== 'input' || !ui.data || typeof ui.data !== 'object') return undefined
+  const message = (ui.data as { message?: unknown }).message
+  return typeof message === 'string' ? message : undefined
 }
 
 export const showAnimationDuration = 400
@@ -60,6 +81,38 @@ export const TextBubble = (props: Props) => {
 
   const filteredTextParts = createMemo(() => textParts().map(part => applyFilterText(part.text, props.filterResponse)))
   const messageText = createMemo(() => filteredTextParts().filter(part => part.trim().length > 0).join('\n\n'))
+  const displayParts = createMemo<DisplayPart[]>(() => {
+    const parts = props.message.parts ?? []
+    const result: DisplayPart[] = []
+    let hasTextPart = false
+
+    for (const part of parts) {
+      if (part?.type === 'text' && typeof part.text === 'string') {
+        hasTextPart = true
+        result.push({ type: 'text', content: applyFilterText(part.text, props.filterResponse) })
+      } else if (getToolNameFromPart(part)) {
+        const rawMessage = getRequestInputMessage(part)
+        const message = rawMessage ? applyFilterText(rawMessage, props.filterResponse) : undefined
+        result.push({ type: 'tool', part, message: message?.trim() ? message : undefined })
+      }
+    }
+
+    if (!hasTextPart && typeof props.message.content === 'string') {
+      result.unshift({ type: 'text', content: applyFilterText(props.message.content, props.filterResponse) })
+    }
+
+    return result
+  })
+  const hasRenderableToolResult = createMemo(() => displayParts().some((part) => {
+    if (part.type !== 'tool') return false
+    const ui = getToolUIData(part.part, Boolean(
+      (part.part as { toolMetadata?: { pdInteraction?: string } })?.toolMetadata?.pdInteraction === 'request_user_input'
+    ))
+    return ui?.source === 'input' || Boolean(ui && typeof props.uiRenderers?.[ui.toolName] === 'function')
+  }))
+  const hasVisibleContent = createMemo(() =>
+    filteredTextParts().some((part) => part.trim().length > 0) || hasRenderableToolResult()
+  )
   const canShowActionBar = createMemo(() => {
     return (
       Boolean(props.showActionBar) &&
@@ -71,8 +124,7 @@ export const TextBubble = (props: Props) => {
   })
 
   createEffect(() => {
-    const hasText = filteredTextParts().some(part => part.trim())
-    if (isTyping() && hasText) {
+    if (isTyping() && (hasVisibleContent() || props.messageComplete)) {
       onTypingEnd()
     }
   })
@@ -174,41 +226,69 @@ export const TextBubble = (props: Props) => {
       class={"flex flex-col" + (props.isPersisted ? '' : ' animate-fade-in')}
       ref={ref}
     >
-      <div class="flex w-full items-center">
-        <div
-          class="flex relative items-start agent-host-bubble-wrapper"
-        >
+      <Show when={hasVisibleContent() || isTyping()}>
+        <div class="flex w-full items-center">
           <div
-            class={clsx(
-              "flex items-center absolute px-4 py-2 bubble-typing agent-host-bubble",
-              props.isPersisted && "no-transition"
-            )}
-            style={{
-              width: isTyping() ? '64px' : '100%',
-              height: '100%',
-            }}
-            data-testid="host-bubble"
+            class="flex relative items-start agent-host-bubble-wrapper"
           >
-            {isTyping() && <TypingBubble />}
-          </div>
-          <div
-            class={clsx(
-              'overflow-hidden mx-4 my-2 whitespace-pre-wrap slate-html-container relative text-ellipsis agent-host-bubble agent-host-bubble-content',
-              isTyping() ? 'opacity-0' : 'opacity-100',
-              props.isPersisted ? '' : ' text-fade-in'
-            )}
-            style={{
-              'min-height': isMobile() ? '16px' : '20px',
-              height: isTyping() ? (isMobile() ? '16px' : '20px') : 'auto',
-              transition: 'height 350ms ease-out',
-            }}
-          >
-            <For each={filteredTextParts()}>
-              {text => <PlateText content={text} />}
-            </For>
+            <div
+              class={clsx(
+                "flex items-center absolute px-4 py-2 bubble-typing agent-host-bubble",
+                props.isPersisted && "no-transition"
+              )}
+              style={{
+                width: isTyping() ? '64px' : '100%',
+                height: '100%',
+              }}
+              data-testid="host-bubble"
+            >
+              {isTyping() && <TypingBubble />}
+            </div>
+            <div
+              class={clsx(
+                'mx-4 my-2 whitespace-pre-wrap slate-html-container relative agent-host-bubble agent-host-bubble-content',
+                hasRenderableToolResult()
+                  ? 'overflow-visible max-w-full min-w-0'
+                  : 'overflow-hidden text-ellipsis',
+                isTyping() ? 'opacity-0' : 'opacity-100',
+                props.isPersisted ? '' : ' text-fade-in'
+              )}
+              style={{
+                'min-height': isMobile() ? '16px' : '20px',
+                height: isTyping() ? (isMobile() ? '16px' : '20px') : 'auto',
+                transition: 'height 350ms ease-out',
+              }}
+            >
+              <Index each={displayParts()}>
+                {(part) => (
+                  <Show
+                    when={part().type === 'text'}
+                    fallback={
+                      <>
+                        <Show when={(part() as Extract<DisplayPart, { type: 'tool' }>).message}>
+                          <div class="mb-2">
+                            <PlateText content={(part() as Extract<DisplayPart, { type: 'tool' }>).message ?? ''} />
+                          </div>
+                        </Show>
+                        <ToolUISlot
+                          part={(part() as Extract<DisplayPart, { type: 'tool' }>).part}
+                          pendingStatus={((part() as Extract<DisplayPart, { type: 'tool' }>).part as { toolMetadata?: { pdInteraction?: string }; toolCallId?: string })?.toolMetadata?.pdInteraction === 'request_user_input'
+                            ? props.messageComplete ? 'ready' : 'detected'
+                            : undefined}
+                          uiRenderers={props.uiRenderers}
+                          onSubmit={props.onSubmitToolInput}
+                        />
+                      </>
+                    }
+                  >
+                    <PlateText content={(part() as Extract<DisplayPart, { type: 'text' }>).content} />
+                  </Show>
+                )}
+              </Index>
+            </div>
           </div>
         </div>
-      </div>
+      </Show>
       <Show when={canShowActionBar()}>
         <MessageActionBar
           selectedFeedbackType={props.selectedFeedbackType}

@@ -4,7 +4,7 @@ import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { BotContext, ToolRenderer, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
@@ -30,6 +30,7 @@ export type BotProps = {
   onInit?: () => void;
   onSend?: () => void;
   onToolResult?: (result: ToolResult) => void;
+  uiRenderers?: Record<string, ToolRenderer>;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
@@ -116,6 +117,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
     // Clear localStorage session data
     storage.clearSession();
     setPersistedMessages([]);
+    setApiData(null);
     // Reinitialize the bot
     await initializeBot();
     setIsInitialized(true);
@@ -342,6 +344,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               onSessionExpired={handleSessionExpired}
               onSend={props.onSend}
               onToolResult={props.onToolResult}
+              uiRenderers={props.uiRenderers}
               widgetContext={props.widgetContext}
               handleClearSession={handleClearSession}
               isClearButtonOnCooldown={isClearButtonOnCooldown()}
@@ -376,6 +379,7 @@ type BotContentProps = {
   onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
   onToolResult?: (result: ToolResult) => void;
+  uiRenderers?: Record<string, ToolRenderer>;
   widgetContext?: WidgetContext;
   handleClearSession: () => Promise<void>;
   isClearButtonOnCooldown: boolean;
@@ -454,6 +458,7 @@ const BotContent = (props: BotContentProps) => {
           onSessionExpired={props.onSessionExpired}
           onSend={props.onSend}
           onToolResult={props.onToolResult}
+          uiRenderers={props.uiRenderers}
           widgetContext={props.widgetContext}
           pendingExpiredMessage={props.pendingExpiredMessage}
           onPendingExpiredMessageConsumed={props.onPendingExpiredMessageConsumed}

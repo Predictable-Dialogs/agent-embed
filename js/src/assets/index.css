@@ -245,6 +245,22 @@ textarea {
   border-radius: var(--agent-border-radius);
 }
 
+.agent-tool-result {
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+}
+
+.agent-tool-render-container {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.agent-tool-render-error {
+  font-size: 0.875rem;
+}
+
 .agent-message-action-bar {
   display: flex;
   align-items: center;

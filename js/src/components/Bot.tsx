@@ -4,7 +4,7 @@ import { createEffect, createSignal, onMount, Show, onCleanup, createMemo } from
 import { getInitialChatReplyQuery } from '@/queries/getInitialChatReplyQuery';
 import { StreamConversation } from './StreamConversation';
 import { setIsMobile } from '@/utils/isMobileSignal';
-import { BotContext, ToolRenderer, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { AgentUi, BotContext, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { ErrorMessage } from './ErrorMessage';
 import { setCssVariablesValue } from '@/utils/setCssVariablesValue';
 import { useAgentStorage } from '@/hooks/useAgentStorage';
@@ -30,7 +30,7 @@ export type BotProps = {
   onInit?: () => void;
   onSend?: () => void;
   onToolResult?: (result: ToolResult) => void;
-  uiRenderers?: Record<string, ToolRenderer>;
+  agentUi?: AgentUi;
   filterResponse?: (response: string) => string;
   stream?: boolean;
   persistSession?: boolean;
@@ -305,6 +305,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   return (
     <>
       <style>{customCss()}</style>
+      <style>{props.agentUi?.css ?? ''}</style>
       <style>{immutableCss}</style>
       <Show when={error()} keyed>
         {(error) => <ErrorMessage error={error} />}
@@ -344,7 +345,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
               onSessionExpired={handleSessionExpired}
               onSend={props.onSend}
               onToolResult={props.onToolResult}
-              uiRenderers={props.uiRenderers}
+              agentUi={props.agentUi}
               widgetContext={props.widgetContext}
               handleClearSession={handleClearSession}
               isClearButtonOnCooldown={isClearButtonOnCooldown()}
@@ -379,7 +380,7 @@ type BotContentProps = {
   onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
   onToolResult?: (result: ToolResult) => void;
-  uiRenderers?: Record<string, ToolRenderer>;
+  agentUi?: AgentUi;
   widgetContext?: WidgetContext;
   handleClearSession: () => Promise<void>;
   isClearButtonOnCooldown: boolean;
@@ -458,7 +459,7 @@ const BotContent = (props: BotContentProps) => {
           onSessionExpired={props.onSessionExpired}
           onSend={props.onSend}
           onToolResult={props.onToolResult}
-          uiRenderers={props.uiRenderers}
+          agentUi={props.agentUi}
           widgetContext={props.widgetContext}
           pendingExpiredMessage={props.pendingExpiredMessage}
           onPendingExpiredMessageConsumed={props.onPendingExpiredMessageConsumed}

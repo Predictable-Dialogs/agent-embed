@@ -1,4 +1,4 @@
-import { BotContext, ChatChunk as ChatChunkType, ToolRenderer } from '@/types';
+import { AgentUi, BotContext, ChatChunk as ChatChunkType } from '@/types';
 import { isMobile } from '@/utils/isMobileSignal';
 import type { ChatReply, Settings, Theme } from '@/schemas';
 import { Show } from 'solid-js';
@@ -12,7 +12,7 @@ import type { FeedbackType } from '@/queries/sendFeedbackQuery';
 
 type Props =  {
   message: any;
-  uiRenderers?: Record<string, ToolRenderer>;
+  agentUi?: AgentUi;
   onSubmitToolInput?: (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => Promise<void>;
   input?: ChatReply['input'];
   theme: Theme;
@@ -75,7 +75,7 @@ export const ChatChunk = (props: Props) => {
             >
               <HostBubble
                 message={props.message}
-                uiRenderers={props.uiRenderers}
+                agentUi={props.agentUi}
                 onSubmitToolInput={props.onSubmitToolInput}
                 messageComplete={props.aiMessageCompleted}
                 typingEmulation={props.settings.typingEmulation}

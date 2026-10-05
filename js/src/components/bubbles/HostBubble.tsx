@@ -3,7 +3,7 @@ import type {
   TypingEmulation
 } from '@/schemas';
 import type { FeedbackType } from '@/queries/sendFeedbackQuery';
-import type { ToolRenderer } from '@/types';
+import type { AgentUi } from '@/types';
 
 type MessageLike = {
   parts?: Array<{ type?: string; text?: string }>;
@@ -12,7 +12,7 @@ type MessageLike = {
 
 type Props = {
   message: MessageLike;
-  uiRenderers?: Record<string, ToolRenderer>;
+  agentUi?: AgentUi;
   onSubmitToolInput?: (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => Promise<void>;
   messageComplete?: boolean;
   typingEmulation: TypingEmulation;
@@ -38,7 +38,7 @@ export const HostBubble = (props: Props) => {
   return (
     <TextBubble
       message={props.message}
-      uiRenderers={props.uiRenderers}
+      agentUi={props.agentUi}
       onSubmitToolInput={props.onSubmitToolInput}
       messageComplete={props.messageComplete}
       typingEmulation={props.isPersisted ? {

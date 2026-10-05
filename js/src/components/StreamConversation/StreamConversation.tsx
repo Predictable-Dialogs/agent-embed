@@ -2,7 +2,7 @@ import { ChatReply, Theme } from '@/schemas';
 import { onMount, createEffect, createSignal, createMemo, For, Show, onCleanup } from 'solid-js'; // Added onCleanup
 import { ChatChunk } from './ChatChunk';
 import { FixedBottomInput } from './FixedBottomInput';
-import { BotContext, InitialChatReply, ToolRenderer, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
+import { AgentUi, BotContext, InitialChatReply, ToolResult, WidgetContext, InitialPrompt, WelcomeContent } from '@/types';
 import { MAX_INITIAL_PROMPTS } from '@/constants';
 import { LoadingChunk, ErrorChunk } from './LoadingChunk';
 import { AvatarConfig } from '@/constants';
@@ -20,6 +20,26 @@ import { extractCompletedToolResults, getToolNameFromPart } from '@/utils/toolRe
 const TOOL_CONTINUATION_PREFIX = 'pd-tool-continuation-';
 const isToolContinuationMessage = (message: { id: string; role: string }) =>
   message.role === 'user' && message.id.startsWith(TOOL_CONTINUATION_PREFIX);
+
+const getBrowserTimeZone = (): string | undefined => {
+  try {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return typeof timeZone === 'string' && timeZone.trim().length > 0 ? timeZone : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const withBrowserTimeZoneHeader = (headers: HeadersInit | undefined): HeadersInit | undefined => {
+  const timeZone = getBrowserTimeZone();
+  if (!timeZone) {
+    return headers;
+  }
+
+  const nextHeaders = new Headers(headers);
+  nextHeaders.set('x-timezone', timeZone);
+  return nextHeaders;
+};
 
 const parseDynamicTheme = (
   initialTheme: Theme,
@@ -61,7 +81,7 @@ type Props = {
   onSessionExpired?: (payload?: { text?: string; files?: FileList | undefined }) => void;
   onSend?: () => void;
   onToolResult?: (result: ToolResult) => void;
-  uiRenderers?: Record<string, ToolRenderer>;
+  agentUi?: AgentUi;
   widgetContext?: WidgetContext;
   pendingExpiredMessage?: { text?: string; files?: FileList | undefined };
   onPendingExpiredMessageConsumed?: () => void;
@@ -155,9 +175,10 @@ export const StreamConversation = (props: Props) => {
   const chatHelpers = useChat({
     transport: new DefaultChatTransport({ 
       api: `${isNotEmpty(props.context.apiStreamHost) ? props.context.apiStreamHost : getApiStreamEndPoint()}`,
-      prepareSendMessagesRequest: async ({ messages, body }) => {
+      prepareSendMessagesRequest: async ({ messages, body, headers }) => {
         const passThroughAuthToken = await getPassThroughAuthToken(props.context.getAuthToken);
         return {
+          headers: withBrowserTimeZoneHeader(headers),
           body: {
             clientVersion: 'v5',
             ...(body?.toolResult
@@ -722,7 +743,7 @@ export const StreamConversation = (props: Props) => {
                 input={message.role === 'assistant' ? props.input : undefined}
                 onDisplayAssistantMessage={onDisplayAssistantMessage}
                 message={message}
-                uiRenderers={props.uiRenderers}
+                agentUi={props.agentUi}
                 onSubmitToolInput={submitToolInput}
                 theme={theme()}
                 settings={props.agentConfig.settings}

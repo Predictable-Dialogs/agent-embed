@@ -1,11 +1,11 @@
 import { Show, createEffect, createSignal, onCleanup } from 'solid-js';
-import type { ToolRenderer, ToolRendererHandle, ToolUIInteractionState } from '@/types';
+import type { AgentUi, ToolRenderer, ToolRendererHandle, ToolUIInteractionState } from '@/types';
 import { getToolUIData, type ToolUIData } from '@/utils/toolResults';
 
 type Props = {
   part: unknown;
   pendingStatus?: 'detected' | 'ready';
-  uiRenderers?: Record<string, ToolRenderer>;
+  agentUi?: AgentUi;
   onSubmit?: (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => Promise<void>;
 };
 
@@ -155,7 +155,7 @@ export const ToolUISlot = (props: Props) => {
   createEffect(() => {
     const nextUI = ui();
     const nextInteractionState = nextUI?.source === 'input' ? interactionState() : undefined;
-    const renderer = nextUI ? props.uiRenderers?.[nextUI.toolName] : undefined;
+    const renderer = nextUI ? props.agentUi?.components?.[nextUI.toolName] : undefined;
     if (container) container.inert = Boolean(nextInteractionState && nextInteractionState !== 'ready');
     if (mounted && nextUI && renderer && canReuseRenderer(mounted, nextUI, renderer)) {
       try {

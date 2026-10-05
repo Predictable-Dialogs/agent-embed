@@ -51,6 +51,11 @@ export type ToolRenderer = (
   }
 ) => void | (() => void) | ToolRendererHandle
 
+export type AgentUi = {
+  css?: string
+  components: Record<string, ToolRenderer>
+}
+
 export type BotContext = {
   agentConfig?: InitialChatReply['agentConfig']
   isPreview: boolean

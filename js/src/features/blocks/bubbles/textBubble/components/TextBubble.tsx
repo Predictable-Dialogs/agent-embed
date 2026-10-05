@@ -5,7 +5,7 @@ import { Index, Show, createEffect, createMemo, createSignal, onCleanup } from '
 import { clsx } from 'clsx'
 import { isMobile } from '@/utils/isMobileSignal'
 import { copyTextToClipboard } from '@/utils/copyTextToClipboard'
-import type { ToolRenderer } from '@/types'
+import type { AgentUi } from '@/types'
 import { getToolUIData, getToolNameFromPart } from '@/utils/toolResults'
 import { applyFilterText } from '../helpers/applyFilterRichText'
 import { PlateText } from './plate/PlateText'
@@ -21,7 +21,7 @@ type MessageLike = {
 
 type Props = {
   message: MessageLike
-  uiRenderers?: Record<string, ToolRenderer>
+  agentUi?: AgentUi
   onSubmitToolInput?: (toolCallId: string, result: { cancelled: boolean; values?: unknown }) => Promise<void>
   messageComplete?: boolean
   typingEmulation: TypingEmulation
@@ -108,7 +108,7 @@ export const TextBubble = (props: Props) => {
     const ui = getToolUIData(part.part, Boolean(
       (part.part as { toolMetadata?: { pdInteraction?: string } })?.toolMetadata?.pdInteraction === 'request_user_input'
     ))
-    return ui?.source === 'input' || Boolean(ui && typeof props.uiRenderers?.[ui.toolName] === 'function')
+    return ui?.source === 'input' || Boolean(ui && typeof props.agentUi?.components?.[ui.toolName] === 'function')
   }))
   const hasVisibleContent = createMemo(() =>
     filteredTextParts().some((part) => part.trim().length > 0) || hasRenderableToolResult()
@@ -275,7 +275,7 @@ export const TextBubble = (props: Props) => {
                           pendingStatus={((part() as Extract<DisplayPart, { type: 'tool' }>).part as { toolMetadata?: { pdInteraction?: string }; toolCallId?: string })?.toolMetadata?.pdInteraction === 'request_user_input'
                             ? props.messageComplete ? 'ready' : 'detected'
                             : undefined}
-                          uiRenderers={props.uiRenderers}
+                          agentUi={props.agentUi}
                           onSubmit={props.onSubmitToolInput}
                         />
                       </>
